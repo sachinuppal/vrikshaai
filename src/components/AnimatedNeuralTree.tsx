@@ -4,19 +4,21 @@ import MatrixRain from './MatrixRain';
 interface Particle {
   id: number;
   path: string;
-  offset: number;
-  speed: number;
-  color: string;
+  duration: number;
+  delay: number;
   size: number;
+  color: string;
 }
 
 interface AlgorithmBlock {
   id: number;
+  text: string;
   x: number;
   y: number;
-  text: string;
-  opacity: number;
+  offsetX: number;
   speed: number;
+  opacity: number;
+  type: 'binary' | 'hex' | 'symbol' | 'packet';
 }
 
 const AnimatedNeuralTree = () => {
@@ -24,88 +26,138 @@ const AnimatedNeuralTree = () => {
   const [rootBlocks, setRootBlocks] = useState<AlgorithmBlock[]>([]);
   const animationRef = useRef<number>();
   const particleIdRef = useRef(0);
-  const blockIdRef = useRef(0);
 
-  // Branch paths for neural flow
-  const branchPaths = [
-    // Main branches - left side
-    "M 400,300 Q 300,250 250,200 T 180,120",
-    "M 400,300 Q 320,280 280,240 T 220,180",
-    "M 400,300 Q 340,290 300,270 T 260,220",
+  // Realistic tree branch paths - organic and expansive
+  const branches = [
+    // Main trunk
+    'M 400 420 Q 400 350 400 280',
     
-    // Main branches - right side
-    "M 400,300 Q 500,250 550,200 T 620,120",
-    "M 400,300 Q 480,280 520,240 T 580,180",
-    "M 400,300 Q 460,290 500,270 T 540,220",
+    // Primary branches - left side
+    'M 400 320 Q 350 280 300 240 Q 280 220 260 180',
+    'M 400 340 Q 340 320 280 300 Q 240 280 200 240',
+    'M 400 360 Q 320 350 260 340 Q 220 330 180 310',
     
-    // Upper branches
-    "M 400,300 Q 380,240 370,200 T 350,140",
-    "M 400,300 Q 420,240 430,200 T 450,140",
+    // Primary branches - right side
+    'M 400 320 Q 450 280 500 240 Q 520 220 540 180',
+    'M 400 340 Q 460 320 520 300 Q 560 280 600 240',
+    'M 400 360 Q 480 350 540 340 Q 580 330 620 310',
     
-    // Secondary branches - left
-    "M 280,240 Q 260,220 240,200",
-    "M 250,200 Q 220,180 200,160",
+    // Secondary branches - creating density
+    'M 300 240 Q 260 200 240 160 Q 220 140 200 100',
+    'M 300 240 Q 280 210 260 180 Q 250 160 240 120',
+    'M 280 300 Q 240 270 220 240 Q 200 220 180 180',
+    'M 260 340 Q 220 320 200 280 Q 180 260 160 220',
     
-    // Secondary branches - right
-    "M 520,240 Q 540,220 560,200",
-    "M 550,200 Q 580,180 600,160",
+    'M 500 240 Q 540 200 560 160 Q 580 140 600 100',
+    'M 500 240 Q 520 210 540 180 Q 550 160 560 120',
+    'M 520 300 Q 560 270 580 240 Q 600 220 620 180',
+    'M 540 340 Q 580 320 600 280 Q 620 260 640 220',
+    
+    // Tertiary branches - upper canopy
+    'M 240 160 Q 220 130 200 100 Q 180 80 160 50',
+    'M 260 180 Q 240 150 220 120 Q 200 100 180 70',
+    'M 560 160 Q 580 130 600 100 Q 620 80 640 50',
+    'M 540 180 Q 560 150 580 120 Q 600 100 620 70',
+    
+    // Fine branches - dense canopy
+    'M 200 100 Q 180 80 160 60 Q 150 50 140 30',
+    'M 240 120 Q 220 100 200 80 Q 190 70 180 50',
+    'M 600 100 Q 620 80 640 60 Q 650 50 660 30',
+    'M 560 120 Q 580 100 600 80 Q 610 70 620 50',
   ];
 
-  // Root paths for algorithm flow
-  const rootPaths = [
-    "M 400,500 Q 350,520 300,530",
-    "M 400,500 Q 330,530 280,550",
-    "M 400,500 Q 450,520 500,530",
-    "M 400,500 Q 470,530 520,550",
-    "M 400,500 Q 380,540 360,570",
-    "M 400,500 Q 420,540 440,570",
+  // Root system - equally dramatic as branches
+  const roots = [
+    // Main roots descending
+    'M 400 420 Q 400 480 400 540',
+    
+    // Primary roots - left side
+    'M 400 460 Q 350 500 300 540 Q 280 560 260 600',
+    'M 400 480 Q 340 520 280 560 Q 240 580 200 620',
+    'M 400 500 Q 320 540 260 580 Q 220 600 180 640',
+    
+    // Primary roots - right side  
+    'M 400 460 Q 450 500 500 540 Q 520 560 540 600',
+    'M 400 480 Q 460 520 520 560 Q 560 580 600 620',
+    'M 400 500 Q 480 540 540 580 Q 580 600 620 640',
+    
+    // Secondary roots - spreading wide
+    'M 300 540 Q 260 580 240 620 Q 220 640 200 680',
+    'M 280 560 Q 240 600 220 640 Q 200 660 180 700',
+    'M 260 580 Q 220 620 200 660 Q 180 680 160 720',
+    
+    'M 500 540 Q 540 580 560 620 Q 580 640 600 680',
+    'M 520 560 Q 560 600 580 640 Q 600 660 620 700',
+    'M 540 580 Q 580 620 600 660 Q 620 680 640 720',
+    
+    // Tertiary roots - deep spread
+    'M 240 620 Q 200 660 180 700 Q 160 720 140 750',
+    'M 220 640 Q 180 680 160 720 Q 140 740 120 770',
+    'M 560 620 Q 600 660 620 700 Q 640 720 660 750',
+    'M 580 640 Q 620 680 640 720 Q 660 740 680 770',
   ];
 
   useEffect(() => {
-    // Initialize particles
-    const initialParticles: Particle[] = branchPaths.map((path, index) => ({
-      id: particleIdRef.current++,
-      path,
-      offset: Math.random() * 100,
-      speed: 0.3 + Math.random() * 0.5,
-      color: Math.random() > 0.5 ? '#FFD700' : '#00FF41',
-      size: 3 + Math.random() * 3,
-    }));
-    setBranchParticles(initialParticles);
+    // Generate branch particles - many more, larger
+    const particles: Particle[] = [];
+    const colors = ['#FFD700', '#FFEA00', '#00FF41', '#39FF14'];
+    
+    branches.forEach((path, index) => {
+      // 3 particles per branch
+      for (let i = 0; i < 3; i++) {
+        particles.push({
+          id: particleIdRef.current++,
+          path,
+          duration: 3 + Math.random() * 2,
+          delay: Math.random() * 5,
+          size: 12 + Math.random() * 8,
+          color: colors[Math.floor(Math.random() * colors.length)]
+        });
+      }
+    });
+    
+    setBranchParticles(particles);
 
-    // Initialize algorithm blocks
-    const initialBlocks: AlgorithmBlock[] = rootPaths.map((_, index) => ({
-      id: blockIdRef.current++,
-      x: 400 + (Math.random() - 0.5) * 100,
-      y: 500 + Math.random() * 80,
-      text: generateAlgorithmText(),
-      opacity: 0.8 + Math.random() * 0.2,
-      speed: 0.5 + Math.random() * 0.5,
-    }));
-    setRootBlocks(initialBlocks);
+    // Generate root algorithm blocks - larger and more visible
+    const blocks: AlgorithmBlock[] = [];
+    const blockTypes: ('binary' | 'hex' | 'symbol' | 'packet')[] = ['binary', 'hex', 'symbol', 'packet'];
+    
+    roots.forEach((_, rootIndex) => {
+      // 4 blocks per root
+      for (let i = 0; i < 4; i++) {
+        blocks.push({
+          id: particleIdRef.current++,
+          text: generateAlgorithmText(blockTypes[Math.floor(Math.random() * blockTypes.length)]),
+          x: 0,
+          y: rootIndex * 40 + i * 60,
+          offsetX: 0,
+          speed: 1 + Math.random() * 1.5,
+          opacity: 0.8 + Math.random() * 0.2,
+          type: blockTypes[Math.floor(Math.random() * blockTypes.length)]
+        });
+      }
+    });
+    
+    setRootBlocks(blocks);
 
     // Animation loop
-    const animate = () => {
-      setBranchParticles(prev => 
-        prev.map(p => ({
-          ...p,
-          offset: (p.offset + p.speed) % 100,
-        }))
-      );
+    let lastTime = 0;
+    const animate = (currentTime: number) => {
+      const deltaTime = currentTime - lastTime;
+      lastTime = currentTime;
 
-      setRootBlocks(prev =>
-        prev.map(b => {
-          const newX = b.x - b.speed;
-          return newX < 200 ? {
-            ...b,
-            x: 600,
-            y: 500 + Math.random() * 80,
-            text: generateAlgorithmText(),
-            opacity: 0.8 + Math.random() * 0.2,
-          } : {
-            ...b,
-            x: newX,
-          };
+      setRootBlocks(prevBlocks => 
+        prevBlocks.map(block => {
+          let newOffsetX = block.offsetX + block.speed;
+          let newText = block.text;
+          
+          // Reset when off screen
+          if (newOffsetX > 400) {
+            newOffsetX = 0;
+            newText = generateAlgorithmText(block.type);
+          }
+          
+          return { ...block, offsetX: newOffsetX, text: newText };
         })
       );
 
@@ -121,153 +173,183 @@ const AnimatedNeuralTree = () => {
     };
   }, []);
 
-  const generateAlgorithmText = () => {
-    const symbols = ['Σ', '∫', '∂', '∆', 'λ', 'π', 'α', 'β', 'γ', 'θ'];
-    const binary = Array.from({ length: 4 }, () => Math.random() > 0.5 ? '1' : '0').join('');
-    const hex = Math.floor(Math.random() * 65536).toString(16).toUpperCase().padStart(4, '0');
-    
-    const choices = [
-      `{${binary}}`,
-      `0x${hex}`,
-      symbols[Math.floor(Math.random() * symbols.length)],
-      `[${binary}]`,
-    ];
-    
-    return choices[Math.floor(Math.random() * choices.length)];
+  const generateAlgorithmText = (type: 'binary' | 'hex' | 'symbol' | 'packet'): string => {
+    switch (type) {
+      case 'binary':
+        return Array.from({ length: 12 }, () => Math.random() > 0.5 ? '1' : '0').join('');
+      case 'hex':
+        return '0x' + Array.from({ length: 8 }, () => 
+          '0123456789ABCDEF'[Math.floor(Math.random() * 16)]
+        ).join('');
+      case 'symbol':
+        const symbols = ['∑', '∫', '∂', 'π', 'λ', 'Δ', 'Ω', '∞', '≈', '≡'];
+        return symbols[Math.floor(Math.random() * symbols.length)] + 
+               symbols[Math.floor(Math.random() * symbols.length)];
+      case 'packet':
+        return `[${Math.floor(Math.random() * 999)}]`;
+      default:
+        return '01010101';
+    }
   };
 
   return (
-    <div className="absolute inset-0 overflow-hidden">
-      {/* Radial gradient background */}
-      <div className="absolute inset-0 bg-gradient-radial from-black/40 via-black to-black" />
+    <div className="absolute inset-0 overflow-hidden bg-black">
+      {/* Intense background gradient */}
+      <div className="absolute inset-0 bg-gradient-radial from-green-900/40 via-black to-black" />
       
+      {/* Animated light rays */}
+      <div className="absolute inset-0 opacity-30">
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full 
+                      bg-gradient-conic from-transparent via-green-500/20 to-transparent animate-spin"
+             style={{ animationDuration: '20s' }} />
+      </div>
+
       <svg
         className="absolute inset-0 w-full h-full"
-        viewBox="0 0 800 600"
+        viewBox="0 0 800 800"
         preserveAspectRatio="xMidYMid slice"
       >
         <defs>
-          {/* Gradients */}
-          <radialGradient id="trunkGlow" cx="50%" cy="50%">
-            <stop offset="0%" stopColor="#00FF41" stopOpacity="0.3" />
-            <stop offset="100%" stopColor="#003B00" stopOpacity="0" />
-          </radialGradient>
+          {/* Intense glow filters */}
+          <filter id="intense-glow" x="-100%" y="-100%" width="300%" height="300%">
+            <feGaussianBlur stdDeviation="15" result="coloredBlur"/>
+            <feMerge>
+              <feMergeNode in="coloredBlur"/>
+              <feMergeNode in="coloredBlur"/>
+              <feMergeNode in="coloredBlur"/>
+              <feMergeNode in="SourceGraphic"/>
+            </feMerge>
+          </filter>
           
-          <linearGradient id="branchGradient" x1="0%" y1="100%" x2="0%" y2="0%">
-            <stop offset="0%" stopColor="#003B00" />
-            <stop offset="50%" stopColor="#00AA00" />
-            <stop offset="100%" stopColor="#00FF41" />
-          </linearGradient>
-          
-          <linearGradient id="rootGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-            <stop offset="0%" stopColor="#00FFFF" />
-            <stop offset="100%" stopColor="#00AA00" />
-          </linearGradient>
-          
-          <linearGradient id="neuralFlow" x1="0%" y1="0%" x2="100%" y2="0%">
-            <stop offset="0%" stopColor="#FFD700" stopOpacity="0" />
-            <stop offset="50%" stopColor="#FFD700" stopOpacity="1" />
-            <stop offset="100%" stopColor="#00FF41" stopOpacity="0" />
+          <filter id="ultra-glow" x="-150%" y="-150%" width="400%" height="400%">
+            <feGaussianBlur stdDeviation="20" result="coloredBlur"/>
+            <feMerge>
+              <feMergeNode in="coloredBlur"/>
+              <feMergeNode in="coloredBlur"/>
+              <feMergeNode in="coloredBlur"/>
+              <feMergeNode in="coloredBlur"/>
+              <feMergeNode in="SourceGraphic"/>
+            </feMerge>
+          </filter>
+
+          <filter id="root-glow" x="-150%" y="-150%" width="400%" height="400%">
+            <feGaussianBlur stdDeviation="18" result="coloredBlur"/>
+            <feColorMatrix in="coloredBlur" type="matrix"
+              values="0 0 0 0 0
+                      0 1 0 0 0
+                      0 0 1 0 0
+                      0 0 0 1.5 0"/>
+            <feMerge>
+              <feMergeNode/>
+              <feMergeNode/>
+              <feMergeNode/>
+              <feMergeNode in="SourceGraphic"/>
+            </feMerge>
+          </filter>
+
+          {/* Bright gradients */}
+          <linearGradient id="branch-gradient" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stopColor="#39FF14" stopOpacity="1" />
+            <stop offset="50%" stopColor="#00FF41" stopOpacity="1" />
+            <stop offset="100%" stopColor="#00AA00" stopOpacity="0.9" />
           </linearGradient>
 
-          {/* Filters */}
-          <filter id="glow">
-            <feGaussianBlur stdDeviation="4" result="coloredBlur" />
-            <feMerge>
-              <feMergeNode in="coloredBlur" />
-              <feMergeNode in="SourceGraphic" />
-            </feMerge>
-          </filter>
-          
-          <filter id="strongGlow">
-            <feGaussianBlur stdDeviation="8" result="coloredBlur" />
-            <feMerge>
-              <feMergeNode in="coloredBlur" />
-              <feMergeNode in="coloredBlur" />
-              <feMergeNode in="SourceGraphic" />
-            </feMerge>
-          </filter>
+          <linearGradient id="root-gradient" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stopColor="#00FFFF" stopOpacity="1">
+              <animate attributeName="stopOpacity" values="1;0.8;1" dur="2s" repeatCount="indefinite" />
+            </stop>
+            <stop offset="50%" stopColor="#00FF80" stopOpacity="1" />
+            <stop offset="100%" stopColor="#00FF41" stopOpacity="1">
+              <animate attributeName="stopOpacity" values="1;0.8;1" dur="2s" repeatCount="indefinite" begin="1s" />
+            </stop>
+          </linearGradient>
+
+          <linearGradient id="particle-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stopColor="#FFD700" stopOpacity="0" />
+            <stop offset="50%" stopColor="#FFEA00" stopOpacity="1" />
+            <stop offset="100%" stopColor="#FFD700" stopOpacity="0" />
+          </linearGradient>
         </defs>
 
         {/* Ground line separator */}
-        <line
-          x1="0"
-          y1="500"
-          x2="800"
-          y2="500"
-          stroke="url(#rootGradient)"
-          strokeWidth="2"
-          strokeDasharray="10,5"
-          opacity="0.3"
-        />
-        
-        <text x="50" y="495" fill="#00FFFF" fontSize="10" opacity="0.5">
-          UNDERGROUND NETWORK
-        </text>
+        <line 
+          x1="0" 
+          y1="420" 
+          x2="800" 
+          y2="420" 
+          stroke="url(#root-gradient)"
+          strokeWidth="3"
+          strokeDasharray="10 5"
+          opacity="0.8"
+          filter="url(#intense-glow)"
+        >
+          <animate attributeName="stroke-dashoffset" from="0" to="15" dur="1s" repeatCount="indefinite" />
+        </line>
 
-        {/* ROOT SYSTEM - Below ground */}
-        <g opacity="0.9">
-          {/* Main root structure */}
-          <path
-            d="M 400,500 Q 350,520 300,530 Q 250,540 200,550"
-            stroke="url(#rootGradient)"
-            strokeWidth="8"
-            fill="none"
-            filter="url(#glow)"
-            opacity="0.8"
-          />
-          <path
-            d="M 400,500 Q 330,530 280,550 Q 240,565 200,580"
-            stroke="url(#rootGradient)"
-            strokeWidth="6"
-            fill="none"
-            filter="url(#glow)"
-            opacity="0.7"
-          />
-          <path
-            d="M 400,500 Q 450,520 500,530 Q 550,540 600,550"
-            stroke="url(#rootGradient)"
-            strokeWidth="8"
-            fill="none"
-            filter="url(#glow)"
-            opacity="0.8"
-          />
-          <path
-            d="M 400,500 Q 470,530 520,550 Q 560,565 600,580"
-            stroke="url(#rootGradient)"
-            strokeWidth="6"
-            fill="none"
-            filter="url(#glow)"
-            opacity="0.7"
-          />
-          
-          {/* Secondary roots */}
-          <path
-            d="M 400,500 Q 380,540 360,570 Q 340,590 320,600"
-            stroke="url(#rootGradient)"
-            strokeWidth="4"
-            fill="none"
-            opacity="0.6"
-          />
-          <path
-            d="M 400,500 Q 420,540 440,570 Q 460,590 480,600"
-            stroke="url(#rootGradient)"
-            strokeWidth="4"
-            fill="none"
-            opacity="0.6"
-          />
-          
-          {/* Algorithm blocks flowing through roots */}
+        {/* Root system - bright and animated */}
+        <g className="roots">
+          {roots.map((d, i) => (
+            <g key={`root-${i}`}>
+              {/* Root path with intense glow */}
+              <path
+                d={d}
+                fill="none"
+                stroke="url(#root-gradient)"
+                strokeWidth={8 + (roots.length - i) * 0.5}
+                strokeLinecap="round"
+                opacity="1"
+                filter="url(#root-glow)"
+              >
+                <animate 
+                  attributeName="stroke-width"
+                  values={`${8 + (roots.length - i) * 0.5};${10 + (roots.length - i) * 0.5};${8 + (roots.length - i) * 0.5}`}
+                  dur="3s"
+                  repeatCount="indefinite"
+                  begin={`${i * 0.1}s`}
+                />
+              </path>
+              
+              {/* Flowing energy through roots */}
+              <circle r="6" fill="#00FFFF" filter="url(#ultra-glow)">
+                <animateMotion
+                  dur={`${4 + Math.random() * 2}s`}
+                  repeatCount="indefinite"
+                  path={d}
+                  begin={`${Math.random() * 3}s`}
+                />
+              </circle>
+            </g>
+          ))}
+        </g>
+
+        {/* Algorithm blocks flowing through roots */}
+        <g className="algorithm-blocks">
           {rootBlocks.map(block => (
-            <g key={block.id} opacity={block.opacity}>
+            <g key={block.id} transform={`translate(${400 + block.offsetX}, ${450 + block.y})`}>
+              {/* Block background */}
+              <rect
+                x="-60"
+                y="-20"
+                width="120"
+                height="40"
+                fill="rgba(0, 20, 40, 0.8)"
+                stroke={block.type === 'packet' ? '#00FFFF' : '#00FF41'}
+                strokeWidth="2"
+                rx="5"
+                filter="url(#intense-glow)"
+                opacity={block.opacity}
+              />
+              
+              {/* Block text */}
               <text
-                x={block.x}
-                y={block.y}
-                fill="#00FFFF"
-                fontSize="14"
+                textAnchor="middle"
+                dominantBaseline="middle"
+                fill={block.type === 'symbol' ? '#FFD700' : '#00FFFF'}
+                fontSize="28"
                 fontFamily="monospace"
                 fontWeight="bold"
-                filter="url(#glow)"
+                filter="url(#ultra-glow)"
+                opacity={block.opacity}
               >
                 {block.text}
               </text>
@@ -275,213 +357,157 @@ const AnimatedNeuralTree = () => {
           ))}
         </g>
 
-        {/* TRUNK - Main tree trunk */}
-        <g>
-          {/* Trunk base */}
-          <path
-            d="M 380,500 Q 385,450 390,400 Q 392,350 395,300 L 405,300 Q 408,350 410,400 Q 415,450 420,500 Z"
-            fill="url(#trunkGlow)"
-            stroke="#00FF41"
-            strokeWidth="3"
-            filter="url(#glow)"
-          />
-          
-          {/* Trunk texture layers */}
-          <path
-            d="M 385,500 L 390,300 L 395,300 L 395,500 Z"
-            fill="#001a00"
-            opacity="0.6"
-          />
-          <path
-            d="M 405,300 L 410,300 L 415,500 L 410,500 Z"
-            fill="#001a00"
-            opacity="0.6"
-          />
-          
-          {/* Trunk highlights */}
-          <path
-            d="M 392,480 Q 393,400 394,320"
-            stroke="#00FF41"
-            strokeWidth="1"
-            opacity="0.3"
-            strokeLinecap="round"
-          />
-          <path
-            d="M 408,480 Q 407,400 406,320"
-            stroke="#00FF41"
-            strokeWidth="1"
-            opacity="0.3"
-            strokeLinecap="round"
-          />
+        {/* Tree branches - bright and organic */}
+        <g className="branches">
+          {branches.map((d, i) => (
+            <g key={`branch-${i}`}>
+              {/* Main branch path */}
+              <path
+                d={d}
+                fill="none"
+                stroke="url(#branch-gradient)"
+                strokeWidth={10 + (branches.length - i) * 0.3}
+                strokeLinecap="round"
+                opacity="1"
+                filter="url(#intense-glow)"
+              />
+              
+              {/* Pulsing vein effect */}
+              <path
+                d={d}
+                fill="none"
+                stroke="#39FF14"
+                strokeWidth={3}
+                strokeLinecap="round"
+                opacity="0.6"
+                filter="url(#ultra-glow)"
+              >
+                <animate 
+                  attributeName="opacity"
+                  values="0.3;0.9;0.3"
+                  dur="2s"
+                  repeatCount="indefinite"
+                  begin={`${i * 0.1}s`}
+                />
+              </path>
+            </g>
+          ))}
         </g>
 
-        {/* BRANCHES - Above ground with neural flow */}
-        <g>
-          {/* Main branch structure - Left side */}
-          <path
-            d="M 400,300 Q 300,250 250,200 Q 220,180 180,120"
-            stroke="url(#branchGradient)"
-            strokeWidth="12"
-            fill="none"
-            filter="url(#glow)"
-            strokeLinecap="round"
-          />
-          <path
-            d="M 400,300 Q 320,280 280,240 Q 250,210 220,180"
-            stroke="url(#branchGradient)"
-            strokeWidth="10"
-            fill="none"
-            filter="url(#glow)"
-            strokeLinecap="round"
-          />
-          <path
-            d="M 400,300 Q 340,290 300,270 Q 280,250 260,220"
-            stroke="url(#branchGradient)"
-            strokeWidth="8"
-            fill="none"
-            filter="url(#glow)"
-            strokeLinecap="round"
-          />
-          
-          {/* Main branch structure - Right side */}
-          <path
-            d="M 400,300 Q 500,250 550,200 Q 580,180 620,120"
-            stroke="url(#branchGradient)"
-            strokeWidth="12"
-            fill="none"
-            filter="url(#glow)"
-            strokeLinecap="round"
-          />
-          <path
-            d="M 400,300 Q 480,280 520,240 Q 550,210 580,180"
-            stroke="url(#branchGradient)"
-            strokeWidth="10"
-            fill="none"
-            filter="url(#glow)"
-            strokeLinecap="round"
-          />
-          <path
-            d="M 400,300 Q 460,290 500,270 Q 520,250 540,220"
-            stroke="url(#branchGradient)"
-            strokeWidth="8"
-            fill="none"
-            filter="url(#glow)"
-            strokeLinecap="round"
-          />
-          
-          {/* Upper branches */}
-          <path
-            d="M 400,300 Q 380,240 370,200 Q 365,170 350,140"
-            stroke="url(#branchGradient)"
-            strokeWidth="9"
-            fill="none"
-            filter="url(#glow)"
-            strokeLinecap="round"
-          />
-          <path
-            d="M 400,300 Q 420,240 430,200 Q 435,170 450,140"
-            stroke="url(#branchGradient)"
-            strokeWidth="9"
-            fill="none"
-            filter="url(#glow)"
-            strokeLinecap="round"
-          />
-          
-          {/* Secondary branches - Left */}
-          <path
-            d="M 280,240 Q 260,220 240,200 Q 220,185 200,170"
-            stroke="url(#branchGradient)"
-            strokeWidth="6"
-            fill="none"
-            opacity="0.8"
-            strokeLinecap="round"
-          />
-          <path
-            d="M 250,200 Q 230,185 220,180 Q 210,172 200,160"
-            stroke="url(#branchGradient)"
-            strokeWidth="5"
-            fill="none"
-            opacity="0.7"
-            strokeLinecap="round"
-          />
-          
-          {/* Secondary branches - Right */}
-          <path
-            d="M 520,240 Q 540,220 560,200 Q 580,185 600,170"
-            stroke="url(#branchGradient)"
-            strokeWidth="6"
-            fill="none"
-            opacity="0.8"
-            strokeLinecap="round"
-          />
-          <path
-            d="M 550,200 Q 570,185 580,180 Q 590,172 600,160"
-            stroke="url(#branchGradient)"
-            strokeWidth="5"
-            fill="none"
-            opacity="0.7"
-            strokeLinecap="round"
-          />
-
-          {/* Neural flow particles */}
-          {branchParticles.map(particle => (
+        {/* Neural flow particles - large and bright */}
+        {branchParticles.map(particle => (
+          <g key={particle.id}>
+            {/* Particle trail */}
             <circle
-              key={particle.id}
-              r={particle.size}
+              r={particle.size * 1.5}
               fill={particle.color}
-              filter="url(#strongGlow)"
+              opacity="0.3"
+              filter="url(#ultra-glow)"
             >
               <animateMotion
-                path={particle.path}
-                dur="4s"
+                dur={`${particle.duration}s`}
                 repeatCount="indefinite"
-                keyPoints={`${particle.offset / 100};1`}
-                keyTimes="0;1"
-                calcMode="linear"
+                path={particle.path}
+                begin={`${particle.delay}s`}
               />
             </circle>
-          ))}
-
-          {/* Pulsing nodes at branch intersections */}
-          <circle cx="400" cy="300" r="8" fill="#FFD700" filter="url(#strongGlow)" className="animate-glow-intense" />
-          <circle cx="280" cy="240" r="6" fill="#00FF41" filter="url(#strongGlow)" className="animate-glow-intense" style={{ animationDelay: '0.5s' }} />
-          <circle cx="520" cy="240" r="6" fill="#00FF41" filter="url(#strongGlow)" className="animate-glow-intense" style={{ animationDelay: '0.7s' }} />
-          <circle cx="250" cy="200" r="5" fill="#FFD700" filter="url(#strongGlow)" className="animate-glow-intense" style={{ animationDelay: '1s' }} />
-          <circle cx="550" cy="200" r="5" fill="#FFD700" filter="url(#strongGlow)" className="animate-glow-intense" style={{ animationDelay: '1.2s' }} />
-          <circle cx="370" cy="200" r="5" fill="#00FF41" filter="url(#strongGlow)" className="animate-glow-intense" style={{ animationDelay: '0.3s' }} />
-          <circle cx="430" cy="200" r="5" fill="#00FF41" filter="url(#strongGlow)" className="animate-glow-intense" style={{ animationDelay: '0.9s' }} />
-        </g>
-
-        {/* Canopy particles (floating bits) */}
-        <g opacity="0.4">
-          {Array.from({ length: 20 }).map((_, i) => (
+            
+            {/* Main particle */}
             <circle
-              key={`canopy-${i}`}
-              cx={300 + Math.random() * 200}
-              cy={80 + Math.random() * 150}
-              r={1 + Math.random() * 2}
-              fill="#00FF41"
-              opacity={0.3 + Math.random() * 0.4}
+              r={particle.size}
+              fill={particle.color}
+              filter="url(#ultra-glow)"
             >
-              <animate
-                attributeName="cy"
-                values={`${80 + Math.random() * 150};${60 + Math.random() * 150};${80 + Math.random() * 150}`}
-                dur={`${3 + Math.random() * 4}s`}
+              <animateMotion
+                dur={`${particle.duration}s`}
                 repeatCount="indefinite"
+                path={particle.path}
+                begin={`${particle.delay}s`}
               />
               <animate
                 attributeName="opacity"
-                values="0.3;0.8;0.3"
-                dur={`${2 + Math.random() * 3}s`}
+                values="1;0.6;1"
+                dur="1s"
                 repeatCount="indefinite"
               />
             </circle>
-          ))}
-        </g>
+          </g>
+        ))}
+
+        {/* Branch intersection nodes - large and pulsing */}
+        {[
+          [400, 320], [400, 340], [400, 360],
+          [300, 240], [280, 300], [260, 340],
+          [500, 240], [520, 300], [540, 340],
+          [240, 160], [260, 180], [200, 100],
+          [560, 160], [540, 180], [600, 100],
+        ].map((pos, i) => (
+          <g key={`node-${i}`}>
+            {/* Expanding ring */}
+            <circle
+              cx={pos[0]}
+              cy={pos[1]}
+              r="25"
+              fill="none"
+              stroke="#FFEA00"
+              strokeWidth="3"
+              opacity="0"
+            >
+              <animate
+                attributeName="r"
+                values="10;35;10"
+                dur="3s"
+                repeatCount="indefinite"
+                begin={`${i * 0.2}s`}
+              />
+              <animate
+                attributeName="opacity"
+                values="0;0.8;0"
+                dur="3s"
+                repeatCount="indefinite"
+                begin={`${i * 0.2}s`}
+              />
+            </circle>
+            
+            {/* Core node */}
+            <circle
+              cx={pos[0]}
+              cy={pos[1]}
+              r="18"
+              fill="#FFFFFF"
+              filter="url(#ultra-glow)"
+            >
+              <animate
+                attributeName="r"
+                values="15;22;15"
+                dur="2s"
+                repeatCount="indefinite"
+                begin={`${i * 0.15}s`}
+              />
+            </circle>
+          </g>
+        ))}
       </svg>
 
       {/* Matrix rain overlay on trunk */}
       <MatrixRain />
+      
+      {/* Floating particle atmosphere */}
+      <div className="absolute inset-0 pointer-events-none">
+        {Array.from({ length: 30 }).map((_, i) => (
+          <div
+            key={`float-${i}`}
+            className="absolute w-2 h-2 bg-green-400 rounded-full opacity-60"
+            style={{
+              left: `${Math.random() * 100}%`,
+              top: `${Math.random() * 100}%`,
+              animation: `float ${5 + Math.random() * 5}s ease-in-out infinite`,
+              animationDelay: `${Math.random() * 3}s`,
+              filter: 'blur(1px)',
+            }}
+          />
+        ))}
+      </div>
     </div>
   );
 };
