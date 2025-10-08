@@ -57,8 +57,8 @@ const MatrixRain = () => {
 
     // Animation loop
     const animate = () => {
-      // Stronger fade effect for trails
-      ctx.fillStyle = 'rgba(0, 0, 0, 0.08)';
+      // Sharper fade for cleaner trails
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.15)';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
       columnsRef.current.forEach((column) => {
@@ -67,15 +67,15 @@ const MatrixRain = () => {
           const isHighlight = Math.random() > 0.85;
           const baseColor = isHighlight ? 255 : Math.floor(255 * char.brightness);
           
-          // Create glow effect
-          ctx.shadowBlur = isHighlight ? 25 : 15;
+          // Subtle sharp glow
+          ctx.shadowBlur = isHighlight ? 4 : 3;
           ctx.shadowColor = isHighlight ? '#FFFFFF' : '#00FF41';
           
           ctx.fillStyle = isHighlight 
             ? `rgba(255, 255, 255, ${char.opacity})`
             : `rgba(0, ${baseColor}, ${Math.floor(65 * char.brightness)}, ${char.opacity})`;
           
-          ctx.font = `bold ${22 + Math.random() * 4}px monospace`;
+          ctx.font = `bold 28px monospace`;
           ctx.fillText(char.char, char.x, char.y);
 
           // Reset shadow
