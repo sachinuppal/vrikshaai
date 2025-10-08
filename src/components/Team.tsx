@@ -2,7 +2,7 @@ import { Award, Code, TrendingUp } from "lucide-react";
 
 const Team = () => {
   return (
-    <section className="py-24 bg-muted/30">
+    <section className="py-20 px-6 bg-background border-t-2 border-primary/20">
       <div className="container mx-auto px-6">
         <div className="max-w-6xl mx-auto">
           {/* Header */}
@@ -34,7 +34,8 @@ const Team = () => {
           {/* Expertise Grid */}
           <div className="grid md:grid-cols-3 gap-6">
             {/* Experience */}
-            <div className="group p-8 rounded-2xl bg-card border-2 border-border hover:border-primary/40 transition-all hover:scale-105 hover:shadow-glow">
+            <div className="group p-8 rounded-lg bg-card border-2 border-primary/30 hover:border-primary transition-all hover:scale-105" style={{ boxShadow: "0 0 0 hsl(var(--primary) / 0)" }}>
+              <div className="absolute inset-0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" style={{ boxShadow: "0 0 30px hsl(var(--primary) / 0.5)" }} />
               <div className="space-y-4">
                 <div className="p-4 rounded-xl bg-primary/10 w-fit group-hover:bg-primary/20 transition-colors">
                   <Award className="w-8 h-8 text-primary" />

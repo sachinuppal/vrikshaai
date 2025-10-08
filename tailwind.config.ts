@@ -88,12 +88,47 @@ export default {
           "0%, 100%": { opacity: "0.5", transform: "scale(1)" },
           "50%": { opacity: "1", transform: "scale(1.05)" },
         },
-        "neural-pulse": {
+        "glow-intense": {
           "0%, 100%": { 
-            boxShadow: "0 0 20px hsl(var(--secondary-glow) / 0.3)",
+            filter: "drop-shadow(0 0 20px hsl(var(--primary) / 0.6))",
           },
           "50%": { 
-            boxShadow: "0 0 40px hsl(var(--secondary-glow) / 0.6)",
+            filter: "drop-shadow(0 0 40px hsl(var(--primary) / 1))",
+          },
+        },
+        "electric-pulse": {
+          "0%": { 
+            opacity: "1",
+            transform: "translateX(0) scale(1)",
+          },
+          "100%": { 
+            opacity: "0",
+            transform: "translateX(100%) scale(0.5)",
+          },
+        },
+        "neural-flow": {
+          "0%": { 
+            backgroundPosition: "0% 50%",
+          },
+          "50%": { 
+            backgroundPosition: "100% 50%",
+          },
+          "100%": { 
+            backgroundPosition: "0% 50%",
+          },
+        },
+        "spark": {
+          "0%, 100%": { opacity: "0", transform: "scale(0)" },
+          "50%": { opacity: "1", transform: "scale(1)" },
+        },
+        "tree-grow": {
+          "0%": { 
+            strokeDashoffset: "1000",
+            opacity: "0",
+          },
+          "100%": { 
+            strokeDashoffset: "0",
+            opacity: "1",
           },
         },
       },
@@ -104,13 +139,18 @@ export default {
         "fade-up": "fade-up 0.8s ease-out",
         "scale-in": "scale-in 0.5s ease-out",
         "glow-pulse": "glow-pulse 3s ease-in-out infinite",
-        "neural-pulse": "neural-pulse 2s ease-in-out infinite",
+        "glow-intense": "glow-intense 2s ease-in-out infinite",
+        "electric-pulse": "electric-pulse 2s linear infinite",
+        "neural-flow": "neural-flow 4s ease-in-out infinite",
+        "spark": "spark 1.5s ease-in-out infinite",
+        "tree-grow": "tree-grow 3s ease-out forwards",
       },
       backgroundImage: {
         "gradient-primary": "var(--gradient-primary)",
         "gradient-neural": "var(--gradient-neural)",
         "gradient-hero": "var(--gradient-hero)",
         "gradient-accent": "var(--gradient-accent)",
+        "gradient-electric": "var(--gradient-electric)",
       },
     },
   },

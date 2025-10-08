@@ -30,77 +30,60 @@ const ventures = [
 
 const Ventures = () => {
   return (
-    <section className="py-24 bg-muted/30">
-      <div className="container mx-auto px-6">
-        <div className="max-w-6xl mx-auto">
-          {/* Header */}
-          <div className="text-center mb-16 space-y-4 animate-fade-in">
-            <h2 className="text-4xl md:text-5xl font-bold text-foreground">
-              Four Branches. One Living Ecosystem.
-            </h2>
-            <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-              Vriksha.ai brings together technologists, marketers, and creators who build scalable, 
-              AI-native companies from the ground up.
-            </p>
-            <div className="w-24 h-1 bg-gradient-neural mx-auto rounded-full" />
-          </div>
+    <section className="py-20 px-6 bg-background border-t-2 border-primary/20">
+      <div className="container mx-auto max-w-6xl">
+        {/* Header */}
+        <div className="text-center mb-16 space-y-6 animate-fade-up">
+          <h2 className="text-4xl md:text-5xl font-bold">
+            <span className="text-primary">Four Branches. </span>
+            <span className="text-foreground">One Living Ecosystem.</span>
+          </h2>
+          <p className="text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
+            Vriksha.ai brings together technologists, marketers, and creators who build scalable, AI-native companies from the ground up.
+            <br />
+            <span className="text-secondary font-medium">From enterprise automation to creative intelligence</span>, every venture feeds the same mission — to make India the world's AI innovation hub.
+          </p>
+        </div>
 
-          {/* Ventures Grid */}
-          <div className="grid md:grid-cols-2 gap-6 animate-fade-up">
-            {ventures.map((venture, index) => {
-              const Icon = venture.icon;
-              return (
-                <Card 
-                  key={index}
-                  className="group p-8 hover:shadow-elegant transition-all duration-500 hover:scale-105 border-2 hover:border-primary/30 bg-card"
-                >
-                  <div className="space-y-4">
-                    {/* Icon */}
-                    <div className={`
-                      p-4 rounded-2xl w-fit
-                      ${venture.color === 'primary' ? 'bg-primary/10 group-hover:bg-primary/20' : ''}
-                      ${venture.color === 'secondary' ? 'bg-secondary/10 group-hover:bg-secondary/20' : ''}
-                      ${venture.color === 'accent' ? 'bg-accent/10 group-hover:bg-accent/20' : ''}
-                      transition-colors duration-300
-                    `}>
-                      <Icon className={`
-                        w-8 h-8
-                        ${venture.color === 'primary' ? 'text-primary' : ''}
-                        ${venture.color === 'secondary' ? 'text-secondary' : ''}
-                        ${venture.color === 'accent' ? 'text-accent' : ''}
-                      `} />
-                    </div>
-
-                    {/* Content */}
-                    <div>
-                      <h3 className="text-2xl font-bold mb-3 text-foreground group-hover:text-primary transition-colors">
-                        {venture.name}
-                      </h3>
-                      <p className="text-muted-foreground leading-relaxed">
-                        {venture.description}
-                      </p>
-                    </div>
-
-                    {/* Decorative Line */}
-                    <div className={`
-                      h-1 w-0 group-hover:w-full transition-all duration-500 rounded-full
-                      ${venture.color === 'primary' ? 'bg-gradient-primary' : ''}
-                      ${venture.color === 'secondary' ? 'bg-secondary' : ''}
-                      ${venture.color === 'accent' ? 'bg-gradient-accent' : ''}
-                    `} />
+        {/* Ventures Grid */}
+        <div className="grid md:grid-cols-2 gap-8">
+          {ventures.map((venture, index) => {
+            const Icon = venture.icon;
+            const colorClass = venture.color === "primary" ? "border-primary/40 hover:border-primary" : venture.color === "secondary" ? "border-secondary/40 hover:border-secondary" : "border-accent/40 hover:border-accent";
+            const iconBg = venture.color === "primary" ? "bg-primary/20" : venture.color === "secondary" ? "bg-secondary/20" : "bg-accent/20";
+            const iconColor = venture.color === "primary" ? "text-primary" : venture.color === "secondary" ? "text-secondary" : "text-accent";
+            const shadowColor = venture.color === "primary" ? "0 0 30px hsl(var(--primary) / 0.4)" : venture.color === "secondary" ? "0 0 30px hsl(var(--secondary) / 0.4)" : "0 0 30px hsl(var(--accent) / 0.4)";
+            
+            return (
+              <Card
+                key={index}
+                className={`group relative p-8 bg-card border-2 ${colorClass} transition-all hover:scale-105 animate-fade-in overflow-hidden`}
+                style={{ animationDelay: `${index * 0.1}s` }}
+              >
+                <div 
+                  className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" 
+                  style={{ boxShadow: shadowColor }}
+                />
+                
+                <div className="relative space-y-4">
+                  <div className={`w-14 h-14 rounded-lg ${iconBg} flex items-center justify-center group-hover:animate-glow-intense`}>
+                    <Icon className={`w-7 h-7 ${iconColor}`} />
                   </div>
-                </Card>
-              );
-            })}
-          </div>
 
-          {/* Bottom Text */}
-          <div className="text-center mt-12">
-            <p className="text-lg text-muted-foreground">
-              From enterprise automation to creative intelligence, every venture feeds the same mission — 
-              <span className="font-semibold text-foreground"> to make India the world's AI innovation hub.</span>
-            </p>
-          </div>
+                  <div className="space-y-2">
+                    <h3 className={`text-2xl font-bold ${iconColor}`}>
+                      {venture.name}
+                    </h3>
+                    <p className="text-muted-foreground leading-relaxed">
+                      {venture.description}
+                    </p>
+                  </div>
+
+                  <div className={`h-0.5 w-0 group-hover:w-full transition-all duration-500 ${iconColor === "text-primary" ? "bg-primary" : iconColor === "text-secondary" ? "bg-secondary" : "bg-accent"}`} />
+                </div>
+              </Card>
+            );
+          })}
         </div>
       </div>
     </section>

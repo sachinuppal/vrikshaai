@@ -1,19 +1,9 @@
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
-import neuralPattern from "@/assets/neural-pattern.jpg";
 
 const JoinEcosystem = () => {
   return (
-    <section className="relative py-32 overflow-hidden bg-gradient-hero">
-      {/* Background */}
-      <div className="absolute inset-0 opacity-30">
-        <img 
-          src={neuralPattern} 
-          alt="Join the Vriksha.ai ecosystem"
-          className="w-full h-full object-cover"
-        />
-      </div>
-      <div className="absolute inset-0 bg-gradient-to-b from-background/90 via-background/70 to-background/90" />
+    <section className="relative py-32 overflow-hidden bg-background border-t-2 border-primary/20">
 
       <div className="relative container mx-auto px-6">
         <div className="max-w-4xl mx-auto text-center space-y-8 animate-fade-up">
