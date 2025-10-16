@@ -1,9 +1,39 @@
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 const Hero = () => {
   const [showContent, setShowContent] = useState(false);
   const [videoDuration, setVideoDuration] = useState(0);
+  const [isVideoLoaded, setIsVideoLoaded] = useState(false);
+  const [useStaticBg, setUseStaticBg] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    // Detect mobile
+    const checkMobile = () => window.innerWidth < 768;
+    setIsMobile(checkMobile());
+
+    const handleResize = () => setIsMobile(checkMobile());
+    window.addEventListener('resize', handleResize);
+
+    // Check network speed if available
+    const connection = (navigator as any).connection;
+    if (connection && (connection.effectiveType === 'slow-2g' || connection.effectiveType === '2g')) {
+      setUseStaticBg(true);
+    }
+
+    // Fallback timeout - show content after 5s if video hasn't loaded
+    const timeout = setTimeout(() => {
+      if (!isVideoLoaded) {
+        setShowContent(true);
+      }
+    }, 5000);
+
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      clearTimeout(timeout);
+    };
+  }, [isVideoLoaded]);
 
   const handleLoadedMetadata = (e: React.SyntheticEvent<HTMLVideoElement>) => {
     setVideoDuration(e.currentTarget.duration);
@@ -18,34 +48,41 @@ const Hero = () => {
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-background">
       {/* Video Background */}
-      <div className={`absolute inset-0 transition-opacity duration-1000 ${showContent ? 'opacity-40' : 'opacity-100'}`}>
-        <video
-          autoPlay
-          loop
-          muted
-          playsInline
-          preload="auto"
-          className="w-full h-full object-cover"
-          src="https://vqglejkydwtopmllymuf.supabase.co/storage/v1/object/public/assets/vrikshaai.mp4"
-          onLoadedMetadata={handleLoadedMetadata}
-          onTimeUpdate={handleTimeUpdate}
-        />
-      </div>
+      {useStaticBg ? (
+        <div className={`absolute inset-0 bg-gradient-hero transition-opacity duration-1000 ${showContent ? 'opacity-40' : 'opacity-100'}`} />
+      ) : (
+        <div className={`absolute inset-0 transition-opacity duration-1000 ${showContent ? 'opacity-40' : 'opacity-100'}`}>
+          <video
+            autoPlay
+            loop
+            muted
+            playsInline
+            preload={isMobile ? "metadata" : "auto"}
+            poster="https://vqglejkydwtopmllymuf.supabase.co/storage/v1/object/public/assets/vrikshaai.mp4"
+            className="w-full h-full object-cover"
+            src="https://vqglejkydwtopmllymuf.supabase.co/storage/v1/object/public/assets/vrikshaai.mp4"
+            onLoadedMetadata={handleLoadedMetadata}
+            onLoadedData={() => setIsVideoLoaded(true)}
+            onTimeUpdate={handleTimeUpdate}
+            onError={() => setUseStaticBg(true)}
+          />
+        </div>
+      )}
 
       {/* Radial Gradient Overlay */}
       <div className={`absolute inset-0 bg-gradient-hero transition-opacity duration-1000 ${showContent ? 'opacity-100' : 'opacity-0'}`} />
 
       {/* Content */}
-      <div className={`relative z-10 container mx-auto px-6 py-20 text-center transition-opacity duration-2000 ${showContent ? 'opacity-100' : 'opacity-0'}`}>
-        <div className="max-w-4xl mx-auto space-y-8">
+      <div className={`relative z-10 container mx-auto px-4 sm:px-6 py-16 sm:py-20 text-center transition-opacity duration-2000 ${showContent ? 'opacity-100' : 'opacity-0'}`}>
+        <div className="max-w-4xl mx-auto space-y-6 sm:space-y-8">
           {/* Badge */}
-          <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-full bg-card border-2 border-primary/40 backdrop-blur-sm transition-all duration-1000 ${showContent ? 'opacity-100' : 'opacity-0'}`}>
+          <div className={`inline-flex items-center gap-2 px-3 sm:px-4 py-2 rounded-full bg-card border-2 border-primary/40 backdrop-blur-sm transition-all duration-1000 ${showContent ? 'opacity-100' : 'opacity-0'}`}>
             <div className="w-2 h-2 rounded-full bg-secondary animate-glow-intense" />
-            <span className="text-sm font-medium text-primary">India's First AI Venture Studio</span>
+            <span className="text-xs sm:text-sm font-medium text-primary">India's First AI Venture Studio</span>
           </div>
 
           {/* Main Headline */}
-          <h1 className={`text-5xl md:text-7xl font-bold tracking-tight transition-all duration-1000 delay-300 ${showContent ? 'opacity-100' : 'opacity-0'}`}>
+          <h1 className={`text-4xl sm:text-5xl md:text-7xl font-bold tracking-tight leading-tight transition-all duration-1000 delay-300 ${showContent ? 'opacity-100' : 'opacity-0'}`}>
             <span className="text-foreground">Rooted in India.</span>
             <br />
             <span className="bg-gradient-neural bg-clip-text text-transparent animate-glow-pulse" style={{ backgroundSize: "200% auto" }}>
@@ -54,17 +91,17 @@ const Hero = () => {
           </h1>
 
           {/* Subtext */}
-          <p className={`text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto leading-relaxed transition-all duration-1000 delay-600 ${showContent ? 'opacity-100' : 'opacity-0'}`}>
+          <p className={`text-lg sm:text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto leading-relaxed transition-all duration-1000 delay-600 ${showContent ? 'opacity-100' : 'opacity-0'}`}>
             Vriksha.ai nurtures bold ideas into global-scale products.
             <br />
             <span className="text-foreground font-medium">Rooted in Indian wisdom, powered by <span className="text-primary">modern intelligence</span>.</span>
           </p>
 
           {/* CTA Buttons */}
-          <div className={`flex flex-col sm:flex-row gap-4 justify-center pt-4 transition-all duration-1000 delay-[900ms] ${showContent ? 'opacity-100' : 'opacity-0'}`}>
+          <div className={`flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center pt-4 transition-all duration-1000 delay-[900ms] ${showContent ? 'opacity-100' : 'opacity-0'}`}>
             <Button 
               size="lg" 
-              className="bg-primary hover:bg-primary-glow text-primary-foreground font-semibold px-8 py-6 text-lg rounded-lg transition-all hover:scale-105 hover:shadow-intense"
+              className="min-h-[44px] bg-primary hover:bg-primary-glow text-primary-foreground font-semibold px-6 sm:px-8 py-3 sm:py-6 text-base sm:text-lg rounded-lg transition-all hover:scale-105 active:scale-95"
               style={{ boxShadow: "var(--shadow-glow)" }}
             >
               Explore Our Ventures
@@ -72,7 +109,7 @@ const Hero = () => {
             <Button 
               size="lg" 
               variant="outline"
-              className="border-2 border-primary text-primary hover:bg-primary hover:text-primary-foreground font-semibold px-8 py-6 text-lg rounded-lg transition-all hover:scale-105 hover:shadow-glow"
+              className="min-h-[44px] border-2 border-primary text-primary hover:bg-primary hover:text-primary-foreground font-semibold px-6 sm:px-8 py-3 sm:py-6 text-base sm:text-lg rounded-lg transition-all hover:scale-105 active:scale-95"
             >
               Partner with Us
             </Button>
