@@ -131,6 +131,16 @@ export default {
             opacity: "1",
           },
         },
+        "confetti": {
+          "0%": {
+            transform: "translateY(0) rotate(0deg)",
+            opacity: "1",
+          },
+          "100%": {
+            transform: "translateY(-200px) rotate(360deg)",
+            opacity: "0",
+          },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
@@ -144,6 +154,7 @@ export default {
         "neural-flow": "neural-flow 4s ease-in-out infinite",
         "spark": "spark 1.5s ease-in-out infinite",
         "tree-grow": "tree-grow 3s ease-out forwards",
+        "confetti": "confetti 1s ease-out forwards",
       },
       backgroundImage: {
         "gradient-primary": "var(--gradient-primary)",

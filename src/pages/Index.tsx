@@ -1,5 +1,6 @@
 import Hero from "@/components/Hero";
 import Philosophy from "@/components/Philosophy";
+import Gamification from "@/components/Gamification";
 import WhyIndia from "@/components/WhyIndia";
 import StudioModel from "@/components/StudioModel";
 import Team from "@/components/Team";
@@ -11,6 +12,7 @@ const Index = () => {
     <div className="min-h-screen">
       <Hero />
       <Philosophy />
+      <Gamification />
       <WhyIndia />
       <StudioModel />
       <Team />
