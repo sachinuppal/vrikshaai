@@ -1,12 +1,19 @@
 import { Button } from "@/components/ui/button";
-import AnimatedNeuralTree from "./AnimatedNeuralTree";
 
 const Hero = () => {
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-background">
-      {/* Animated Neural Tree Background */}
+      {/* Video Background */}
       <div className="absolute inset-0 opacity-40">
-        <AnimatedNeuralTree />
+        <video
+          autoPlay
+          loop
+          muted
+          playsInline
+          preload="auto"
+          className="w-full h-full object-cover"
+          src="https://vqglejkydwtopmllymuf.supabase.co/storage/v1/object/public/assets/vrikshaai.mp4"
+        />
       </div>
 
       {/* Radial Gradient Overlay */}
