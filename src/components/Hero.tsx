@@ -51,7 +51,7 @@ const Hero = () => {
       {useStaticBg ? (
         <div className={`absolute inset-0 bg-gradient-hero transition-opacity duration-1000 ${showContent ? 'opacity-40' : 'opacity-100'}`} />
       ) : (
-        <div className={`absolute inset-0 transition-opacity duration-1000 ${showContent ? 'opacity-40' : 'opacity-100'}`}>
+        <div className={`absolute inset-0 bg-black transition-opacity duration-1000 ${showContent ? 'opacity-40' : 'opacity-100'}`}>
           <video
             autoPlay
             loop
@@ -59,7 +59,7 @@ const Hero = () => {
             playsInline
             preload={isMobile ? "metadata" : "auto"}
             poster="https://vqglejkydwtopmllymuf.supabase.co/storage/v1/object/public/assets/vrikshaai.mp4"
-            className="w-full h-full object-cover"
+            className="w-full h-full object-contain sm:object-cover object-center"
             src="https://vqglejkydwtopmllymuf.supabase.co/storage/v1/object/public/assets/vrikshaai.mp4"
             onLoadedMetadata={handleLoadedMetadata}
             onLoadedData={() => setIsVideoLoaded(true)}
