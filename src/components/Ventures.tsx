@@ -1,30 +1,61 @@
+import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Phone, Users, Sparkles, Network } from "lucide-react";
+import { Phone, BarChart3, Headphones, Shield, Users, Clipboard, BadgeCheck, Camera, Sun } from "lucide-react";
 
 const ventures = [
   {
     name: "Revenueable.ai",
-    description: "The AI Call Center transforming enterprise communication.",
+    description: "Sales and Marketing Automation Engine. Converts lost leads into conversations using AI voice, chat, and omnichannel automation.",
     icon: Phone,
     color: "primary",
   },
   {
-    name: "NexoCircle",
-    description: "AI-powered social commerce and community platform.",
+    name: "Vriksha Analytics",
+    description: "Chat-based Deep Analytics. Ask questions. Get instant insights. No dashboards. Just conversation.",
+    icon: BarChart3,
+    color: "secondary",
+  },
+  {
+    name: "Telecallers.ai",
+    description: "Cloud-Native Voice AI Platform. AI voice agents that call, talk, and sell — at scale, with empathy.",
+    icon: Headphones,
+    color: "accent",
+  },
+  {
+    name: "Signal Box",
+    description: "On-premise + On-device Voice AI. Private, secure, and enterprise-grade voice AI stack for regulated industries.",
+    icon: Shield,
+    color: "primary",
+  },
+  {
+    name: "Vriksha CRM",
+    description: "The All-New AI-led CRM. A CRM that listens, talks, and acts — automating follow-ups, proposals, and insights.",
     icon: Users,
     color: "secondary",
   },
   {
-    name: "The Forge",
-    description: "Interactive storytelling and IP creation at scale. The Disney of India.",
-    icon: Sparkles,
+    name: "MarketResearchLabs",
+    description: "Rapid Voice AI-based Market Research. Outbound voice surveys, instant segmentation, and analytics — all automated.",
+    icon: Clipboard,
     color: "accent",
   },
   {
-    name: "ModelSpine",
-    description: "AI model orchestration and interoperability infrastructure.",
-    icon: Network,
+    name: "AirMingle",
+    description: "Hardware Badge + Voice Transcription + Workflow Automation. Bridges the offline world with AI — record, summarize, and trigger actions instantly.",
+    icon: BadgeCheck,
     color: "primary",
+  },
+  {
+    name: "iPolice",
+    description: "AI-powered Image and Video Monitoring. Automates challan detection, license plate recognition, and violation analytics.",
+    icon: Camera,
+    color: "secondary",
+  },
+  {
+    name: "OneSolar",
+    description: "AI-driven Solar Analytics and Lead Platform. Unified solar lead generation and satellite-based feasibility analysis.",
+    icon: Sun,
+    color: "accent",
   },
 ];
 
@@ -35,18 +66,13 @@ const Ventures = () => {
         {/* Header */}
         <div className="text-center mb-16 space-y-6 animate-fade-up">
           <h2 className="text-4xl md:text-5xl font-bold">
-            <span className="text-primary">Four Branches. </span>
-            <span className="text-foreground">One Living Ecosystem.</span>
+            <span className="text-primary">Branches of the Vriksha — </span>
+            <span className="text-foreground">Platforms Built for the Real World.</span>
           </h2>
-          <p className="text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
-            Vriksha.ai brings together technologists, marketers, and creators who build scalable, AI-native companies from the ground up.
-            <br />
-            <span className="text-secondary font-medium">From enterprise automation to creative intelligence</span>, every venture feeds the same mission — to make India the world's AI innovation hub.
-          </p>
         </div>
 
         {/* Ventures Grid */}
-        <div className="grid md:grid-cols-2 gap-8">
+        <div className="grid md:grid-cols-3 gap-6 mb-12">
           {ventures.map((venture, index) => {
             const Icon = venture.icon;
             const colorClass = venture.color === "primary" ? "border-primary/40 hover:border-primary" : venture.color === "secondary" ? "border-secondary/40 hover:border-secondary" : "border-accent/40 hover:border-accent";
@@ -84,6 +110,17 @@ const Ventures = () => {
               </Card>
             );
           })}
+        </div>
+
+        {/* CTA */}
+        <div className="text-center">
+          <Button 
+            size="lg" 
+            variant="outline"
+            className="border-2 border-primary text-primary hover:bg-primary hover:text-primary-foreground font-semibold px-8 py-6 text-lg rounded-lg transition-all hover:scale-105"
+          >
+            View All Ventures
+          </Button>
         </div>
       </div>
     </section>
