@@ -1,6 +1,8 @@
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { DollarSign, TrendingUp, Network, Zap } from "lucide-react";
+import HubSpotFormModal from "@/components/HubSpotFormModal";
 
 const features = [
   {
@@ -30,6 +32,8 @@ const features = [
 ];
 
 const Accelerator = () => {
+  const [showContactModal, setShowContactModal] = useState(false);
+
   return (
     <section className="py-20 px-6 bg-background border-t-2 border-primary/20">
       <div className="container mx-auto max-w-6xl">
@@ -90,14 +94,17 @@ const Accelerator = () => {
         {/* CTA */}
         <div className="text-center">
           <Button 
-            size="lg" 
+            size="lg"
+            onClick={() => setShowContactModal(true)}
             className="bg-primary hover:bg-primary-glow text-primary-foreground font-semibold px-8 py-6 text-lg rounded-lg transition-all hover:scale-105"
             style={{ boxShadow: "var(--shadow-glow)" }}
           >
-            Apply to Accelerator
+            Contact Us
           </Button>
         </div>
       </div>
+
+      <HubSpotFormModal open={showContactModal} onOpenChange={setShowContactModal} />
     </section>
   );
 };

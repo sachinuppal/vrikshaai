@@ -21,5 +21,24 @@
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
+    <script>
+      (function(d, s, o, f, js, fjs) {
+        const origin = 'https://agent-chat.plivo.com'
+        js = d.createElement(s), fjs = d.getElementsByTagName(s)[0]
+        js.id = o
+        js.src = origin + f
+        js.async = 1
+        fjs.parentNode.insertBefore(js, fjs)
+        js.onload = (e) => (_moduleAC.init(origin))
+      }(document, 'script', '_ac', '/assets/js/widget.js'))
+      window.__C_CHAT_CONFIG = {
+        appInfo: {
+          appId: '93447910-c618-4638-8b35-5449adc4b189',
+          appKey: '8bcbfe8058550ed62f3cda3e81c044520f72273cf083ba177d553c075fd8fa76',
+          region: 'ap-south-1',
+          device: 'web'
+        },
+      }
+    </script>
   </body>
 </html>
