@@ -1,4 +1,5 @@
 import { TreeDeciduous } from "lucide-react";
+import { Link } from "react-router-dom";
 
 const Footer = () => {
   return (
@@ -20,6 +21,23 @@ const Footer = () => {
               <p className="text-xl font-semibold text-foreground">
                 Vriksha.ai — Rooted in India. Growing the Future of AI.
               </p>
+            </div>
+
+            {/* Legal Links */}
+            <div className="flex items-center gap-4 text-sm">
+              <Link 
+                to="/terms" 
+                className="text-muted-foreground hover:text-primary transition-colors"
+              >
+                Terms of Use
+              </Link>
+              <span className="text-muted-foreground">|</span>
+              <Link 
+                to="/privacy" 
+                className="text-muted-foreground hover:text-primary transition-colors"
+              >
+                Privacy Policy
+              </Link>
             </div>
 
             {/* Copyright */}
