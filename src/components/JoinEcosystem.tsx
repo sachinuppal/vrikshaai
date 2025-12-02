@@ -1,7 +1,10 @@
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { ArrowRight } from "lucide-react";
+import HubSpotFormModal from "@/components/HubSpotFormModal";
 
 const JoinEcosystem = () => {
+  const [showContactModal, setShowContactModal] = useState(false);
+  
   return (
     <section className="relative py-32 overflow-hidden bg-background border-t-2 border-primary/20">
 
@@ -28,27 +31,19 @@ const JoinEcosystem = () => {
           {/* CTA Buttons */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center pt-8">
             <Button 
-              size="lg" 
+              size="lg"
+              onClick={() => setShowContactModal(true)}
               className="group bg-primary hover:bg-primary-glow text-primary-foreground font-semibold px-8 py-6 text-lg rounded-xl shadow-glow transition-all hover:scale-105"
             >
-              Join the Accelerator
-              <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
+              Contact Us
             </Button>
             <Button 
               size="lg" 
               variant="outline"
+              onClick={() => (window as any)._moduleAC?.openChat?.()}
               className="group border-2 border-secondary/30 hover:border-secondary hover:bg-secondary/10 font-semibold px-8 py-6 text-lg rounded-xl backdrop-blur-sm transition-all hover:scale-105"
             >
-              Integrate Our SDKs
-              <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
-            </Button>
-            <Button 
-              size="lg" 
-              variant="ghost"
-              className="group text-secondary hover:bg-secondary/10 font-semibold px-8 py-6 text-lg rounded-xl transition-all hover:scale-105"
-            >
-              Talk to Vriksha 🌳
-              <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
+              Talk to Us
             </Button>
           </div>
 
@@ -65,6 +60,8 @@ const JoinEcosystem = () => {
           </div>
         </div>
       </div>
+
+      <HubSpotFormModal open={showContactModal} onOpenChange={setShowContactModal} />
     </section>
   );
 };

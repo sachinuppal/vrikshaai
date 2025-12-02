@@ -16,11 +16,13 @@ import {
   PlayCircle,
   Sparkles,
 } from "lucide-react";
+import HubSpotFormModal from "@/components/HubSpotFormModal";
 
 const Gamification = () => {
   const [showReward, setShowReward] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const [showContactModal, setShowContactModal] = useState(false);
   const sectionRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
@@ -214,13 +216,15 @@ const Gamification = () => {
         <div className="text-center space-y-6 pt-8 border-t-2 border-primary/20">
           <Button
             size="lg"
+            onClick={() => setShowContactModal(true)}
             className="min-h-[44px] bg-gradient-to-r from-primary to-secondary hover:scale-110 active:scale-95 transition-transform text-base sm:text-lg px-8 py-6"
           >
-            <PlayCircle className="mr-2 w-5 h-5" />
-            See Gamification Demo ▶
+            Contact Us
           </Button>
         </div>
       </div>
+
+      <HubSpotFormModal open={showContactModal} onOpenChange={setShowContactModal} />
     </section>
   );
 };

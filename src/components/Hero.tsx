@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { useState, useEffect } from "react";
+import HubSpotFormModal from "@/components/HubSpotFormModal";
 
 const Hero = () => {
   const [showContent, setShowContent] = useState(false);
@@ -7,6 +8,7 @@ const Hero = () => {
   const [isVideoLoaded, setIsVideoLoaded] = useState(false);
   const [useStaticBg, setUseStaticBg] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const [showContactModal, setShowContactModal] = useState(false);
 
   useEffect(() => {
     // Detect mobile
@@ -100,25 +102,20 @@ const Hero = () => {
           {/* CTA Buttons */}
           <div className={`flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center pt-4 transition-all duration-1000 delay-[900ms] ${showContent ? 'opacity-100' : 'opacity-0'}`}>
             <Button 
-              size="lg" 
+              size="lg"
+              onClick={() => setShowContactModal(true)}
               className="min-h-[44px] bg-primary hover:bg-primary-glow text-primary-foreground font-semibold px-6 sm:px-8 py-3 sm:py-6 text-base sm:text-lg rounded-lg transition-all hover:scale-105 active:scale-95"
               style={{ boxShadow: "var(--shadow-glow)" }}
             >
-              Explore Our Ventures
+              Contact Us
             </Button>
             <Button 
               size="lg" 
               variant="outline"
+              onClick={() => (window as any)._moduleAC?.openChat?.()}
               className="min-h-[44px] border-2 border-primary text-primary hover:bg-primary hover:text-primary-foreground font-semibold px-6 sm:px-8 py-3 sm:py-6 text-base sm:text-lg rounded-lg transition-all hover:scale-105 active:scale-95"
             >
-              Apply to the Accelerator
-            </Button>
-            <Button 
-              size="lg" 
-              variant="ghost"
-              className="min-h-[44px] text-secondary hover:bg-secondary/10 hover:text-secondary font-semibold px-6 sm:px-8 py-3 sm:py-6 text-base sm:text-lg rounded-lg transition-all hover:scale-105 active:scale-95"
-            >
-              Talk to Vriksha 🌳
+              Talk to Us
             </Button>
           </div>
         </div>
@@ -130,6 +127,8 @@ const Hero = () => {
           </div>
         </div>
       </div>
+
+      <HubSpotFormModal open={showContactModal} onOpenChange={setShowContactModal} />
     </section>
   );
 };

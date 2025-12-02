@@ -1,7 +1,11 @@
+import { useState } from "react";
 import { Globe, Users, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import HubSpotFormModal from "@/components/HubSpotFormModal";
 
 const WhyIndia = () => {
+  const [showContactModal, setShowContactModal] = useState(false);
+  
   const stats = [
     {
       icon: Globe,
@@ -84,14 +88,17 @@ const WhyIndia = () => {
             Vriksha.ai stands on India's strongest roots — and builds branches that reach the world.
           </p>
           <Button 
-            size="lg" 
+            size="lg"
+            onClick={() => setShowContactModal(true)}
             className="bg-primary hover:bg-primary-glow text-primary-foreground font-semibold px-8 py-6 text-lg rounded-lg transition-all hover:scale-105"
             style={{ boxShadow: "var(--shadow-glow)" }}
           >
-            Partner with Us
+            Contact Us
           </Button>
         </div>
       </div>
+
+      <HubSpotFormModal open={showContactModal} onOpenChange={setShowContactModal} />
     </section>
   );
 };

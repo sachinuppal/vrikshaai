@@ -112,16 +112,6 @@ const Ventures = () => {
           })}
         </div>
 
-        {/* CTA */}
-        <div className="text-center">
-          <Button 
-            size="lg" 
-            variant="outline"
-            className="border-2 border-primary text-primary hover:bg-primary hover:text-primary-foreground font-semibold px-8 py-6 text-lg rounded-lg transition-all hover:scale-105"
-          >
-            View All Ventures
-          </Button>
-        </div>
       </div>
     </section>
   );
