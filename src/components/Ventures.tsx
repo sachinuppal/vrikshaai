@@ -1,5 +1,6 @@
 import { Card } from "@/components/ui/card";
 import { Phone, BarChart3, Headphones, Shield, Users, Clipboard, BadgeCheck, Camera, Sun } from "lucide-react";
+import { FadeInView, StaggerContainer, StaggerItem } from "@/components/animations";
 
 const ventures = [
   {
@@ -63,46 +64,44 @@ const Ventures = () => {
     <section className="py-20 px-6 bg-background">
       <div className="container mx-auto max-w-6xl">
         {/* Header */}
-        <div className="text-center mb-16 space-y-6 animate-fade-up">
+        <FadeInView className="text-center mb-16 space-y-6">
           <h2 className="text-4xl md:text-5xl font-bold">
             <span className="text-primary">Branches of the Vriksha — </span>
             <span className="text-foreground">Built for the Real World</span>
           </h2>
-        </div>
+        </FadeInView>
 
         {/* Ventures Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+        <StaggerContainer className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-12" staggerDelay={0.08}>
           {ventures.map((venture, index) => {
             const Icon = venture.icon;
             const iconBg = venture.color === "primary" ? "bg-primary/10" : venture.color === "secondary" ? "bg-secondary/10" : "bg-accent/10";
             const iconColor = venture.color === "primary" ? "text-primary" : venture.color === "secondary" ? "text-secondary" : "text-accent";
             
             return (
-              <Card
-                key={index}
-                className="group relative p-6 bg-card border border-border shadow-card hover:shadow-hover transition-all duration-300 hover:-translate-y-1 animate-fade-in overflow-hidden"
-                style={{ animationDelay: `${index * 0.05}s` }}
-              >
-                <div className="relative space-y-4">
-                  <div className={`w-12 h-12 rounded-xl ${iconBg} flex items-center justify-center group-hover:scale-110 transition-transform`}>
-                    <Icon className={`w-6 h-6 ${iconColor}`} />
-                  </div>
+              <StaggerItem key={index}>
+                <Card className="group relative p-6 bg-card border border-border shadow-card hover:shadow-hover transition-all duration-300 hover:-translate-y-1 overflow-hidden h-full">
+                  <div className="relative space-y-4">
+                    <div className={`w-12 h-12 rounded-xl ${iconBg} flex items-center justify-center group-hover:scale-110 transition-transform`}>
+                      <Icon className={`w-6 h-6 ${iconColor}`} />
+                    </div>
 
-                  <div className="space-y-2">
-                    <h3 className={`text-xl font-bold ${iconColor}`}>
-                      {venture.name}
-                    </h3>
-                    <p className="text-sm text-muted-foreground leading-relaxed">
-                      {venture.description}
-                    </p>
-                  </div>
+                    <div className="space-y-2">
+                      <h3 className={`text-xl font-bold ${iconColor}`}>
+                        {venture.name}
+                      </h3>
+                      <p className="text-sm text-muted-foreground leading-relaxed">
+                        {venture.description}
+                      </p>
+                    </div>
 
-                  <div className={`h-0.5 w-0 group-hover:w-full transition-all duration-500 rounded-full ${iconColor === "text-primary" ? "bg-primary" : iconColor === "text-secondary" ? "bg-secondary" : "bg-accent"}`} />
-                </div>
-              </Card>
+                    <div className={`h-0.5 w-0 group-hover:w-full transition-all duration-500 rounded-full ${iconColor === "text-primary" ? "bg-primary" : iconColor === "text-secondary" ? "bg-secondary" : "bg-accent"}`} />
+                  </div>
+                </Card>
+              </StaggerItem>
             );
           })}
-        </div>
+        </StaggerContainer>
       </div>
     </section>
   );

@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { DollarSign, TrendingUp, Network, Zap } from "lucide-react";
 import HubSpotFormModal from "@/components/HubSpotFormModal";
+import { FadeInView, SlideInView } from "@/components/animations";
 
 const features = [
   {
@@ -38,7 +39,7 @@ const Accelerator = () => {
     <section className="py-20 px-6 bg-muted/30">
       <div className="container mx-auto max-w-6xl">
         {/* Header */}
-        <div className="text-center mb-16 space-y-6 animate-fade-up">
+        <FadeInView className="text-center mb-16 space-y-6">
           <h2 className="text-4xl md:text-5xl font-bold">
             <span className="text-primary">The Vriksha Accelerator — </span>
             <span className="text-foreground">Co-Build. Co-Grow. Co-Scale.</span>
@@ -48,7 +49,7 @@ const Accelerator = () => {
             <br />
             We're <span className="text-secondary font-medium">hands-on partners</span> in the arena.
           </p>
-        </div>
+        </FadeInView>
 
         {/* Features Grid */}
         <div className="grid md:grid-cols-2 gap-6 mb-12">
@@ -58,34 +59,36 @@ const Accelerator = () => {
             const iconColor = feature.color === "primary" ? "text-primary" : feature.color === "secondary" ? "text-secondary" : "text-accent";
             
             return (
-              <Card
+              <SlideInView
                 key={index}
-                className="group relative p-8 bg-card border border-border shadow-card hover:shadow-hover transition-all duration-300 hover:-translate-y-1 animate-fade-in"
-                style={{ animationDelay: `${index * 0.1}s` }}
+                direction={index % 2 === 0 ? "left" : "right"}
+                delay={index * 0.1}
               >
-                <div className="relative space-y-4">
-                  <div className={`w-14 h-14 rounded-xl ${iconBg} flex items-center justify-center group-hover:scale-110 transition-transform`}>
-                    <Icon className={`w-7 h-7 ${iconColor}`} />
-                  </div>
+                <Card className="group relative p-8 bg-card border border-border shadow-card hover:shadow-hover transition-all duration-300 hover:-translate-y-1">
+                  <div className="relative space-y-4">
+                    <div className={`w-14 h-14 rounded-xl ${iconBg} flex items-center justify-center group-hover:scale-110 transition-transform`}>
+                      <Icon className={`w-7 h-7 ${iconColor}`} />
+                    </div>
 
-                  <div className="space-y-2">
-                    <h3 className={`text-2xl font-bold ${iconColor}`}>
-                      {feature.title}
-                    </h3>
-                    <p className="text-muted-foreground leading-relaxed">
-                      {feature.description}
-                    </p>
-                  </div>
+                    <div className="space-y-2">
+                      <h3 className={`text-2xl font-bold ${iconColor}`}>
+                        {feature.title}
+                      </h3>
+                      <p className="text-muted-foreground leading-relaxed">
+                        {feature.description}
+                      </p>
+                    </div>
 
-                  <div className={`h-1 w-0 group-hover:w-full transition-all duration-500 rounded-full ${iconColor === "text-primary" ? "bg-primary" : iconColor === "text-secondary" ? "bg-secondary" : "bg-accent"}`} />
-                </div>
-              </Card>
+                    <div className={`h-1 w-0 group-hover:w-full transition-all duration-500 rounded-full ${iconColor === "text-primary" ? "bg-primary" : iconColor === "text-secondary" ? "bg-secondary" : "bg-accent"}`} />
+                  </div>
+                </Card>
+              </SlideInView>
             );
           })}
         </div>
 
         {/* CTA */}
-        <div className="text-center">
+        <FadeInView className="text-center" delay={0.4}>
           <Button 
             size="lg"
             onClick={() => setShowContactModal(true)}
@@ -93,7 +96,7 @@ const Accelerator = () => {
           >
             Contact Us
           </Button>
-        </div>
+        </FadeInView>
       </div>
 
       <HubSpotFormModal open={showContactModal} onOpenChange={setShowContactModal} />

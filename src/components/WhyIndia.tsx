@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Globe, Users, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import HubSpotFormModal from "@/components/HubSpotFormModal";
+import { FadeInView, ScaleInView } from "@/components/animations";
 
 const WhyIndia = () => {
   const [showContactModal, setShowContactModal] = useState(false);
@@ -41,14 +42,14 @@ const WhyIndia = () => {
 
       <div className="relative container mx-auto max-w-6xl">
         {/* Header */}
-        <div className="text-center mb-16 space-y-6 animate-fade-up">
+        <FadeInView className="text-center mb-16 space-y-6">
           <h2 className="text-4xl md:text-5xl font-bold text-foreground">
             India's AI Moment
           </h2>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
             India has everything needed to lead the global AI wave:
           </p>
-        </div>
+        </FadeInView>
 
         {/* Stats Cards */}
         <div className="grid md:grid-cols-3 gap-8 mb-12">
@@ -58,29 +59,27 @@ const WhyIndia = () => {
             const iconBg = stat.color === "primary" ? "bg-primary/10" : stat.color === "secondary" ? "bg-secondary/10" : "bg-accent/10";
             
             return (
-              <div
-                key={index}
-                className="group relative p-8 rounded-2xl bg-card border border-border shadow-card hover:shadow-hover transition-all duration-300 hover:-translate-y-1 animate-fade-in text-center"
-                style={{ animationDelay: `${index * 0.15}s` }}
-              >
-                <div className="relative space-y-4">
-                  <div className="flex justify-center">
-                    <div className={`w-16 h-16 rounded-2xl ${iconBg} flex items-center justify-center group-hover:scale-110 transition-transform`}>
-                      <Icon className={`w-8 h-8 ${iconColor}`} />
+              <ScaleInView key={index} delay={index * 0.15}>
+                <div className="group relative p-8 rounded-2xl bg-card border border-border shadow-card hover:shadow-hover transition-all duration-300 hover:-translate-y-1 text-center">
+                  <div className="relative space-y-4">
+                    <div className="flex justify-center">
+                      <div className={`w-16 h-16 rounded-2xl ${iconBg} flex items-center justify-center group-hover:scale-110 transition-transform`}>
+                        <Icon className={`w-8 h-8 ${iconColor}`} />
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <div className={`text-4xl font-bold ${iconColor}`}>{stat.value}</div>
+                      <div className="text-foreground font-medium">{stat.label}</div>
                     </div>
                   </div>
-                  <div className="space-y-2">
-                    <div className={`text-4xl font-bold ${iconColor}`}>{stat.value}</div>
-                    <div className="text-foreground font-medium">{stat.label}</div>
-                  </div>
                 </div>
-              </div>
+              </ScaleInView>
             );
           })}
         </div>
 
         {/* Body Text */}
-        <div className="text-center max-w-3xl mx-auto space-y-6">
+        <FadeInView className="text-center max-w-3xl mx-auto space-y-6" delay={0.4}>
           <p className="text-xl text-foreground font-medium">
             Vriksha.ai grows on India's strongest roots — and builds branches that reach the world.
           </p>
@@ -91,7 +90,7 @@ const WhyIndia = () => {
           >
             Contact Us
           </Button>
-        </div>
+        </FadeInView>
       </div>
 
       <HubSpotFormModal open={showContactModal} onOpenChange={setShowContactModal} />
