@@ -1,6 +1,6 @@
 import { Card } from "@/components/ui/card";
 import { Phone, BarChart3, Headphones, Shield, Users, Clipboard, BadgeCheck, Camera, Sun } from "lucide-react";
-import { FadeInView, StaggerContainer, StaggerItem } from "@/components/animations";
+import { FadeInView, StaggerContainer, StaggerItem, BentoCard3D } from "@/components/animations";
 
 const ventures = [
   {
@@ -80,24 +80,26 @@ const Ventures = () => {
             
             return (
               <StaggerItem key={index}>
-                <Card className="group relative p-6 bg-card border border-border shadow-card hover:shadow-hover transition-all duration-300 hover:-translate-y-1 overflow-hidden h-full">
-                  <div className="relative space-y-4">
-                    <div className={`w-12 h-12 rounded-xl ${iconBg} flex items-center justify-center group-hover:scale-110 transition-transform`}>
-                      <Icon className={`w-6 h-6 ${iconColor}`} />
-                    </div>
+                <BentoCard3D className="h-full group">
+                  <Card className="relative p-6 bg-card border border-border shadow-card transition-all duration-300 overflow-hidden h-full">
+                    <div className="relative space-y-4">
+                      <div className={`w-12 h-12 rounded-xl ${iconBg} flex items-center justify-center group-hover:scale-110 transition-transform`}>
+                        <Icon className={`w-6 h-6 ${iconColor}`} />
+                      </div>
 
-                    <div className="space-y-2">
-                      <h3 className={`text-xl font-bold ${iconColor}`}>
-                        {venture.name}
-                      </h3>
-                      <p className="text-sm text-muted-foreground leading-relaxed">
-                        {venture.description}
-                      </p>
-                    </div>
+                      <div className="space-y-2">
+                        <h3 className={`text-xl font-bold ${iconColor}`}>
+                          {venture.name}
+                        </h3>
+                        <p className="text-sm text-muted-foreground leading-relaxed">
+                          {venture.description}
+                        </p>
+                      </div>
 
-                    <div className={`h-0.5 w-0 group-hover:w-full transition-all duration-500 rounded-full ${iconColor === "text-primary" ? "bg-primary" : iconColor === "text-secondary" ? "bg-secondary" : "bg-accent"}`} />
-                  </div>
-                </Card>
+                      <div className={`h-0.5 w-0 group-hover:w-full transition-all duration-500 rounded-full ${iconColor === "text-primary" ? "bg-primary" : iconColor === "text-secondary" ? "bg-secondary" : "bg-accent"}`} />
+                    </div>
+                  </Card>
+                </BentoCard3D>
               </StaggerItem>
             );
           })}
