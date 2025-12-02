@@ -94,7 +94,7 @@ const Hero = () => {
             <span className="text-xs sm:text-sm font-semibold text-primary">India's First AI Venture Studio & Accelerator</span>
           </motion.div>
 
-          {/* Main Headline with word-by-word reveal */}
+          {/* Main Headline */}
           <h1 className="text-4xl sm:text-5xl md:text-7xl font-bold tracking-tight leading-tight">
             <motion.span
               className="text-foreground block"
@@ -113,24 +113,26 @@ const Hero = () => {
                 </motion.span>
               ))}
             </motion.span>
-            <motion.span
-              className="bg-gradient-neural bg-clip-text text-transparent block"
-              initial="hidden"
-              animate={showContent ? "visible" : "hidden"}
-              transition={{ staggerChildren: 0.06, delayChildren: 0.8 }}
-            >
-              {subHeadlineWords.map((word, index) => (
-                <motion.span
-                  key={index}
-                  variants={wordVariants}
-                  transition={{ duration: 0.4 }}
-                  className="inline-block mr-[0.25em]"
-                >
-                  {word}
-                </motion.span>
-              ))}
-            </motion.span>
           </h1>
+
+          {/* Sub-headline */}
+          <motion.p
+            className="text-xl sm:text-2xl md:text-3xl text-muted-foreground max-w-3xl mx-auto leading-relaxed"
+            initial="hidden"
+            animate={showContent ? "visible" : "hidden"}
+            transition={{ staggerChildren: 0.04, delayChildren: 0.8 }}
+          >
+            {subHeadlineWords.map((word, index) => (
+              <motion.span
+                key={index}
+                variants={wordVariants}
+                transition={{ duration: 0.4 }}
+                className="inline-block mr-[0.25em]"
+              >
+                {word}
+              </motion.span>
+            ))}
+          </motion.p>
 
           {/* CTA Buttons */}
           <motion.div
