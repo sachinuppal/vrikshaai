@@ -247,8 +247,8 @@ const PrivacyPolicy = () => {
                 For any privacy-related questions, data access/removal requests, complaints or clarifications, contact us at:
               </p>
               <div className="space-y-2 text-foreground">
-                <p><strong>Email:</strong> [insert email]</p>
-                <p><strong>Address:</strong> [insert registered address]</p>
+                <p><strong>Email:</strong> support@vriksha.ai</p>
+                <p><strong>Address:</strong> FLAT C1-123, Gottigere Main Road, CHIKKA KAMMANAHALLI, Bannerghatta, Bangalore South, Karnataka, PIN Code: 560083</p>
               </div>
               <p className="text-foreground leading-relaxed mt-4">
                 We will respond within a reasonable timeframe.
