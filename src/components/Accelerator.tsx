@@ -7,25 +7,25 @@ import HubSpotFormModal from "@/components/HubSpotFormModal";
 const features = [
   {
     title: "Capital + Capability",
-    description: "Funding combined with in-house tech, design, and GTM.",
+    description: "Funding paired with engineering, design, and GTM muscle.",
     icon: DollarSign,
     color: "primary",
   },
   {
     title: "Shared Growth Model",
-    description: "We co-participate in outcomes — our success grows with yours.",
+    description: "Our success grows only when yours does.",
     icon: TrendingUp,
     color: "secondary",
   },
   {
     title: "AI Infrastructure",
-    description: "Access to Vriksha's APIs, Voice AI stack, and analytics engine.",
+    description: "Access to Vriksha's APIs, Voice AI, CRM, analytics, and data tooling.",
     icon: Zap,
     color: "accent",
   },
   {
     title: "Distribution Power",
-    description: "Network across BFSI, Retail, Manufacturing, Energy, and Government.",
+    description: "Reach across BFSI, Retail, Energy, Manufacturing, and Government ecosystems.",
     icon: Network,
     color: "primary",
   },
@@ -44,9 +44,9 @@ const Accelerator = () => {
             <span className="text-foreground">Co-Build. Co-Grow. Co-Scale.</span>
           </h2>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
-            We're more than mentors — we're hands-on co-founders.
+            We're not mentors on the sidelines.
             <br />
-            Our accelerator partners with visionary teams to create <span className="text-secondary font-medium">real traction</span>, not pitch decks.
+            We're <span className="text-secondary font-medium">hands-on partners</span> in the arena.
           </p>
         </div>
 

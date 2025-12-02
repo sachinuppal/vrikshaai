@@ -4,55 +4,55 @@ import { Phone, BarChart3, Headphones, Shield, Users, Clipboard, BadgeCheck, Cam
 const ventures = [
   {
     name: "Revenueable.ai",
-    description: "Sales and Marketing Automation Engine. Converts lost leads into conversations using AI voice, chat, and omnichannel automation.",
+    description: "Sales & Marketing Automation. Turns silent leads into real conversations using AI voice, chat, and omnichannel flows.",
     icon: Phone,
     color: "primary",
   },
   {
     name: "Vriksha Analytics",
-    description: "Chat-based Deep Analytics. Ask questions. Get instant insights. No dashboards. Just conversation.",
+    description: "Chat-Based Deep Analytics. Ask questions. Get instant insights. No dashboards. Just conversation.",
     icon: BarChart3,
     color: "secondary",
   },
   {
     name: "Telecallers.ai",
-    description: "Cloud-Native Voice AI Platform. AI voice agents that call, talk, and sell — at scale, with empathy.",
+    description: "Cloud Voice AI. AI agents that call, talk, and sell — multilingual and massively scalable.",
     icon: Headphones,
     color: "accent",
   },
   {
     name: "Signal Box",
-    description: "On-premise + On-device Voice AI. Private, secure, and enterprise-grade voice AI stack for regulated industries.",
+    description: "On-Premise + On-Device Voice AI. Ultra-secure voice intelligence for regulated industries.",
     icon: Shield,
     color: "primary",
   },
   {
     name: "Vriksha CRM",
-    description: "The All-New AI-led CRM. A CRM that listens, talks, and acts — automating follow-ups, proposals, and insights.",
+    description: "AI-First CRM. A CRM that listens, thinks, and acts — from follow-ups to proposals.",
     icon: Users,
     color: "secondary",
   },
   {
     name: "MarketResearchLabs",
-    description: "Rapid Voice AI-based Market Research. Outbound voice surveys, instant segmentation, and analytics — all automated.",
+    description: "Voice-Led Research Automation. Outbound AI calling, segmentation, insights — fully automated.",
     icon: Clipboard,
     color: "accent",
   },
   {
     name: "AirMingle",
-    description: "Hardware Badge + Voice Transcription + Workflow Automation. Bridges the offline world with AI — record, summarize, and trigger actions instantly.",
+    description: "Hardware + Voice Workflows. A smart badge that captures meetings, summarizes instantly, and triggers actions.",
     icon: BadgeCheck,
     color: "primary",
   },
   {
     name: "iPolice",
-    description: "AI-powered Image and Video Monitoring. Automates challan detection, license plate recognition, and violation analytics.",
+    description: "AI Image & Video Monitoring. Automates challan detection, number-plate recognition, and city-level compliance.",
     icon: Camera,
     color: "secondary",
   },
   {
     name: "OneSolar",
-    description: "AI-driven Solar Analytics and Lead Platform. Unified solar lead generation and satellite-based feasibility analysis.",
+    description: "Satellite + AI Solar Intelligence. Unified lead generation, feasibility, and remote solar analysis.",
     icon: Sun,
     color: "accent",
   },
@@ -66,7 +66,7 @@ const Ventures = () => {
         <div className="text-center mb-16 space-y-6 animate-fade-up">
           <h2 className="text-4xl md:text-5xl font-bold">
             <span className="text-primary">Branches of the Vriksha — </span>
-            <span className="text-foreground">Platforms Built for the Real World.</span>
+            <span className="text-foreground">Built for the Real World</span>
           </h2>
         </div>
 

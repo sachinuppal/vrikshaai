@@ -85,19 +85,19 @@ const Hero = () => {
 
           {/* Main Headline */}
           <h1 className={`text-4xl sm:text-5xl md:text-7xl font-bold tracking-tight leading-tight transition-all duration-1000 delay-300 ${showContent ? 'opacity-100' : 'opacity-0'}`}>
-            <span className="text-foreground">Building India's AI Ecosystem —</span>
+            <span className="text-foreground">We Build India's AI Ecosystem —</span>
             <br />
             <span className="bg-gradient-neural bg-clip-text text-transparent">
-              One Venture, One Growth Story at a Time.
+              One Venture at a Time.
             </span>
           </h1>
 
           {/* Subtext */}
-          <p className={`text-lg sm:text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto leading-relaxed transition-all duration-1000 delay-600 ${showContent ? 'opacity-100' : 'opacity-0'}`}>
-            Vriksha.ai is an AI Venture Studio and Accelerator that co-builds and co-participates in the growth of AI-first products — from idea to global scale.
-            <br />
-            <span className="text-foreground font-medium">Rooted in Indian wisdom. Engineered with <span className="text-primary font-semibold">modern intelligence</span>.</span>
-          </p>
+          <div className={`text-lg sm:text-xl md:text-2xl max-w-3xl mx-auto leading-relaxed transition-all duration-1000 delay-600 space-y-4 ${showContent ? 'opacity-100' : 'opacity-0'}`}>
+            <p className="text-muted-foreground">Vriksha.ai builds and scales AI-first companies.</p>
+            <p className="text-muted-foreground">We co-create products, co-invest in growth, and stay long after launch.</p>
+            <p className="text-foreground font-medium">Rooted in Indian wisdom. Built with <span className="text-primary font-semibold">modern intelligence</span>.</p>
+          </div>
 
           {/* CTA Buttons */}
           <div className={`flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center pt-4 transition-all duration-1000 delay-[900ms] ${showContent ? 'opacity-100' : 'opacity-0'}`}>

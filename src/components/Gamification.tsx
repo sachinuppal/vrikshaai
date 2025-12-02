@@ -50,17 +50,17 @@ const Gamification = () => {
               isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
             }`}
           >
-            Gamification at Vriksha.ai isn't cosmetic — it's core architecture. Our AI-powered gamification SDK transforms every digital experience into a growth loop — improving acquisition, retention, and lifetime contribution (LTC).
+            Gamification at Vriksha isn't decoration — it's growth science. Our AI-powered gamification SDK transforms any user journey into a habit loop that boosts retention and lifetime value.
           </p>
         </div>
 
         {/* Mini Highlights */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {[
-            { icon: Brain, title: "AI-driven motivation mapping" },
-            { icon: TrendingUp, title: "Progress visibility and habit loops" },
-            { icon: BarChart3, title: "Real-time performance analytics" },
-            { icon: Award, title: "Reward & recognition systems" }
+            { icon: Brain, title: "Motivation mapping" },
+            { icon: TrendingUp, title: "Progress visibility" },
+            { icon: BarChart3, title: "Real-time analytics" },
+            { icon: Award, title: "Rewards & recognition" }
           ].map((item, index) => {
             const Icon = item.icon;
             return (
@@ -89,8 +89,8 @@ const Gamification = () => {
             <div className="text-lg text-muted-foreground">Retention</div>
           </div>
           <div className="text-center p-6 rounded-2xl bg-card border border-border shadow-card">
-            <div className="text-5xl font-bold text-accent mb-2">×2</div>
-            <div className="text-lg text-muted-foreground">LTC</div>
+            <div className="text-5xl font-bold text-accent mb-2">2×</div>
+            <div className="text-lg text-muted-foreground">Lifetime Contribution</div>
           </div>
         </div>
 

@@ -20,11 +20,11 @@ const JoinEcosystem = () => {
 
           {/* Description */}
           <p className="text-xl md:text-2xl text-muted-foreground leading-relaxed max-w-3xl mx-auto">
-            Whether you're a founder, developer, enterprise, or investor, Vriksha.ai is an open ecosystem designed for collaboration.
+            Whether you're a founder, developer, enterprise, or investor, Vriksha.ai is an open ecosystem built for people who want to create.
           </p>
 
           <p className="text-lg text-foreground font-medium max-w-3xl mx-auto">
-            Together, we'll plant the next generation of AI ventures — rooted in India, scaling to the world.
+            Together, we'll plant the next generation of AI ventures — rooted in India, scaling globally.
           </p>
 
           {/* CTA Buttons */}
