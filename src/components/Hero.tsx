@@ -122,13 +122,6 @@ const Hero = () => {
             </Button>
           </div>
         </div>
-
-        {/* Scroll Indicator */}
-        <div className={`absolute bottom-8 left-1/2 -translate-x-1/2 animate-bounce transition-all duration-1000 delay-[1200ms] ${showContent ? 'opacity-100' : 'opacity-0'}`}>
-          <div className="w-6 h-10 border-2 border-primary/60 rounded-full flex items-start justify-center p-2" style={{ boxShadow: "var(--shadow-glow)" }}>
-            <div className="w-1.5 h-3 bg-primary rounded-full animate-glow-intense" />
-          </div>
-        </div>
       </div>
 
       <HubSpotFormModal open={showContactModal} onOpenChange={setShowContactModal} />
