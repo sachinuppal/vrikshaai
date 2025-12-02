@@ -2,6 +2,8 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import HubSpotFormModal from "@/components/HubSpotFormModal";
 import { Code2, Rocket, Building2, TrendingUp, Check } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { FadeInView } from "@/components/animations";
 
 const audiences = [
   {
@@ -78,27 +80,31 @@ const JoinEcosystem = () => {
   return (
     <section className="relative py-32 overflow-hidden bg-gradient-to-b from-muted/30 to-background">
       <div className="relative container mx-auto px-6">
-        <div className="max-w-4xl mx-auto text-center space-y-8 animate-fade-up">
+        <div className="max-w-4xl mx-auto text-center space-y-8">
           {/* Header */}
-          <div className="space-y-4">
+          <FadeInView className="space-y-4">
             <h2 className="text-4xl md:text-6xl font-bold">
               <span className="text-foreground">Let's Grow </span>
               <span className="bg-gradient-neural bg-clip-text text-transparent">Together.</span>
             </h2>
             <div className="w-24 h-1 bg-gradient-primary mx-auto rounded-full" />
-          </div>
+          </FadeInView>
 
           {/* Description */}
-          <p className="text-xl md:text-2xl text-muted-foreground leading-relaxed max-w-3xl mx-auto">
-            Whether you're a founder, developer, enterprise, or investor, Vriksha.ai is an open ecosystem built for people who want to create.
-          </p>
+          <FadeInView delay={0.1}>
+            <p className="text-xl md:text-2xl text-muted-foreground leading-relaxed max-w-3xl mx-auto">
+              Whether you're a founder, developer, enterprise, or investor, Vriksha.ai is an open ecosystem built for people who want to create.
+            </p>
+          </FadeInView>
 
-          <p className="text-lg text-foreground font-medium max-w-3xl mx-auto">
-            Together, we'll plant the next generation of AI ventures — rooted in India, scaling globally.
-          </p>
+          <FadeInView delay={0.2}>
+            <p className="text-lg text-foreground font-medium max-w-3xl mx-auto">
+              Together, we'll plant the next generation of AI ventures — rooted in India, scaling globally.
+            </p>
+          </FadeInView>
 
           {/* CTA Buttons */}
-          <div className="flex flex-col sm:flex-row gap-4 justify-center pt-8">
+          <FadeInView delay={0.3} className="flex flex-col sm:flex-row gap-4 justify-center pt-8">
             <Button 
               size="lg"
               onClick={() => setShowContactModal(true)}
@@ -132,70 +138,89 @@ const JoinEcosystem = () => {
             >
               Talk to Us
             </Button>
-          </div>
+          </FadeInView>
 
           {/* Audience Tabs */}
-          <div className="pt-12 space-y-6">
+          <FadeInView delay={0.4} className="pt-12 space-y-6">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-3xl mx-auto">
               {audiences.map((audience) => {
                 const Icon = audience.icon;
                 const isSelected = selectedAudience === audience.id;
                 return (
-                  <button
+                  <motion.button
                     key={audience.id}
                     onClick={() => setSelectedAudience(isSelected ? null : audience.id)}
-                    className={`p-4 rounded-xl border-2 transition-all duration-300 hover:-translate-y-1 cursor-pointer ${
+                    className={`p-4 rounded-xl border-2 transition-all duration-300 cursor-pointer ${
                       isSelected 
                         ? 'bg-primary/10 border-primary text-primary shadow-lg' 
                         : 'bg-card border-border text-foreground hover:border-primary/50 hover:shadow-hover'
                     }`}
+                    whileHover={{ y: -4 }}
+                    whileTap={{ scale: 0.98 }}
                   >
                     <Icon className={`w-5 h-5 mx-auto mb-2 ${isSelected ? 'text-primary' : 'text-muted-foreground'}`} />
                     <p className="font-semibold">{audience.title}</p>
-                  </button>
+                  </motion.button>
                 );
               })}
             </div>
 
             {/* Content Area */}
-            {selectedData ? (
-              <div 
-                key={selectedData.id}
-                className="max-w-3xl mx-auto bg-card border border-border rounded-2xl p-8 text-left shadow-card animate-fade-in"
-              >
-                <div className="flex items-center gap-3 mb-4">
-                  <selectedData.icon className="w-6 h-6 text-primary" />
-                  <h3 className="text-xl font-bold text-foreground">For {selectedData.title}</h3>
-                </div>
-                
-                <p className="text-lg font-semibold text-primary mb-4 italic">
-                  "{selectedData.tagline}"
-                </p>
-                
-                <p className="text-muted-foreground mb-6">
-                  {selectedData.description}
-                </p>
-                
-                <p className="font-medium text-foreground mb-3">You get:</p>
-                <ul className="space-y-2 mb-6">
-                  {selectedData.benefits.map((benefit, index) => (
-                    <li key={index} className="flex items-start gap-3">
-                      <Check className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
-                      <span className="text-muted-foreground">{benefit}</span>
-                    </li>
-                  ))}
-                </ul>
-                
-                <p className="text-foreground font-medium italic border-l-4 border-primary pl-4">
-                  {selectedData.closing}
-                </p>
-              </div>
-            ) : (
-              <p className="text-lg text-muted-foreground italic max-w-2xl mx-auto pt-4">
-                Builders build with us. Founders grow with us. Enterprises transform with us. Investors scale with us.
-              </p>
-            )}
-          </div>
+            <AnimatePresence mode="wait">
+              {selectedData ? (
+                <motion.div
+                  key={selectedData.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  transition={{ duration: 0.3 }}
+                  className="max-w-3xl mx-auto bg-card border border-border rounded-2xl p-8 text-left shadow-card"
+                >
+                  <div className="flex items-center gap-3 mb-4">
+                    <selectedData.icon className="w-6 h-6 text-primary" />
+                    <h3 className="text-xl font-bold text-foreground">For {selectedData.title}</h3>
+                  </div>
+                  
+                  <p className="text-lg font-semibold text-primary mb-4 italic">
+                    "{selectedData.tagline}"
+                  </p>
+                  
+                  <p className="text-muted-foreground mb-6">
+                    {selectedData.description}
+                  </p>
+                  
+                  <p className="font-medium text-foreground mb-3">You get:</p>
+                  <ul className="space-y-2 mb-6">
+                    {selectedData.benefits.map((benefit, index) => (
+                      <motion.li
+                        key={index}
+                        initial={{ opacity: 0, x: -10 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: index * 0.05 }}
+                        className="flex items-start gap-3"
+                      >
+                        <Check className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
+                        <span className="text-muted-foreground">{benefit}</span>
+                      </motion.li>
+                    ))}
+                  </ul>
+                  
+                  <p className="text-foreground font-medium italic border-l-4 border-primary pl-4">
+                    {selectedData.closing}
+                  </p>
+                </motion.div>
+              ) : (
+                <motion.p
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="text-lg text-muted-foreground italic max-w-2xl mx-auto pt-4"
+                >
+                  Builders build with us. Founders grow with us. Enterprises transform with us. Investors scale with us.
+                </motion.p>
+              )}
+            </AnimatePresence>
+          </FadeInView>
         </div>
       </div>
 

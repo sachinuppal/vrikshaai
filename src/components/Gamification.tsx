@@ -1,101 +1,72 @@
-import { useState, useEffect, useRef } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import {
-  Brain,
-  TrendingUp,
-  Award,
-  BarChart3,
-} from "lucide-react";
+import { Brain, TrendingUp, Award, BarChart3 } from "lucide-react";
+import { motion } from "framer-motion";
 import HubSpotFormModal from "@/components/HubSpotFormModal";
+import { FadeInView, StaggerContainer, StaggerItem, ScaleInView } from "@/components/animations";
 
 const Gamification = () => {
-  const [isVisible, setIsVisible] = useState(false);
   const [showContactModal, setShowContactModal] = useState(false);
-  const sectionRef = useRef<HTMLElement>(null);
 
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setIsVisible(true);
-        }
-      },
-      { threshold: 0.1 }
-    );
+  const highlights = [
+    { icon: Brain, title: "Motivation mapping" },
+    { icon: TrendingUp, title: "Progress visibility" },
+    { icon: BarChart3, title: "Real-time analytics" },
+    { icon: Award, title: "Rewards & recognition" }
+  ];
 
-    if (sectionRef.current) {
-      observer.observe(sectionRef.current);
-    }
-
-    return () => observer.disconnect();
-  }, []);
+  const stats = [
+    { value: "+60%", label: "Engagement", color: "text-primary" },
+    { value: "+80%", label: "Retention", color: "text-secondary" },
+    { value: "2×", label: "Lifetime Contribution", color: "text-accent" }
+  ];
 
   return (
-    <section
-      ref={sectionRef}
-      className="py-12 sm:py-16 md:py-20 px-4 sm:px-6 bg-muted/30"
-    >
+    <section className="py-12 sm:py-16 md:py-20 px-4 sm:px-6 bg-muted/30">
       <div className="container mx-auto max-w-6xl space-y-12 sm:space-y-16">
         {/* Header */}
-        <div className="text-center space-y-3 sm:space-y-4">
-          <h2
-            className={`text-3xl sm:text-4xl md:text-5xl font-bold transition-all duration-700 ${
-              isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
-            }`}
-          >
+        <FadeInView className="text-center space-y-3 sm:space-y-4">
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold">
             <span className="text-primary">Turning Intelligence into Motivation.</span>
           </h2>
-          <p
-            className={`text-lg sm:text-xl text-muted-foreground max-w-3xl mx-auto transition-all duration-700 delay-100 ${
-              isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
-            }`}
-          >
+          <p className="text-lg sm:text-xl text-muted-foreground max-w-3xl mx-auto">
             Gamification at Vriksha isn't decoration — it's growth science. Our AI-powered gamification SDK transforms any user journey into a habit loop that boosts retention and lifetime value.
           </p>
-        </div>
+        </FadeInView>
 
         {/* Mini Highlights */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {[
-            { icon: Brain, title: "Motivation mapping" },
-            { icon: TrendingUp, title: "Progress visibility" },
-            { icon: BarChart3, title: "Real-time analytics" },
-            { icon: Award, title: "Rewards & recognition" }
-          ].map((item, index) => {
+        <StaggerContainer className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6" staggerDelay={0.1}>
+          {highlights.map((item, index) => {
             const Icon = item.icon;
             return (
-              <div
-                key={index}
-                className={`p-6 rounded-2xl bg-card border border-border shadow-card hover:shadow-hover transition-all duration-300 hover:-translate-y-1 ${
-                  isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
-                }`}
-                style={{ transitionDelay: `${300 + index * 100}ms` }}
-              >
-                <Icon className="w-8 h-8 text-primary mb-3" />
-                <p className="text-sm font-medium text-foreground">{item.title}</p>
-              </div>
+              <StaggerItem key={index}>
+                <div className="p-6 rounded-2xl bg-card border border-border shadow-card hover:shadow-hover transition-all duration-300 hover:-translate-y-1">
+                  <Icon className="w-8 h-8 text-primary mb-3" />
+                  <p className="text-sm font-medium text-foreground">{item.title}</p>
+                </div>
+              </StaggerItem>
             );
           })}
-        </div>
+        </StaggerContainer>
 
         {/* Animated Stats */}
         <div className="flex flex-col sm:flex-row gap-8 justify-center items-center py-8">
-          <div className="text-center p-6 rounded-2xl bg-card border border-border shadow-card">
-            <div className="text-5xl font-bold text-primary mb-2">+60%</div>
-            <div className="text-lg text-muted-foreground">Engagement</div>
-          </div>
-          <div className="text-center p-6 rounded-2xl bg-card border border-border shadow-card">
-            <div className="text-5xl font-bold text-secondary mb-2">+80%</div>
-            <div className="text-lg text-muted-foreground">Retention</div>
-          </div>
-          <div className="text-center p-6 rounded-2xl bg-card border border-border shadow-card">
-            <div className="text-5xl font-bold text-accent mb-2">2×</div>
-            <div className="text-lg text-muted-foreground">Lifetime Contribution</div>
-          </div>
+          {stats.map((stat, index) => (
+            <ScaleInView key={index} delay={index * 0.15}>
+              <motion.div
+                className="text-center p-6 rounded-2xl bg-card border border-border shadow-card"
+                whileHover={{ scale: 1.05 }}
+                transition={{ duration: 0.2 }}
+              >
+                <div className={`text-5xl font-bold ${stat.color} mb-2`}>{stat.value}</div>
+                <div className="text-lg text-muted-foreground">{stat.label}</div>
+              </motion.div>
+            </ScaleInView>
+          ))}
         </div>
 
         {/* Call to Action */}
-        <div className="text-center space-y-6 pt-8 border-t border-border">
+        <FadeInView className="text-center space-y-6 pt-8 border-t border-border" delay={0.3}>
           <Button
             size="lg"
             onClick={() => setShowContactModal(true)}
@@ -103,7 +74,7 @@ const Gamification = () => {
           >
             Contact Us
           </Button>
-        </div>
+        </FadeInView>
       </div>
 
       <HubSpotFormModal open={showContactModal} onOpenChange={setShowContactModal} />

@@ -1,11 +1,13 @@
 import { useState } from "react";
 import { TreeDeciduous } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import { FadeInView } from "@/components/animations";
 
 const categories = [
   { id: "about", label: "About Vriksha" },
@@ -356,7 +358,7 @@ const FAQ = () => {
       <div className="container mx-auto px-6">
         <div className="max-w-4xl mx-auto">
           {/* Header */}
-          <div className="text-center mb-12">
+          <FadeInView className="text-center mb-12">
             <div className="flex items-center justify-center gap-3 mb-4">
               <TreeDeciduous className="w-8 h-8 text-primary" />
               <h2 className="text-3xl md:text-4xl font-bold text-foreground">
@@ -366,12 +368,12 @@ const FAQ = () => {
             <p className="text-muted-foreground text-lg">
               Everything you need to know about Vriksha.ai
             </p>
-          </div>
+          </FadeInView>
 
           {/* Category Tabs */}
-          <div className="flex flex-wrap justify-center gap-2 mb-8">
+          <FadeInView delay={0.1} className="flex flex-wrap justify-center gap-2 mb-8">
             {categories.map((category) => (
-              <button
+              <motion.button
                 key={category.id}
                 onClick={() => setActiveCategory(category.id)}
                 className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
@@ -379,31 +381,45 @@ const FAQ = () => {
                     ? "bg-primary text-primary-foreground shadow-md"
                     : "bg-background text-muted-foreground hover:bg-primary/10 hover:text-primary border border-border"
                 }`}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
               >
                 {category.label}
-              </button>
+              </motion.button>
             ))}
-          </div>
+          </FadeInView>
 
           {/* FAQ Accordion */}
-          <div className="bg-background rounded-2xl border border-border shadow-sm p-6">
-            <Accordion type="multiple" className="space-y-2">
-              {faqData[activeCategory as keyof typeof faqData].map((faq, index) => (
-                <AccordionItem
-                  key={index}
-                  value={`item-${index}`}
-                  className="border border-border/50 rounded-xl px-4 data-[state=open]:bg-primary/5"
+          <FadeInView delay={0.2}>
+            <div className="bg-background rounded-2xl border border-border shadow-sm p-6">
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={activeCategory}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  transition={{ duration: 0.2 }}
                 >
-                  <AccordionTrigger className="text-left font-semibold text-foreground hover:text-primary hover:no-underline py-4">
-                    {faq.question}
-                  </AccordionTrigger>
-                  <AccordionContent className="text-muted-foreground pb-4">
-                    {faq.answer}
-                  </AccordionContent>
-                </AccordionItem>
-              ))}
-            </Accordion>
-          </div>
+                  <Accordion type="multiple" className="space-y-2">
+                    {faqData[activeCategory as keyof typeof faqData].map((faq, index) => (
+                      <AccordionItem
+                        key={index}
+                        value={`item-${index}`}
+                        className="border border-border/50 rounded-xl px-4 data-[state=open]:bg-primary/5"
+                      >
+                        <AccordionTrigger className="text-left font-semibold text-foreground hover:text-primary hover:no-underline py-4">
+                          {faq.question}
+                        </AccordionTrigger>
+                        <AccordionContent className="text-muted-foreground pb-4">
+                          {faq.answer}
+                        </AccordionContent>
+                      </AccordionItem>
+                    ))}
+                  </Accordion>
+                </motion.div>
+              </AnimatePresence>
+            </div>
+          </FadeInView>
         </div>
       </div>
     </section>

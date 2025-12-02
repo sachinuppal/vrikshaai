@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { useState, useEffect } from "react";
+import { motion } from "framer-motion";
 import HubSpotFormModal from "@/components/HubSpotFormModal";
 
 const Hero = () => {
@@ -11,20 +12,17 @@ const Hero = () => {
   const [showContactModal, setShowContactModal] = useState(false);
 
   useEffect(() => {
-    // Detect mobile
     const checkMobile = () => window.innerWidth < 768;
     setIsMobile(checkMobile());
 
     const handleResize = () => setIsMobile(checkMobile());
     window.addEventListener('resize', handleResize);
 
-    // Check network speed if available
     const connection = (navigator as any).connection;
     if (connection && (connection.effectiveType === 'slow-2g' || connection.effectiveType === '2g')) {
       setUseStaticBg(true);
     }
 
-    // Fallback timeout - show content after 5s if video hasn't loaded
     const timeout = setTimeout(() => {
       if (!isVideoLoaded) {
         setShowContent(true);
@@ -45,6 +43,14 @@ const Hero = () => {
     if (!showContent && videoDuration > 0 && e.currentTarget.currentTime >= videoDuration - 0.5) {
       setShowContent(true);
     }
+  };
+
+  const headlineWords = "We Build India's AI Ecosystem —".split(" ");
+  const subHeadlineWords = "One Venture at a Time.".split(" ");
+
+  const wordVariants = {
+    hidden: { opacity: 0, y: 20, filter: "blur(8px)" },
+    visible: { opacity: 1, y: 0, filter: "blur(0px)" },
   };
 
   return (
@@ -78,29 +84,73 @@ const Hero = () => {
       <div className={`relative z-10 container mx-auto px-4 sm:px-6 py-16 sm:py-20 text-center transition-opacity duration-2000 ${showContent ? 'opacity-100' : 'opacity-0'}`}>
         <div className="max-w-4xl mx-auto space-y-6 sm:space-y-8">
           {/* Badge */}
-          <div className={`inline-flex items-center gap-2 px-4 sm:px-5 py-2.5 rounded-full bg-card border border-primary/20 shadow-soft transition-all duration-1000 ${showContent ? 'opacity-100' : 'opacity-0'}`}>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={showContent ? { opacity: 1, y: 0 } : {}}
+            transition={{ duration: 0.6, delay: 0.2 }}
+            className="inline-flex items-center gap-2 px-4 sm:px-5 py-2.5 rounded-full bg-card border border-primary/20 shadow-soft"
+          >
             <div className="w-2 h-2 rounded-full bg-primary animate-pulse-soft" />
             <span className="text-xs sm:text-sm font-semibold text-primary">India's First AI Venture Studio & Accelerator</span>
-          </div>
+          </motion.div>
 
-          {/* Main Headline */}
-          <h1 className={`text-4xl sm:text-5xl md:text-7xl font-bold tracking-tight leading-tight transition-all duration-1000 delay-300 ${showContent ? 'opacity-100' : 'opacity-0'}`}>
-            <span className="text-foreground">We Build India's AI Ecosystem —</span>
-            <br />
-            <span className="bg-gradient-neural bg-clip-text text-transparent">
-              One Venture at a Time.
-            </span>
+          {/* Main Headline with word-by-word reveal */}
+          <h1 className="text-4xl sm:text-5xl md:text-7xl font-bold tracking-tight leading-tight">
+            <motion.span
+              className="text-foreground block"
+              initial="hidden"
+              animate={showContent ? "visible" : "hidden"}
+              transition={{ staggerChildren: 0.05, delayChildren: 0.4 }}
+            >
+              {headlineWords.map((word, index) => (
+                <motion.span
+                  key={index}
+                  variants={wordVariants}
+                  transition={{ duration: 0.4 }}
+                  className="inline-block mr-[0.25em]"
+                >
+                  {word}
+                </motion.span>
+              ))}
+            </motion.span>
+            <motion.span
+              className="bg-gradient-neural bg-clip-text text-transparent block"
+              initial="hidden"
+              animate={showContent ? "visible" : "hidden"}
+              transition={{ staggerChildren: 0.06, delayChildren: 0.8 }}
+            >
+              {subHeadlineWords.map((word, index) => (
+                <motion.span
+                  key={index}
+                  variants={wordVariants}
+                  transition={{ duration: 0.4 }}
+                  className="inline-block mr-[0.25em]"
+                >
+                  {word}
+                </motion.span>
+              ))}
+            </motion.span>
           </h1>
 
           {/* Subtext */}
-          <div className={`text-lg sm:text-xl md:text-2xl max-w-3xl mx-auto leading-relaxed transition-all duration-1000 delay-600 space-y-4 ${showContent ? 'opacity-100' : 'opacity-0'}`}>
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={showContent ? { opacity: 1, y: 0 } : {}}
+            transition={{ duration: 0.6, delay: 1.2 }}
+            className="text-lg sm:text-xl md:text-2xl max-w-3xl mx-auto leading-relaxed space-y-4"
+          >
             <p className="text-muted-foreground">Vriksha.ai builds and scales AI-first companies.</p>
             <p className="text-muted-foreground">We co-create products, co-invest in growth, and stay long after launch.</p>
             <p className="text-foreground font-medium">Rooted in Indian wisdom. Built with <span className="text-primary font-semibold">modern intelligence</span>.</p>
-          </div>
+          </motion.div>
 
           {/* CTA Buttons */}
-          <div className={`flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center pt-4 transition-all duration-1000 delay-[900ms] ${showContent ? 'opacity-100' : 'opacity-0'}`}>
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={showContent ? { opacity: 1, y: 0 } : {}}
+            transition={{ duration: 0.6, delay: 1.5 }}
+            className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center pt-4"
+          >
             <Button 
               size="lg"
               onClick={() => setShowContactModal(true)}
@@ -134,7 +184,7 @@ const Hero = () => {
             >
               Talk to Us
             </Button>
-          </div>
+          </motion.div>
         </div>
       </div>
 
