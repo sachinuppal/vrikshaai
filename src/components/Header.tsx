@@ -24,7 +24,7 @@ const Header = () => {
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2 group">
-            <img src="/images/vriksha-logo.png" alt="Vriksha.ai Logo" className="w-10 h-10 rounded-lg group-hover:scale-110 transition-transform" />
+            <img src="/images/vriksha-logo.png" alt="Vriksha.ai Logo" className="w-12 h-12 rounded-lg group-hover:scale-110 transition-transform" />
             <span className="text-xl font-bold text-foreground">Vriksha.ai</span>
           </Link>
 
@@ -52,7 +52,7 @@ const Header = () => {
             <SheetContent side="right" className="w-[280px] bg-background">
               <SheetHeader className="text-left">
                 <SheetTitle className="flex items-center gap-2">
-                  <img src="/images/vriksha-logo.png" alt="Vriksha.ai Logo" className="w-8 h-8 rounded-lg" />
+                  <img src="/images/vriksha-logo.png" alt="Vriksha.ai Logo" className="w-10 h-10 rounded-lg" />
                   <span className="text-lg font-bold">Vriksha.ai</span>
                 </SheetTitle>
               </SheetHeader>
