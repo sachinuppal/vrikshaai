@@ -12,13 +12,13 @@ const Philosophy = () => {
           </h2>
           <div className="max-w-3xl mx-auto space-y-4 text-lg text-muted-foreground">
             <p>
-              Every tree grows because it's <span className="text-primary font-medium">rooted deeply</span>.
+              Every thriving system starts with <span className="text-primary font-medium">strong roots</span>.
             </p>
             <p>
-              At Vriksha.ai, our roots are values that have endured — <span className="text-foreground font-medium">curiosity, collaboration, and creation</span>.
+              Ours are simple: <span className="text-foreground font-medium">curiosity, collaboration, and creation</span>.
             </p>
             <p>
-              Our branches are AI ventures that redefine industries, empower people, and strengthen India's digital foundation.
+              From these roots grow ventures that transform industries, empower people, and strengthen India's digital backbone.
             </p>
             <p className="text-xl font-bold text-foreground">
               We don't just invest. We build, grow, and co-own the future.
@@ -36,7 +36,7 @@ const Philosophy = () => {
               </div>
               <h3 className="text-2xl font-bold text-foreground">Deep Roots</h3>
               <p className="text-muted-foreground leading-relaxed">
-                Grounded in timeless values and Indian wisdom — our foundation is strong, resilient, and enduring.
+                A foundation shaped by Indian values — resilient, steady, and purpose-driven.
               </p>
             </div>
           </div>
@@ -49,7 +49,7 @@ const Philosophy = () => {
               </div>
               <h3 className="text-2xl font-bold text-foreground">Expanding Branches</h3>
               <p className="text-muted-foreground leading-relaxed">
-                Our ventures reach far and wide — each one a neural pathway connecting intelligence to impact.
+                Ventures that stretch across sectors and unlock intelligence where it matters.
               </p>
             </div>
           </div>
@@ -62,7 +62,7 @@ const Philosophy = () => {
               </div>
               <h3 className="text-2xl font-bold text-foreground">Continuous Growth</h3>
               <p className="text-muted-foreground leading-relaxed">
-                We evolve, learn, and adapt — just like nature, our ecosystem thrives through constant innovation.
+                An evolving ecosystem — always learning, always adapting, always building.
               </p>
             </div>
           </div>

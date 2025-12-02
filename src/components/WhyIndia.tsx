@@ -42,10 +42,12 @@ const WhyIndia = () => {
       <div className="relative container mx-auto max-w-6xl">
         {/* Header */}
         <div className="text-center mb-16 space-y-6 animate-fade-up">
-          <h2 className="text-4xl md:text-5xl font-bold">
-            <span className="text-primary">India's Moment in AI </span>
-            <span className="text-foreground">Has Arrived.</span>
+          <h2 className="text-4xl md:text-5xl font-bold text-foreground">
+            India's AI Moment
           </h2>
+          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+            India has everything needed to lead the global AI wave:
+          </p>
         </div>
 
         {/* Stats Cards */}
@@ -80,7 +82,7 @@ const WhyIndia = () => {
         {/* Body Text */}
         <div className="text-center max-w-3xl mx-auto space-y-6">
           <p className="text-xl text-foreground font-medium">
-            Vriksha.ai stands on India's strongest roots — and builds branches that reach the world.
+            Vriksha.ai grows on India's strongest roots — and builds branches that reach the world.
           </p>
           <Button 
             size="lg"
