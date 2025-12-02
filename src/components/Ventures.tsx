@@ -71,7 +71,7 @@ const Ventures = () => {
         </div>
 
         {/* Ventures Grid */}
-        <div className="grid md:grid-cols-3 gap-6 mb-12">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
           {ventures.map((venture, index) => {
             const Icon = venture.icon;
             const iconBg = venture.color === "primary" ? "bg-primary/10" : venture.color === "secondary" ? "bg-secondary/10" : "bg-accent/10";
