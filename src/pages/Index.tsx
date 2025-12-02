@@ -4,8 +4,8 @@ import Accelerator from "@/components/Accelerator";
 import Ventures from "@/components/Ventures";
 import Gamification from "@/components/Gamification";
 import WhyIndia from "@/components/WhyIndia";
-
 import JoinEcosystem from "@/components/JoinEcosystem";
+import FAQ from "@/components/FAQ";
 import Footer from "@/components/Footer";
 
 const Index = () => {
@@ -17,8 +17,8 @@ const Index = () => {
       <Ventures />
       <Gamification />
       <WhyIndia />
-      
       <JoinEcosystem />
+      <FAQ />
       <Footer />
     </div>
   );
