@@ -24,7 +24,7 @@ const Header = () => {
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2 group">
-            <img src="/images/vriksha-logo.png" alt="Vriksha.ai Logo" className="w-12 h-12 rounded-lg group-hover:scale-110 transition-transform" />
+            <img src="/images/vriksha-logo.png" alt="Vriksha.ai Logo" className="w-14 h-14 rounded-lg group-hover:scale-110 transition-transform" />
             <span className="text-xl font-bold text-foreground">Vriksha.ai</span>
           </Link>
 
