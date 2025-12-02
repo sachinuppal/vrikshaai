@@ -112,7 +112,10 @@ const Hero = () => {
             <Button 
               size="lg" 
               variant="outline"
-              onClick={() => (window as any)._moduleAC?.openChat?.()}
+              onClick={() => {
+                const trigger = document.querySelector('[data-dv-agent-trigger]') as HTMLElement;
+                if (trigger) trigger.click();
+              }}
               className="min-h-[44px] border-2 border-primary text-primary hover:bg-primary hover:text-primary-foreground font-semibold px-6 sm:px-8 py-3 sm:py-6 text-base sm:text-lg rounded-lg transition-all hover:scale-105 active:scale-95"
             >
               Talk to Us

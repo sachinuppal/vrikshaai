@@ -72,7 +72,10 @@ const Conversation = () => {
           <div className="text-center pt-6 animate-fade-in" style={{ animationDelay: "0.4s" }}>
             <Button 
               size="lg"
-              onClick={() => (window as any)._moduleAC?.openChat?.()}
+              onClick={() => {
+                const trigger = document.querySelector('[data-dv-agent-trigger]') as HTMLElement;
+                if (trigger) trigger.click();
+              }}
               className="bg-gradient-to-r from-primary to-secondary hover:scale-105 transition-transform text-primary-foreground font-semibold px-8 py-6 text-lg rounded-xl"
             >
               Talk to Us
