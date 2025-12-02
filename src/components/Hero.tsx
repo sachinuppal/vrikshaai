@@ -45,8 +45,8 @@ const Hero = () => {
     }
   };
 
-  const headlineWords = "We Build India's AI Ecosystem —".split(" ");
-  const subHeadlineWords = "One Venture at a Time.".split(" ");
+  const headlineWords = "Co-Building AI that People Want.".split(" ");
+  const subHeadlineWords = "We co-create products, back execution, and grow real companies together.".split(" ");
 
   const wordVariants = {
     hidden: { opacity: 0, y: 20, filter: "blur(8px)" },
@@ -131,18 +131,6 @@ const Hero = () => {
               ))}
             </motion.span>
           </h1>
-
-          {/* Subtext */}
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={showContent ? { opacity: 1, y: 0 } : {}}
-            transition={{ duration: 0.6, delay: 1.2 }}
-            className="text-lg sm:text-xl md:text-2xl max-w-3xl mx-auto leading-relaxed space-y-4"
-          >
-            <p className="text-muted-foreground">Vriksha.ai builds and scales AI-first companies.</p>
-            <p className="text-muted-foreground">We co-create products, co-invest in growth, and stay long after launch.</p>
-            <p className="text-foreground font-medium">Rooted in Indian wisdom. Built with <span className="text-primary font-semibold">modern intelligence</span>.</p>
-          </motion.div>
 
           {/* CTA Buttons */}
           <motion.div
