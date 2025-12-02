@@ -27,21 +27,21 @@ const Footer = () => {
 
             {/* Links */}
             <div className="flex flex-wrap justify-center gap-6 text-sm">
-              <a href="#ventures" className="text-muted-foreground hover:text-primary transition-colors">
+              <span className="text-muted-foreground">
                 Ventures
-              </a>
-              <a href="#accelerator" className="text-muted-foreground hover:text-primary transition-colors">
+              </span>
+              <span className="text-muted-foreground">
                 Accelerator
-              </a>
-              <a href="#gamification" className="text-muted-foreground hover:text-primary transition-colors">
+              </span>
+              <span className="text-muted-foreground">
                 Gamification
-              </a>
-              <a href="#docs" className="text-muted-foreground hover:text-primary transition-colors">
+              </span>
+              <span className="text-muted-foreground">
                 Docs
-              </a>
-              <a href="#contact" className="text-muted-foreground hover:text-primary transition-colors">
+              </span>
+              <span className="text-muted-foreground">
                 Contact
-              </a>
+              </span>
             </div>
 
             {/* Copyright */}
