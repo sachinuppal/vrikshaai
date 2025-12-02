@@ -6,8 +6,7 @@ const JoinEcosystem = () => {
   const [showContactModal, setShowContactModal] = useState(false);
   
   return (
-    <section className="relative py-32 overflow-hidden bg-background border-t-2 border-primary/20">
-
+    <section className="relative py-32 overflow-hidden bg-gradient-to-b from-muted/30 to-background">
       <div className="relative container mx-auto px-6">
         <div className="max-w-4xl mx-auto text-center space-y-8 animate-fade-up">
           {/* Header */}
@@ -16,7 +15,7 @@ const JoinEcosystem = () => {
               <span className="text-foreground">Let's Grow </span>
               <span className="bg-gradient-neural bg-clip-text text-transparent">Together.</span>
             </h2>
-            <div className="w-24 h-1 bg-gradient-accent mx-auto rounded-full" />
+            <div className="w-24 h-1 bg-gradient-primary mx-auto rounded-full" />
           </div>
 
           {/* Description */}
@@ -33,7 +32,7 @@ const JoinEcosystem = () => {
             <Button 
               size="lg"
               onClick={() => setShowContactModal(true)}
-              className="group bg-primary hover:bg-primary-glow text-primary-foreground font-semibold px-8 py-6 text-lg rounded-xl shadow-glow transition-all hover:scale-105"
+              className="group bg-primary hover:bg-primary/90 text-primary-foreground font-semibold px-10 py-6 text-lg rounded-xl shadow-hover transition-all hover:scale-105"
             >
               Contact Us
             </Button>
@@ -41,7 +40,6 @@ const JoinEcosystem = () => {
               size="lg" 
               variant="outline"
               onClick={() => {
-                // Try multiple selectors for the Ringg widget
                 const selectors = [
                   '[data-dv-agent-trigger]',
                   '.dv-agent-button',
@@ -60,7 +58,7 @@ const JoinEcosystem = () => {
                 
                 console.warn('Ringg widget button not found');
               }}
-              className="group border-2 border-secondary/30 hover:border-secondary hover:bg-secondary/10 font-semibold px-8 py-6 text-lg rounded-xl backdrop-blur-sm transition-all hover:scale-105"
+              className="group border-2 border-secondary/30 text-secondary hover:border-secondary hover:bg-secondary hover:text-secondary-foreground font-semibold px-10 py-6 text-lg rounded-xl transition-all hover:scale-105"
             >
               Talk to Us
             </Button>
@@ -71,7 +69,7 @@ const JoinEcosystem = () => {
             {['Developers', 'Founders', 'Enterprises', 'Investors'].map((role, index) => (
               <div 
                 key={index}
-                className="p-4 rounded-xl bg-card/50 backdrop-blur-sm border border-border hover:border-primary/40 transition-all hover:scale-105"
+                className="p-4 rounded-xl bg-card border border-border shadow-card hover:shadow-hover transition-all duration-300 hover:-translate-y-1"
               >
                 <p className="font-semibold text-foreground">{role}</p>
               </div>

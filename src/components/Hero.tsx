@@ -48,12 +48,12 @@ const Hero = () => {
   };
 
   return (
-    <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-background">
+    <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-gradient-hero">
       {/* Video Background */}
       {useStaticBg ? (
-        <div className={`absolute inset-0 bg-gradient-hero transition-opacity duration-1000 ${showContent ? 'opacity-40' : 'opacity-100'}`} />
+        <div className={`absolute inset-0 bg-gradient-hero transition-opacity duration-1000 ${showContent ? 'opacity-60' : 'opacity-100'}`} />
       ) : (
-        <div className={`absolute inset-0 bg-black transition-opacity duration-1000 ${showContent ? 'opacity-40' : 'opacity-100'}`}>
+        <div className={`absolute inset-0 transition-opacity duration-1000 ${showContent ? 'opacity-30' : 'opacity-60'}`}>
           <video
             autoPlay
             loop
@@ -71,23 +71,23 @@ const Hero = () => {
         </div>
       )}
 
-      {/* Radial Gradient Overlay */}
-      <div className={`absolute inset-0 bg-gradient-hero transition-opacity duration-1000 ${showContent ? 'opacity-100' : 'opacity-0'}`} />
+      {/* Warm Gradient Overlay */}
+      <div className={`absolute inset-0 bg-gradient-to-b from-background/40 via-background/60 to-background transition-opacity duration-1000 ${showContent ? 'opacity-100' : 'opacity-0'}`} />
 
       {/* Content */}
       <div className={`relative z-10 container mx-auto px-4 sm:px-6 py-16 sm:py-20 text-center transition-opacity duration-2000 ${showContent ? 'opacity-100' : 'opacity-0'}`}>
         <div className="max-w-4xl mx-auto space-y-6 sm:space-y-8">
           {/* Badge */}
-          <div className={`inline-flex items-center gap-2 px-3 sm:px-4 py-2 rounded-full bg-card border-2 border-primary/40 backdrop-blur-sm transition-all duration-1000 ${showContent ? 'opacity-100' : 'opacity-0'}`}>
-            <div className="w-2 h-2 rounded-full bg-secondary animate-glow-intense" />
-            <span className="text-xs sm:text-sm font-medium text-primary">India's First AI Venture Studio & Accelerator</span>
+          <div className={`inline-flex items-center gap-2 px-4 sm:px-5 py-2.5 rounded-full bg-card border border-primary/20 shadow-soft transition-all duration-1000 ${showContent ? 'opacity-100' : 'opacity-0'}`}>
+            <div className="w-2 h-2 rounded-full bg-primary animate-pulse-soft" />
+            <span className="text-xs sm:text-sm font-semibold text-primary">India's First AI Venture Studio & Accelerator</span>
           </div>
 
           {/* Main Headline */}
           <h1 className={`text-4xl sm:text-5xl md:text-7xl font-bold tracking-tight leading-tight transition-all duration-1000 delay-300 ${showContent ? 'opacity-100' : 'opacity-0'}`}>
             <span className="text-foreground">Building India's AI Ecosystem —</span>
             <br />
-            <span className="bg-gradient-neural bg-clip-text text-transparent animate-glow-pulse" style={{ backgroundSize: "200% auto" }}>
+            <span className="bg-gradient-neural bg-clip-text text-transparent">
               One Venture, One Growth Story at a Time.
             </span>
           </h1>
@@ -96,7 +96,7 @@ const Hero = () => {
           <p className={`text-lg sm:text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto leading-relaxed transition-all duration-1000 delay-600 ${showContent ? 'opacity-100' : 'opacity-0'}`}>
             Vriksha.ai is an AI Venture Studio and Accelerator that co-builds and co-participates in the growth of AI-first products — from idea to global scale.
             <br />
-            <span className="text-foreground font-medium">Rooted in Indian wisdom. Engineered with <span className="text-primary">modern intelligence</span>.</span>
+            <span className="text-foreground font-medium">Rooted in Indian wisdom. Engineered with <span className="text-primary font-semibold">modern intelligence</span>.</span>
           </p>
 
           {/* CTA Buttons */}
@@ -104,8 +104,7 @@ const Hero = () => {
             <Button 
               size="lg"
               onClick={() => setShowContactModal(true)}
-              className="min-h-[44px] bg-primary hover:bg-primary-glow text-primary-foreground font-semibold px-6 sm:px-8 py-3 sm:py-6 text-base sm:text-lg rounded-lg transition-all hover:scale-105 active:scale-95"
-              style={{ boxShadow: "var(--shadow-glow)" }}
+              className="min-h-[48px] bg-primary hover:bg-primary/90 text-primary-foreground font-semibold px-8 sm:px-10 py-4 sm:py-6 text-base sm:text-lg rounded-xl transition-all hover:scale-105 hover:shadow-hover active:scale-95"
             >
               Contact Us
             </Button>
@@ -113,7 +112,6 @@ const Hero = () => {
               size="lg" 
               variant="outline"
               onClick={() => {
-                // Try multiple selectors for the Ringg widget
                 const selectors = [
                   '[data-dv-agent-trigger]',
                   '.dv-agent-button',
@@ -132,7 +130,7 @@ const Hero = () => {
                 
                 console.warn('Ringg widget button not found');
               }}
-              className="min-h-[44px] border-2 border-primary text-primary hover:bg-primary hover:text-primary-foreground font-semibold px-6 sm:px-8 py-3 sm:py-6 text-base sm:text-lg rounded-lg transition-all hover:scale-105 active:scale-95"
+              className="min-h-[48px] border-2 border-primary/30 text-primary hover:bg-primary hover:text-primary-foreground font-semibold px-8 sm:px-10 py-4 sm:py-6 text-base sm:text-lg rounded-xl transition-all hover:scale-105 active:scale-95"
             >
               Talk to Us
             </Button>

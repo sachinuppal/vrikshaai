@@ -33,14 +33,14 @@ const HubSpotFormModal = ({ open, onOpenChange }: HubSpotFormModalProps) => {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto bg-card border border-border">
         <DialogHeader>
           <DialogTitle className="text-2xl font-bold text-foreground">Contact Us</DialogTitle>
           <DialogDescription className="text-muted-foreground">
             Fill out the form below and we'll get back to you shortly.
           </DialogDescription>
         </DialogHeader>
-        <div className="bg-white rounded-lg p-6 mt-4">
+        <div className="bg-muted/30 rounded-xl p-6 mt-4">
           <div 
             className="hs-form-frame" 
             data-region="na2" 

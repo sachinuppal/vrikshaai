@@ -1,38 +1,17 @@
 import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import {
-  Gamepad2,
-  Heart,
-  TrendingUp,
-  Target,
-  Users,
-  Award,
-  Puzzle,
-  Package,
   Brain,
+  TrendingUp,
+  Award,
   BarChart3,
-  Link,
-  Code2,
-  PlayCircle,
-  Sparkles,
 } from "lucide-react";
 import HubSpotFormModal from "@/components/HubSpotFormModal";
 
 const Gamification = () => {
-  const [showReward, setShowReward] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
   const [showContactModal, setShowContactModal] = useState(false);
   const sectionRef = useRef<HTMLElement>(null);
-
-  useEffect(() => {
-    const checkMobile = () => window.innerWidth < 640;
-    setIsMobile(checkMobile());
-
-    const handleResize = () => setIsMobile(checkMobile());
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -51,106 +30,10 @@ const Gamification = () => {
     return () => observer.disconnect();
   }, []);
 
-  const handleExperienceGrowth = () => {
-    setShowReward(true);
-    setTimeout(() => setShowReward(false), 3000);
-  };
-
-  const principles = [
-    {
-      emoji: "🌱",
-      title: "Intrinsic Motivation",
-      subtitle: "Growth must feel meaningful.",
-      description: "We use AI-driven personalization to create experiences aligned with what users want to become, not just what they do.",
-      icon: Heart,
-      color: "primary",
-    },
-    {
-      emoji: "🌿",
-      title: "Progress Visibility",
-      subtitle: "People grow when they see their evolution.",
-      description: "We design feedback loops — dashboards, streaks, milestones — powered by real-time data APIs.",
-      icon: TrendingUp,
-      color: "secondary",
-    },
-    {
-      emoji: "🌾",
-      title: "Challenge and Mastery",
-      subtitle: "Growth happens through tension and triumph.",
-      description: "Our system dynamically adjusts difficulty using reinforcement learning — creating just the right level of challenge to sustain engagement.",
-      icon: Target,
-      color: "accent",
-    },
-    {
-      emoji: "🍃",
-      title: "Social Connection",
-      subtitle: "Trees don't grow alone.",
-      description: "We embed social graphs and team-based goals, rewarding collaboration and community engagement.",
-      icon: Users,
-      color: "primary",
-    },
-    {
-      emoji: "🌸",
-      title: "Rewards and Recognition",
-      subtitle: "Recognition reinforces behavior.",
-      description: "Our SDK enables tiered reward systems — badges, reputation points, or even tokenized incentives — seamlessly integrated into your product.",
-      icon: Award,
-      color: "secondary",
-    },
-  ];
-
-  const capabilities = [
-    {
-      emoji: "🧩",
-      title: "Gamify any user flow",
-      description: "signups, learning modules, purchases, community participation",
-      icon: Puzzle,
-    },
-    {
-      emoji: "⚙️",
-      title: "Plug-and-play SDKs",
-      description: "for Web, Android, iOS, and React-based apps",
-      icon: Package,
-    },
-    {
-      emoji: "🧠",
-      title: "AI-powered personalization",
-      description: "adapts rewards and challenges to user behavior",
-      icon: Brain,
-    },
-    {
-      emoji: "📈",
-      title: "Analytics layer",
-      description: "track engagement, retention, and LTC with dashboards",
-      icon: BarChart3,
-    },
-    {
-      emoji: "🔗",
-      title: "Compatible integrations",
-      description: "HubSpot, Intercom, Segment, Mixpanel, or in-house systems",
-      icon: Link,
-    },
-  ];
-
-  const metrics = [
-    {
-      metric: "Acquisition",
-      impact: "+25–60% through engagement-based referrals and rewards",
-    },
-    {
-      metric: "Retention",
-      impact: "+40–80% through habit loops and progression systems",
-    },
-    {
-      metric: "LTC (Lifetime Contribution)",
-      impact: "+2–3x uplift via reactivation, loyalty, and up-sell incentives",
-    },
-  ];
-
   return (
     <section
       ref={sectionRef}
-      className="py-12 sm:py-16 md:py-20 px-4 sm:px-6 bg-background border-t-2 border-primary/20"
+      className="py-12 sm:py-16 md:py-20 px-4 sm:px-6 bg-muted/30"
     >
       <div className="container mx-auto max-w-6xl space-y-12 sm:space-y-16">
         {/* Header */}
@@ -163,7 +46,7 @@ const Gamification = () => {
             <span className="text-primary">Turning Intelligence into Motivation.</span>
           </h2>
           <p
-            className={`text-lg sm:text-xl text-muted-foreground transition-all duration-700 delay-100 ${
+            className={`text-lg sm:text-xl text-muted-foreground max-w-3xl mx-auto transition-all duration-700 delay-100 ${
               isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
             }`}
           >
@@ -183,7 +66,7 @@ const Gamification = () => {
             return (
               <div
                 key={index}
-                className={`p-6 rounded-lg bg-card border-2 border-primary/20 hover:border-primary transition-all duration-300 hover:scale-105 ${
+                className={`p-6 rounded-2xl bg-card border border-border shadow-card hover:shadow-hover transition-all duration-300 hover:-translate-y-1 ${
                   isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
                 }`}
                 style={{ transitionDelay: `${300 + index * 100}ms` }}
@@ -197,27 +80,26 @@ const Gamification = () => {
 
         {/* Animated Stats */}
         <div className="flex flex-col sm:flex-row gap-8 justify-center items-center py-8">
-          <div className="text-center">
+          <div className="text-center p-6 rounded-2xl bg-card border border-border shadow-card">
             <div className="text-5xl font-bold text-primary mb-2">+60%</div>
             <div className="text-lg text-muted-foreground">Engagement</div>
           </div>
-          <div className="text-center">
+          <div className="text-center p-6 rounded-2xl bg-card border border-border shadow-card">
             <div className="text-5xl font-bold text-secondary mb-2">+80%</div>
             <div className="text-lg text-muted-foreground">Retention</div>
           </div>
-          <div className="text-center">
+          <div className="text-center p-6 rounded-2xl bg-card border border-border shadow-card">
             <div className="text-5xl font-bold text-accent mb-2">×2</div>
             <div className="text-lg text-muted-foreground">LTC</div>
           </div>
         </div>
 
-
         {/* Call to Action */}
-        <div className="text-center space-y-6 pt-8 border-t-2 border-primary/20">
+        <div className="text-center space-y-6 pt-8 border-t border-border">
           <Button
             size="lg"
             onClick={() => setShowContactModal(true)}
-            className="min-h-[44px] bg-gradient-to-r from-primary to-secondary hover:scale-110 active:scale-95 transition-transform text-base sm:text-lg px-8 py-6"
+            className="min-h-[48px] bg-gradient-to-r from-primary to-secondary hover:opacity-90 text-primary-foreground hover:scale-105 active:scale-95 transition-all text-base sm:text-lg px-10 py-6 rounded-xl shadow-hover"
           >
             Contact Us
           </Button>

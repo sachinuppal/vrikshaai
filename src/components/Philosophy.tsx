@@ -2,7 +2,7 @@ import { Sprout, Network, TrendingUp } from "lucide-react";
 
 const Philosophy = () => {
   return (
-    <section className="py-20 px-6 bg-background border-t-2 border-primary/20">
+    <section className="py-20 px-6 bg-background">
       <div className="container mx-auto max-w-6xl">
         {/* Header */}
         <div className="text-center mb-16 space-y-6 animate-fade-up">
@@ -29,10 +29,9 @@ const Philosophy = () => {
         {/* Visual Cards */}
         <div className="grid md:grid-cols-3 gap-8">
           {/* Deep Roots */}
-          <div className="group relative p-8 rounded-lg bg-card border-2 border-primary/30 hover:border-primary transition-all hover:scale-105 animate-fade-in" style={{ animationDelay: "0.1s" }}>
-            <div className="absolute inset-0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" style={{ boxShadow: "0 0 30px hsl(var(--primary) / 0.5)" }} />
+          <div className="group relative p-8 rounded-2xl bg-card border border-border shadow-card hover:shadow-hover transition-all duration-300 hover:-translate-y-1 animate-fade-in" style={{ animationDelay: "0.1s" }}>
             <div className="relative space-y-4">
-              <div className="w-16 h-16 rounded-full bg-primary/20 flex items-center justify-center group-hover:animate-glow-intense">
+              <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
                 <Sprout className="w-8 h-8 text-primary" />
               </div>
               <h3 className="text-2xl font-bold text-foreground">Deep Roots</h3>
@@ -43,10 +42,9 @@ const Philosophy = () => {
           </div>
 
           {/* Expanding Branches */}
-          <div className="group relative p-8 rounded-lg bg-card border-2 border-secondary/30 hover:border-secondary transition-all hover:scale-105 animate-fade-in" style={{ animationDelay: "0.2s" }}>
-            <div className="absolute inset-0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" style={{ boxShadow: "0 0 30px hsl(var(--secondary) / 0.5)" }} />
+          <div className="group relative p-8 rounded-2xl bg-card border border-border shadow-card hover:shadow-hover transition-all duration-300 hover:-translate-y-1 animate-fade-in" style={{ animationDelay: "0.2s" }}>
             <div className="relative space-y-4">
-              <div className="w-16 h-16 rounded-full bg-secondary/20 flex items-center justify-center group-hover:animate-glow-intense">
+              <div className="w-16 h-16 rounded-2xl bg-secondary/10 flex items-center justify-center group-hover:bg-secondary/20 transition-colors">
                 <Network className="w-8 h-8 text-secondary" />
               </div>
               <h3 className="text-2xl font-bold text-foreground">Expanding Branches</h3>
@@ -57,10 +55,9 @@ const Philosophy = () => {
           </div>
 
           {/* Continuous Growth */}
-          <div className="group relative p-8 rounded-lg bg-card border-2 border-accent/30 hover:border-accent transition-all hover:scale-105 animate-fade-in" style={{ animationDelay: "0.3s" }}>
-            <div className="absolute inset-0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" style={{ boxShadow: "0 0 30px hsl(var(--accent) / 0.5)" }} />
+          <div className="group relative p-8 rounded-2xl bg-card border border-border shadow-card hover:shadow-hover transition-all duration-300 hover:-translate-y-1 animate-fade-in" style={{ animationDelay: "0.3s" }}>
             <div className="relative space-y-4">
-              <div className="w-16 h-16 rounded-full bg-accent/20 flex items-center justify-center group-hover:animate-glow-intense">
+              <div className="w-16 h-16 rounded-2xl bg-accent/10 flex items-center justify-center group-hover:bg-accent/20 transition-colors">
                 <TrendingUp className="w-8 h-8 text-accent" />
               </div>
               <h3 className="text-2xl font-bold text-foreground">Continuous Growth</h3>

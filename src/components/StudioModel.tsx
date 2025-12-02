@@ -23,7 +23,7 @@ const StudioModel = () => {
   ];
 
   return (
-    <section className="py-20 px-6 bg-background border-t-2 border-primary/20">
+    <section className="py-20 px-6 bg-muted/30">
       <div className="container mx-auto max-w-6xl">
         {/* Header */}
         <div className="text-center mb-16 space-y-6 animate-fade-up">
@@ -45,25 +45,18 @@ const StudioModel = () => {
         <div className="grid md:grid-cols-3 gap-8">
           {processes.map((process, index) => {
             const Icon = process.icon;
-            const borderClass = process.color === "primary" ? "border-primary/40 hover:border-primary" : process.color === "secondary" ? "border-secondary/40 hover:border-secondary" : "border-accent/40 hover:border-accent";
-            const iconBg = process.color === "primary" ? "bg-primary/20" : process.color === "secondary" ? "bg-secondary/20" : "bg-accent/20";
+            const iconBg = process.color === "primary" ? "bg-primary/10" : process.color === "secondary" ? "bg-secondary/10" : "bg-accent/10";
             const iconColor = process.color === "primary" ? "text-primary" : process.color === "secondary" ? "text-secondary" : "text-accent";
-            const shadowColor = process.color === "primary" ? "0 0 50px hsl(var(--primary) / 0.6)" : process.color === "secondary" ? "0 0 50px hsl(var(--secondary) / 0.6)" : "0 0 50px hsl(var(--accent) / 0.6)";
 
             return (
               <div
                 key={index}
-                className={`group relative p-8 rounded-lg bg-card border-2 ${borderClass} transition-all hover:scale-105 animate-fade-in`}
+                className="group relative p-8 rounded-2xl bg-card border border-border shadow-card hover:shadow-hover transition-all duration-300 hover:-translate-y-1 animate-fade-in"
                 style={{ animationDelay: `${index * 0.15}s` }}
               >
-                <div 
-                  className="absolute inset-0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" 
-                  style={{ boxShadow: shadowColor }}
-                />
-
                 <div className="relative space-y-6">
                   <div className="flex items-center gap-4">
-                    <div className={`w-16 h-16 rounded-lg ${iconBg} flex items-center justify-center group-hover:animate-glow-intense`}>
+                    <div className={`w-16 h-16 rounded-2xl ${iconBg} flex items-center justify-center group-hover:scale-110 transition-transform`}>
                       <Icon className={`w-8 h-8 ${iconColor}`} />
                     </div>
                     <span className={`text-5xl font-bold ${iconColor} opacity-20`}>
