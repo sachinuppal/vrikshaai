@@ -91,7 +91,7 @@ const Hero = () => {
             className="inline-flex items-center gap-2 px-4 sm:px-5 py-2.5 rounded-full bg-card border border-primary/20 shadow-soft"
           >
             <div className="w-2 h-2 rounded-full bg-primary animate-pulse-soft" />
-            <span className="text-xs sm:text-sm font-semibold text-primary">India's First AI Venture Studio & Accelerator</span>
+            <span className="text-xs sm:text-sm font-semibold text-primary">India's First AI Venture Engine</span>
           </motion.div>
 
           {/* Main Headline */}
