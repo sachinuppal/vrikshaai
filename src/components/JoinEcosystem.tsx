@@ -71,7 +71,7 @@ const audiences = [
 
 const JoinEcosystem = () => {
   const [showContactModal, setShowContactModal] = useState(false);
-  const [selectedAudience, setSelectedAudience] = useState<string | null>(null);
+  const [selectedAudience, setSelectedAudience] = useState<string | null>('developers');
 
   const selectedData = audiences.find(a => a.id === selectedAudience);
   
