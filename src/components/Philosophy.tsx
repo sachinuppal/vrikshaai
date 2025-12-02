@@ -7,21 +7,21 @@ const Philosophy = () => {
         {/* Header */}
         <div className="text-center mb-16 space-y-6 animate-fade-up">
           <h2 className="text-4xl md:text-5xl font-bold">
-            <span className="text-foreground">Strong Roots. </span>
-            <span className="text-primary">Expanding Branches.</span>
+            <span className="text-primary">Strong Roots. Expanding Branches. </span>
+            <span className="text-foreground">Continuous Growth.</span>
           </h2>
           <div className="max-w-3xl mx-auto space-y-4 text-lg text-muted-foreground">
             <p>
-              A tree stands because its <span className="text-primary font-medium">roots go deep</span>.
+              Every tree grows because it's <span className="text-primary font-medium">rooted deeply</span>.
             </p>
             <p>
-              At Vriksha.ai, our roots are values that have stood the test of time — <span className="text-foreground font-medium">curiosity, collaboration, and creation</span>.
+              At Vriksha.ai, our roots are values that have endured — <span className="text-foreground font-medium">curiosity, collaboration, and creation</span>.
             </p>
             <p>
-              Our branches are the ventures we grow: AI products that redefine industries, empower people, and strengthen India's digital foundation.
+              Our branches are AI ventures that redefine industries, empower people, and strengthen India's digital foundation.
             </p>
-            <p className="text-secondary font-medium">
-              Each idea we plant is designed to grow — powered by technology, guided by purpose.
+            <p className="text-xl font-bold text-foreground">
+              We don't just invest. We build, grow, and co-own the future.
             </p>
           </div>
         </div>

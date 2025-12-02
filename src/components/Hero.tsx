@@ -78,23 +78,23 @@ const Hero = () => {
           {/* Badge */}
           <div className={`inline-flex items-center gap-2 px-3 sm:px-4 py-2 rounded-full bg-card border-2 border-primary/40 backdrop-blur-sm transition-all duration-1000 ${showContent ? 'opacity-100' : 'opacity-0'}`}>
             <div className="w-2 h-2 rounded-full bg-secondary animate-glow-intense" />
-            <span className="text-xs sm:text-sm font-medium text-primary">India's First AI Venture Studio</span>
+            <span className="text-xs sm:text-sm font-medium text-primary">India's First AI Venture Studio & Accelerator</span>
           </div>
 
           {/* Main Headline */}
           <h1 className={`text-4xl sm:text-5xl md:text-7xl font-bold tracking-tight leading-tight transition-all duration-1000 delay-300 ${showContent ? 'opacity-100' : 'opacity-0'}`}>
-            <span className="text-foreground">Rooted in India.</span>
+            <span className="text-foreground">Building India's AI Ecosystem —</span>
             <br />
             <span className="bg-gradient-neural bg-clip-text text-transparent animate-glow-pulse" style={{ backgroundSize: "200% auto" }}>
-              Growing the Future of AI.
+              One Venture, One Growth Story at a Time.
             </span>
           </h1>
 
           {/* Subtext */}
           <p className={`text-lg sm:text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto leading-relaxed transition-all duration-1000 delay-600 ${showContent ? 'opacity-100' : 'opacity-0'}`}>
-            Vriksha.ai nurtures bold ideas into global-scale products.
+            Vriksha.ai is an AI Venture Studio and Accelerator that co-builds and co-participates in the growth of AI-first products — from idea to global scale.
             <br />
-            <span className="text-foreground font-medium">Rooted in Indian wisdom, powered by <span className="text-primary">modern intelligence</span>.</span>
+            <span className="text-foreground font-medium">Rooted in Indian wisdom. Engineered with <span className="text-primary">modern intelligence</span>.</span>
           </p>
 
           {/* CTA Buttons */}
@@ -111,7 +111,14 @@ const Hero = () => {
               variant="outline"
               className="min-h-[44px] border-2 border-primary text-primary hover:bg-primary hover:text-primary-foreground font-semibold px-6 sm:px-8 py-3 sm:py-6 text-base sm:text-lg rounded-lg transition-all hover:scale-105 active:scale-95"
             >
-              Partner with Us
+              Apply to the Accelerator
+            </Button>
+            <Button 
+              size="lg" 
+              variant="ghost"
+              className="min-h-[44px] text-secondary hover:bg-secondary/10 hover:text-secondary font-semibold px-6 sm:px-8 py-3 sm:py-6 text-base sm:text-lg rounded-lg transition-all hover:scale-105 active:scale-95"
+            >
+              Talk to Vriksha 🌳
             </Button>
           </div>
         </div>

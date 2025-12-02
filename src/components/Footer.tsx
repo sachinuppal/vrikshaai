@@ -15,13 +15,10 @@ const Footer = () => {
               <span className="text-2xl font-bold text-foreground">Vriksha.ai</span>
             </div>
 
-            {/* Mantra */}
+            {/* Brand Line */}
             <div className="space-y-2">
               <p className="text-xl font-semibold text-foreground">
-                Rooted in India. Growing the Future of AI.
-              </p>
-              <p className="text-muted-foreground">
-                Made in India, for the world.
+                Vriksha.ai — Rooted in India. Growing the Future of AI.
               </p>
             </div>
 
@@ -33,11 +30,14 @@ const Footer = () => {
               <a href="#ventures" className="text-muted-foreground hover:text-primary transition-colors">
                 Ventures
               </a>
-              <a href="#philosophy" className="text-muted-foreground hover:text-primary transition-colors">
-                Philosophy
+              <a href="#accelerator" className="text-muted-foreground hover:text-primary transition-colors">
+                Accelerator
               </a>
-              <a href="#team" className="text-muted-foreground hover:text-primary transition-colors">
-                Team
+              <a href="#gamification" className="text-muted-foreground hover:text-primary transition-colors">
+                Gamification
+              </a>
+              <a href="#docs" className="text-muted-foreground hover:text-primary transition-colors">
+                Docs
               </a>
               <a href="#contact" className="text-muted-foreground hover:text-primary transition-colors">
                 Contact
@@ -46,7 +46,7 @@ const Footer = () => {
 
             {/* Copyright */}
             <div className="text-sm text-muted-foreground pt-4">
-              © {new Date().getFullYear()} Vriksha.ai. All rights reserved.
+              © 2025 Vriksha.ai | Made in India for the world.
             </div>
           </div>
         </div>

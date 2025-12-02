@@ -1,4 +1,5 @@
 import { Globe, Users, Zap } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 const WhyIndia = () => {
   const stats = [
@@ -38,24 +39,13 @@ const WhyIndia = () => {
         {/* Header */}
         <div className="text-center mb-16 space-y-6 animate-fade-up">
           <h2 className="text-4xl md:text-5xl font-bold">
-            <span className="text-foreground">India is the Next </span>
-            <span className="text-primary">AI Superpower.</span>
+            <span className="text-primary">India's Moment in AI </span>
+            <span className="text-foreground">Has Arrived.</span>
           </h2>
-          <div className="max-w-3xl mx-auto space-y-4 text-lg text-muted-foreground">
-            <p>
-              With <span className="text-primary font-semibold">500 million connected citizens</span>, India has the scale, speed, and spirit to lead the AI revolution.
-            </p>
-            <p>
-              Vriksha.ai builds on Jio's digital infrastructure, India's engineering talent, and the world's hunger for scalable innovation.
-            </p>
-            <p className="text-secondary font-medium text-xl">
-              We believe the next global giants in AI will not emerge from Silicon Valley — they'll grow from Indian soil.
-            </p>
-          </div>
         </div>
 
         {/* Stats Cards */}
-        <div className="grid md:grid-cols-3 gap-8">
+        <div className="grid md:grid-cols-3 gap-8 mb-12">
           {stats.map((stat, index) => {
             const Icon = stat.icon;
             const colorClass = stat.color === "primary" ? "border-primary/40 hover:border-primary text-primary" : stat.color === "secondary" ? "border-secondary/40 hover:border-secondary text-secondary" : "border-accent/40 hover:border-accent text-accent";
@@ -86,6 +76,20 @@ const WhyIndia = () => {
               </div>
             );
           })}
+        </div>
+
+        {/* Body Text */}
+        <div className="text-center max-w-3xl mx-auto space-y-6">
+          <p className="text-xl text-foreground font-medium">
+            Vriksha.ai stands on India's strongest roots — and builds branches that reach the world.
+          </p>
+          <Button 
+            size="lg" 
+            className="bg-primary hover:bg-primary-glow text-primary-foreground font-semibold px-8 py-6 text-lg rounded-lg transition-all hover:scale-105"
+            style={{ boxShadow: "var(--shadow-glow)" }}
+          >
+            Partner with Us
+          </Button>
         </div>
       </div>
     </section>

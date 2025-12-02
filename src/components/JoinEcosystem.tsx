@@ -18,12 +18,11 @@ const JoinEcosystem = () => {
 
           {/* Description */}
           <p className="text-xl md:text-2xl text-muted-foreground leading-relaxed max-w-3xl mx-auto">
-            Whether you're a developer, founder, enterprise, or investor — 
-            Vriksha.ai is an open ecosystem for collaboration.
+            Whether you're a founder, developer, enterprise, or investor, Vriksha.ai is an open ecosystem designed for collaboration.
           </p>
 
           <p className="text-lg text-foreground font-medium max-w-3xl mx-auto">
-            Join us to build the future of intelligence — one rooted, resilient, and revolutionary idea at a time.
+            Together, we'll plant the next generation of AI ventures — rooted in India, scaling to the world.
           </p>
 
           {/* CTA Buttons */}
@@ -32,7 +31,7 @@ const JoinEcosystem = () => {
               size="lg" 
               className="group bg-primary hover:bg-primary-glow text-primary-foreground font-semibold px-8 py-6 text-lg rounded-xl shadow-glow transition-all hover:scale-105"
             >
-              Collaborate with Us
+              Join the Accelerator
               <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
             </Button>
             <Button 
@@ -40,7 +39,15 @@ const JoinEcosystem = () => {
               variant="outline"
               className="group border-2 border-secondary/30 hover:border-secondary hover:bg-secondary/10 font-semibold px-8 py-6 text-lg rounded-xl backdrop-blur-sm transition-all hover:scale-105"
             >
-              Explore Open Roles
+              Integrate Our SDKs
+              <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
+            </Button>
+            <Button 
+              size="lg" 
+              variant="ghost"
+              className="group text-secondary hover:bg-secondary/10 font-semibold px-8 py-6 text-lg rounded-xl transition-all hover:scale-105"
+            >
+              Talk to Vriksha 🌳
               <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
             </Button>
           </div>

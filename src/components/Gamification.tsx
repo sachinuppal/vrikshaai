@@ -153,322 +153,72 @@ const Gamification = () => {
       <div className="container mx-auto max-w-6xl space-y-12 sm:space-y-16">
         {/* Header */}
         <div className="text-center space-y-3 sm:space-y-4">
-          <div className="inline-flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4">
-            <Gamepad2 className="w-8 h-8 sm:w-10 sm:h-10 text-primary" />
-            <h2
-              className={`text-3xl sm:text-4xl md:text-5xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent transition-all duration-700 ${
-                isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
-              }`}
-            >
-              Gamification as a Growth Engine
-            </h2>
-          </div>
+          <h2
+            className={`text-3xl sm:text-4xl md:text-5xl font-bold transition-all duration-700 ${
+              isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
+            }`}
+          >
+            <span className="text-primary">Turning Intelligence into Motivation.</span>
+          </h2>
           <p
             className={`text-lg sm:text-xl text-muted-foreground transition-all duration-700 delay-100 ${
               isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
             }`}
           >
-            Turning Intelligence into Motivation
+            Gamification at Vriksha.ai isn't cosmetic — it's core architecture. Our AI-powered gamification SDK transforms every digital experience into a growth loop — improving acquisition, retention, and lifetime contribution (LTC).
           </p>
         </div>
 
-        {/* Context Section */}
-        <div
-          className={`max-w-4xl mx-auto space-y-3 sm:space-y-4 text-sm sm:text-base md:text-lg leading-relaxed transition-all duration-700 delay-200 ${
-            isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
-          }`}
-        >
-          <p>
-            Gamification isn't about points or badges. It's about designing
-            systems that <span className="text-primary font-semibold">feel alive</span> — systems that respond to users,
-            reward progress, and build long-term relationships.
-          </p>
-          <p>
-            At Vriksha.ai, we've built a gamification layer that plugs into any
-            digital experience — transforming ordinary interactions into
-            self-reinforcing <span className="text-secondary font-semibold">growth loops</span>.
-          </p>
-          <p>
-            We believe the next era of growth won't come from ads or incentives
-            — it will come from{" "}
-            <span className="text-primary font-bold">motivation architecture</span>.
-          </p>
-        </div>
-
-        {/* Core Principles Grid */}
-        <div>
-          <h3 className="text-2xl sm:text-3xl font-bold text-center mb-6 sm:mb-8">
-            Core Principles of Gamification
-            <span className="block text-base sm:text-lg text-muted-foreground mt-2 font-normal">
-              The Vriksha.ai Framework
-            </span>
-          </h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 md:gap-8">
-            {principles.map((principle, index) => {
-              const Icon = principle.icon;
-              return (
-                <div
-                  key={index}
-                  className={`p-6 md:p-8 rounded-lg bg-card border-2 border-${principle.color}/40 hover:border-${principle.color} transition-all duration-300 hover:scale-105 active:scale-95 hover:shadow-xl ${
-                    isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
-                  }`}
-                  style={{
-                    transitionDelay: `${300 + index * 100}ms`,
-                  }}
-                >
-                  <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4">
-                    <div className={`p-2 sm:p-3 rounded-full bg-${principle.color}/20`}>
-                      <Icon className={`w-6 h-6 sm:w-8 sm:h-8 text-${principle.color}`} />
-                    </div>
-                    <span className="text-2xl sm:text-3xl">{principle.emoji}</span>
-                  </div>
-                  <h4 className="text-lg sm:text-xl font-bold mb-2">{principle.title}</h4>
-                  <p className="text-xs sm:text-sm text-muted-foreground font-medium mb-2 sm:mb-3">
-                    {principle.subtitle}
-                  </p>
-                  <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
-                    {principle.description}
-                  </p>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* Visual Data-Tree Animation */}
-        <div className="relative w-full max-w-3xl mx-auto h-[300px] sm:h-[400px] md:h-[500px]">
-          <svg viewBox="0 0 600 600" className="w-full h-full">
-            {/* Central core with intense glow */}
-            <defs>
-              <radialGradient id="coreGlow">
-                <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity="1" />
-                <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity="0" />
-              </radialGradient>
-            </defs>
-            
-            <circle
-              cx="300"
-              cy="300"
-              r="40"
-              fill="url(#coreGlow)"
-              className={isMobile ? "" : "animate-glow-intense"}
-            />
-
-            {/* Concentric rings - 3 on mobile, 5 on desktop */}
-            {(isMobile ? [100, 180, 260] : [80, 140, 200, 260, 320]).map((radius, i) => {
-              const labels = isMobile 
-                ? ["Motivation", "Mastery", "Rewards"]
-                : ["Motivation", "Progress", "Mastery", "Connection", "Rewards"];
-              return (
-                <g key={i}>
-                  <circle
-                    cx="300"
-                    cy="300"
-                    r={radius}
-                    className={`fill-none stroke-primary/30 ${isMobile ? "" : "animate-glow-pulse"}`}
-                    strokeWidth="3"
-                    style={{ animationDelay: `${i * 0.2}s` }}
-                  />
-                  <text
-                    x="300"
-                    y={300 - radius - 15}
-                    className="text-xs fill-primary font-medium"
-                    textAnchor="middle"
-                  >
-                    {labels[i]}
-                  </text>
-                  <circle
-                    cx={300 + radius * Math.cos((i * 72 * Math.PI) / 180)}
-                    cy={300 + radius * Math.sin((i * 72 * Math.PI) / 180)}
-                    r="6"
-                    className={`fill-secondary ${isMobile ? "" : "animate-electric-pulse"}`}
-                    style={{ animationDelay: `${i * 0.3}s` }}
-                  />
-                </g>
-              );
-            })}
-          </svg>
-
-          {/* Floating metric badges - hidden on mobile */}
-          <div className="hidden sm:block absolute top-10 right-10 bg-card/90 backdrop-blur p-3 rounded-lg border border-primary/30 animate-fade-in">
-            <div className="text-2xl font-bold text-primary">+60%</div>
-            <div className="text-xs text-muted-foreground">Engagement</div>
-          </div>
-          <div className="hidden sm:block absolute bottom-20 left-10 bg-card/90 backdrop-blur p-3 rounded-lg border border-secondary/30 animate-fade-in delay-200">
-            <div className="text-2xl font-bold text-secondary">+80%</div>
-            <div className="text-xs text-muted-foreground">Retention</div>
-          </div>
-        </div>
-
-        {/* Mobile metric badges - inline */}
-        <div className="sm:hidden flex gap-4 justify-center">
-          <div className="bg-card/90 backdrop-blur p-3 rounded-lg border border-primary/30">
-            <div className="text-xl font-bold text-primary">+60%</div>
-            <div className="text-xs text-muted-foreground">Engagement</div>
-          </div>
-          <div className="bg-card/90 backdrop-blur p-3 rounded-lg border border-secondary/30">
-            <div className="text-xl font-bold text-secondary">+80%</div>
-            <div className="text-xs text-muted-foreground">Retention</div>
-          </div>
-        </div>
-
-        {/* Technology & APIs Section */}
-        <div className="space-y-6 sm:space-y-8">
-          <div className="text-center space-y-3 sm:space-y-4">
-            <h3 className="text-2xl sm:text-3xl font-bold">
-              Seamless Integration. Infinite Engagement.
-            </h3>
-            <p className="text-sm sm:text-base md:text-lg text-muted-foreground max-w-3xl mx-auto">
-              The <span className="text-primary font-semibold">Vriksha Gamification API</span> is
-              built to integrate with your existing website or app — in minutes.
-              It turns every customer journey into a live growth experience.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
-            {capabilities.map((capability, index) => {
-              const Icon = capability.icon;
-              return (
-                <div
-                  key={index}
-                  className="p-4 sm:p-6 rounded-lg bg-card/50 backdrop-blur-sm border border-primary/20 hover:border-primary/40 active:border-primary/60 transition-all duration-300"
-                >
-                  <div className="flex items-start gap-3 sm:gap-4">
-                    <div className="p-2 rounded-lg bg-primary/10">
-                      <Icon className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
-                    </div>
-                    <div className="flex-1">
-                      <h4 className="text-sm sm:text-base font-bold mb-1 flex items-center gap-2">
-                        <span>{capability.emoji}</span>
-                        {capability.title}
-                      </h4>
-                      <p className="text-xs sm:text-sm text-muted-foreground">
-                        {capability.description}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* Business Outcomes Section */}
-        <div className="space-y-6 sm:space-y-8">
-          <div className="text-center space-y-3 sm:space-y-4">
-            <h3 className="text-2xl sm:text-3xl font-bold">Measured Growth. Real ROI.</h3>
-            <p className="text-sm sm:text-base md:text-lg text-muted-foreground max-w-3xl mx-auto">
-              Gamification is not decoration — it's a{" "}
-              <span className="text-primary font-semibold">performance engine</span>. Our clients see{" "}
-              <span className="text-secondary font-semibold">measurable improvement</span> across all
-              key growth metrics.
-            </p>
-          </div>
-
-          {/* Metrics Table - Desktop */}
-          <div className="hidden md:block overflow-hidden rounded-lg border border-primary/20">
-            <table className="w-full">
-              <thead>
-                <tr className="bg-primary/10 border-b border-primary/20">
-                  <th className="text-left p-4 font-bold text-base sm:text-lg">Metric</th>
-                  <th className="text-left p-4 font-bold text-base sm:text-lg">Impact</th>
-                </tr>
-              </thead>
-              <tbody>
-                {metrics.map((row, index) => (
-                  <tr
-                    key={index}
-                    className="border-b border-primary/10 hover:bg-card/50 transition-colors"
-                  >
-                    <td className="p-3 sm:p-4 text-primary font-bold text-sm sm:text-base">{row.metric}</td>
-                    <td className="p-3 sm:p-4 text-foreground text-sm sm:text-base">{row.impact}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-
-          {/* Metrics Cards - Mobile */}
-          <div className="md:hidden space-y-3 sm:space-y-4">
-            {metrics.map((row, index) => (
+        {/* Mini Highlights */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {[
+            { icon: Brain, title: "AI-driven motivation mapping" },
+            { icon: TrendingUp, title: "Progress visibility and habit loops" },
+            { icon: BarChart3, title: "Real-time performance analytics" },
+            { icon: Award, title: "Reward & recognition systems" }
+          ].map((item, index) => {
+            const Icon = item.icon;
+            return (
               <div
                 key={index}
-                className="p-4 sm:p-6 rounded-lg bg-card border border-primary/20"
+                className={`p-6 rounded-lg bg-card border-2 border-primary/20 hover:border-primary transition-all duration-300 hover:scale-105 ${
+                  isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
+                }`}
+                style={{ transitionDelay: `${300 + index * 100}ms` }}
               >
-                <div className="inline-block px-3 py-1 rounded-full bg-primary/20 text-primary font-bold text-xs sm:text-sm mb-2 sm:mb-3">
-                  {row.metric}
-                </div>
-                <p className="text-foreground text-sm sm:text-base">{row.impact}</p>
+                <Icon className="w-8 h-8 text-primary mb-3" />
+                <p className="text-sm font-medium text-foreground">{item.title}</p>
               </div>
-            ))}
-          </div>
-
-          <p className="text-center text-muted-foreground italic text-xs sm:text-sm md:text-base">
-            These outcomes aren't hypothetical — they're coded into our{" "}
-            <span className="text-primary font-semibold">growth architecture</span>.
-          </p>
+            );
+          })}
         </div>
 
-        {/* Interactive Widget */}
-        <div className="text-center space-y-6 sm:space-y-8">
+        {/* Animated Stats */}
+        <div className="flex flex-col sm:flex-row gap-8 justify-center items-center py-8">
+          <div className="text-center">
+            <div className="text-5xl font-bold text-primary mb-2">+60%</div>
+            <div className="text-lg text-muted-foreground">Engagement</div>
+          </div>
+          <div className="text-center">
+            <div className="text-5xl font-bold text-secondary mb-2">+80%</div>
+            <div className="text-lg text-muted-foreground">Retention</div>
+          </div>
+          <div className="text-center">
+            <div className="text-5xl font-bold text-accent mb-2">×2</div>
+            <div className="text-lg text-muted-foreground">LTC</div>
+          </div>
+        </div>
+
+
+        {/* Call to Action */}
+        <div className="text-center space-y-6 pt-8 border-t-2 border-primary/20">
           <Button
             size="lg"
-            onClick={handleExperienceGrowth}
-            className="min-h-[44px] bg-gradient-to-r from-primary to-secondary hover:scale-110 active:scale-95 transition-transform text-base sm:text-lg px-6 sm:px-8 py-3 sm:py-6"
+            className="min-h-[44px] bg-gradient-to-r from-primary to-secondary hover:scale-110 active:scale-95 transition-transform text-base sm:text-lg px-8 py-6"
           >
-            <Sparkles className="mr-2 w-4 h-4 sm:w-5 sm:h-5" />
-            Experience Growth
+            <PlayCircle className="mr-2 w-5 h-5" />
+            See Gamification Demo ▶
           </Button>
-
-          {showReward && (
-            <div className="p-6 sm:p-8 bg-card border-2 border-primary rounded-lg animate-scale-in relative overflow-hidden">
-              <Award className="w-12 h-12 sm:w-16 sm:h-16 text-primary mx-auto animate-bounce" />
-              <h3 className="text-xl sm:text-2xl font-bold mt-3 sm:mt-4">Achievement Unlocked!</h3>
-              <p className="text-muted-foreground text-sm sm:text-base">+100 XP • Growth Badge Earned</p>
-              
-              {/* Confetti particles - 10 on mobile, 20 on desktop */}
-              {[...Array(isMobile ? 10 : 20)].map((_, i) => (
-                <div
-                  key={i}
-                  className="absolute w-2 h-2 rounded-full animate-[confetti_1s_ease-out_forwards]"
-                  style={{
-                    left: "50%",
-                    top: "50%",
-                    backgroundColor: i % 3 === 0 ? "hsl(var(--primary))" : i % 3 === 1 ? "hsl(var(--secondary))" : "hsl(var(--accent))",
-                    animationDelay: `${i * 0.05}s`,
-                    transform: `rotate(${i * 18}deg) translateY(-${50 + i * 10}px)`,
-                    opacity: 0,
-                  }}
-                />
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* CTA Section */}
-        <div className="text-center space-y-6 sm:space-y-8 pt-6 sm:pt-8 border-t-2 border-primary/20">
-          <blockquote className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-medium italic border-l-4 border-primary pl-4 sm:pl-6 py-2 inline-block">
-            "Gamification is not a layer on top of growth — it{" "}
-            <span className="text-primary font-bold">is</span> growth."
-          </blockquote>
-
-          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
-            <Button
-              size="lg"
-              className="min-h-[44px] bg-gradient-to-r from-primary to-primary/80 hover:shadow-2xl active:scale-95 transition-all text-base sm:text-lg px-6 sm:px-8"
-            >
-              <Code2 className="mr-2 w-4 h-4 sm:w-5 sm:h-5" />
-              Explore Vriksha APIs
-            </Button>
-            <Button
-              size="lg"
-              variant="outline"
-              className="min-h-[44px] border-2 border-secondary text-secondary hover:bg-secondary hover:text-background active:bg-secondary/80 transition-all text-base sm:text-lg px-6 sm:px-8"
-            >
-              <PlayCircle className="mr-2 w-4 h-4 sm:w-5 sm:h-5" />
-              Request a Demo
-            </Button>
-          </div>
         </div>
       </div>
     </section>
