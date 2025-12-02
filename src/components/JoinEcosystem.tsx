@@ -40,7 +40,10 @@ const JoinEcosystem = () => {
             <Button 
               size="lg" 
               variant="outline"
-              onClick={() => (window as any)._moduleAC?.openChat?.()}
+              onClick={() => {
+                const trigger = document.querySelector('[data-dv-agent-trigger]') as HTMLElement;
+                if (trigger) trigger.click();
+              }}
               className="group border-2 border-secondary/30 hover:border-secondary hover:bg-secondary/10 font-semibold px-8 py-6 text-lg rounded-xl backdrop-blur-sm transition-all hover:scale-105"
             >
               Talk to Us

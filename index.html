@@ -21,36 +21,58 @@
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
+    <!-- Ringg AI Web Call Assistant -->
     <script>
-      // Define config FIRST before loading widget
-      window.__C_CHAT_CONFIG = {
-        appInfo: {
-          appId: '93447910-c618-4638-8b35-5449adc4b189',
-          appKey: '8bcbfe8058550ed62f3cda3e81c044520f72273cf083ba177d553c075fd8fa76',
-          region: 'ap-south-1',
-          device: 'web'
-        },
+      function loadAgentsCdn(e,t){
+        let n=document.createElement("link");
+        n.rel="stylesheet",n.type="text/css",n.href=`https://cdn.jsdelivr.net/npm/@desivocal/agents-cdn@${e}/dist/style.css`;
+        var a=document.createElement("script");
+        a.type="text/javascript",a.readyState?a.onreadystatechange=function(){
+          "loaded"!==a.readyState&&"complete"!==a.readyState||(a.onreadystatechange=null,t())
+        }:a.onload=function(){t()},
+        a.src=`https://cdn.jsdelivr.net/npm/@desivocal/agents-cdn@${e}/dist/dv-agent.es.js`,
+        document.getElementsByTagName("head")[0].appendChild(n),
+        document.getElementsByTagName("head")[0].appendChild(a)
       }
-      
-      // THEN load the widget script
-      ;(function(d, s, o, f, js, fjs) {
-        const origin = 'https://agent-chat.plivo.com'
-        js = d.createElement(s)
-        fjs = d.getElementsByTagName(s)[0]
-        js.id = o
-        js.src = origin + f
-        js.async = 1
-        if (fjs && fjs.parentNode) {
-          fjs.parentNode.insertBefore(js, fjs)
-        } else {
-          d.head.appendChild(js)
-        }
-        js.onload = function() {
-          if (typeof _moduleAC !== 'undefined') {
-            _moduleAC.init(origin)
+    </script>
+    <script>
+      loadAgentsCdn("latest", function () {
+        loadAgent({
+          agentId: "1b0faabe-2256-47d3-9321-ab113091dc5d",
+          xApiKey: "5c67d04f-3302-4d21-9fcd-8ca6eeb030f5",
+          variables: {},
+          
+          // Custom Branding
+          title: "Talk to Vriksha",
+          description: "Ask me anything about our AI ventures and accelerator",
+          logoUrl: "/images/vriksha-logo.png",
+          logoStyles: {
+            width: "60px",
+            height: "60px",
+            borderRadius: "50%"
+          },
+          
+          // Button Styling (matching site theme)
+          buttons: {
+            modalTrigger: {
+              styles: {
+                backgroundColor: "#00FF00",
+                color: "#000000",
+                borderRadius: "50%",
+              }
+            },
+            call: {
+              textBeforeCall: "Start Call",
+              textDuringCall: "End Call",
+              styles: {
+                backgroundColor: "#00FF00",
+                color: "#000000",
+                borderRadius: "8px"
+              }
+            }
           }
-        }
-      }(document, 'script', '_ac', '/assets/js/widget.js'))
+        });
+      });
     </script>
   </body>
 </html>
