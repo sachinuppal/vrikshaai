@@ -22,15 +22,7 @@
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
     <script>
-      (function(d, s, o, f, js, fjs) {
-        const origin = 'https://agent-chat.plivo.com'
-        js = d.createElement(s), fjs = d.getElementsByTagName(s)[0]
-        js.id = o
-        js.src = origin + f
-        js.async = 1
-        fjs.parentNode.insertBefore(js, fjs)
-        js.onload = (e) => (_moduleAC.init(origin))
-      }(document, 'script', '_ac', '/assets/js/widget.js'))
+      // Define config FIRST before loading widget
       window.__C_CHAT_CONFIG = {
         appInfo: {
           appId: '93447910-c618-4638-8b35-5449adc4b189',
@@ -39,6 +31,26 @@
           device: 'web'
         },
       }
+      
+      // THEN load the widget script
+      ;(function(d, s, o, f, js, fjs) {
+        const origin = 'https://agent-chat.plivo.com'
+        js = d.createElement(s)
+        fjs = d.getElementsByTagName(s)[0]
+        js.id = o
+        js.src = origin + f
+        js.async = 1
+        if (fjs && fjs.parentNode) {
+          fjs.parentNode.insertBefore(js, fjs)
+        } else {
+          d.head.appendChild(js)
+        }
+        js.onload = function() {
+          if (typeof _moduleAC !== 'undefined') {
+            _moduleAC.init(origin)
+          }
+        }
+      }(document, 'script', '_ac', '/assets/js/widget.js'))
     </script>
   </body>
 </html>

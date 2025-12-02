@@ -177,4 +177,22 @@ All colors MUST be HSL.
       padding-bottom: env(safe-area-inset-bottom);
     }
   }
+
+  /* HubSpot Form Styling Overrides */
+  .hs-form-frame label {
+    color: #1a1a1a !important;
+  }
+
+  .hs-form-frame input,
+  .hs-form-frame textarea,
+  .hs-form-frame select {
+    background-color: #f5f5f5 !important;
+    border: 1px solid #d1d5db !important;
+    color: #1a1a1a !important;
+  }
+
+  .hs-form-frame button[type="submit"] {
+    background-color: hsl(123 100% 50%) !important;
+    color: #000 !important;
+  }
 }
