@@ -304,8 +304,8 @@ const TermsOfUse = () => {
                 If you have questions about these Terms or the Services, contact us at:
               </p>
               <div className="space-y-2 text-foreground">
-                <p><strong>Email:</strong> [insert contact email]</p>
-                <p><strong>Address:</strong> [insert registered address of VRIKSHA.ai]</p>
+                <p><strong>Email:</strong> support@vriksha.ai</p>
+                <p><strong>Address:</strong> FLAT C1-123, Gottigere Main Road, CHIKKA KAMMANAHALLI, Bannerghatta, Bangalore South, Karnataka, PIN Code: 560083</p>
               </div>
             </div>
           </section>
