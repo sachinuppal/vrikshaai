@@ -1,4 +1,3 @@
-import { TreeDeciduous } from "lucide-react";
 import { Link } from "react-router-dom";
 
 const Footer = () => {
@@ -10,9 +9,7 @@ const Footer = () => {
           <div className="flex flex-col items-center text-center space-y-8">
             {/* Logo & Brand */}
             <div className="flex items-center gap-3">
-              <div className="p-3 rounded-xl bg-primary/10 border border-primary/20">
-                <TreeDeciduous className="w-8 h-8 text-primary" />
-              </div>
+              <img src="/images/vriksha-logo.png" alt="Vriksha.ai Logo" className="w-14 h-14 rounded-xl" />
               <span className="text-2xl font-bold text-foreground">Vriksha.ai</span>
             </div>
 
