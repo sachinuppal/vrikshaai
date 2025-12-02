@@ -9,7 +9,7 @@ const Footer = () => {
           <div className="flex flex-col items-center text-center space-y-8">
             {/* Logo & Brand */}
             <div className="flex items-center gap-3">
-              <img src="/images/vriksha-logo.png" alt="Vriksha.ai Logo" className="w-14 h-14 rounded-xl" />
+              <img src="/images/vriksha-logo.png" alt="Vriksha.ai Logo" className="w-16 h-16 rounded-xl" />
               <span className="text-2xl font-bold text-foreground">Vriksha.ai</span>
             </div>
 
