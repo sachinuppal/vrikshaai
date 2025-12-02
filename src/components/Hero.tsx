@@ -113,8 +113,24 @@ const Hero = () => {
               size="lg" 
               variant="outline"
               onClick={() => {
-                const trigger = document.querySelector('[data-dv-agent-trigger]') as HTMLElement;
-                if (trigger) trigger.click();
+                // Try multiple selectors for the Ringg widget
+                const selectors = [
+                  '[data-dv-agent-trigger]',
+                  '.dv-agent-button',
+                  '.ringg-widget-button',
+                  'button[class*="dv-"]',
+                  'button[class*="ringg"]'
+                ];
+                
+                for (const selector of selectors) {
+                  const trigger = document.querySelector(selector) as HTMLElement;
+                  if (trigger) {
+                    trigger.click();
+                    return;
+                  }
+                }
+                
+                console.warn('Ringg widget button not found');
               }}
               className="min-h-[44px] border-2 border-primary text-primary hover:bg-primary hover:text-primary-foreground font-semibold px-6 sm:px-8 py-3 sm:py-6 text-base sm:text-lg rounded-lg transition-all hover:scale-105 active:scale-95"
             >
