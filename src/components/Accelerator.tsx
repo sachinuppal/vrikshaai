@@ -35,7 +35,7 @@ const Accelerator = () => {
   const [showContactModal, setShowContactModal] = useState(false);
 
   return (
-    <section className="py-20 px-6 bg-background border-t-2 border-primary/20">
+    <section className="py-20 px-6 bg-muted/30">
       <div className="container mx-auto max-w-6xl">
         {/* Header */}
         <div className="text-center mb-16 space-y-6 animate-fade-up">
@@ -51,27 +51,20 @@ const Accelerator = () => {
         </div>
 
         {/* Features Grid */}
-        <div className="grid md:grid-cols-2 gap-8 mb-12">
+        <div className="grid md:grid-cols-2 gap-6 mb-12">
           {features.map((feature, index) => {
             const Icon = feature.icon;
-            const colorClass = feature.color === "primary" ? "border-primary/40 hover:border-primary" : feature.color === "secondary" ? "border-secondary/40 hover:border-secondary" : "border-accent/40 hover:border-accent";
-            const iconBg = feature.color === "primary" ? "bg-primary/20" : feature.color === "secondary" ? "bg-secondary/20" : "bg-accent/20";
+            const iconBg = feature.color === "primary" ? "bg-primary/10" : feature.color === "secondary" ? "bg-secondary/10" : "bg-accent/10";
             const iconColor = feature.color === "primary" ? "text-primary" : feature.color === "secondary" ? "text-secondary" : "text-accent";
-            const shadowColor = feature.color === "primary" ? "0 0 30px hsl(var(--primary) / 0.4)" : feature.color === "secondary" ? "0 0 30px hsl(var(--secondary) / 0.4)" : "0 0 30px hsl(var(--accent) / 0.4)";
             
             return (
               <Card
                 key={index}
-                className={`group relative p-8 bg-card border-2 ${colorClass} transition-all hover:scale-105 animate-fade-in`}
+                className="group relative p-8 bg-card border border-border shadow-card hover:shadow-hover transition-all duration-300 hover:-translate-y-1 animate-fade-in"
                 style={{ animationDelay: `${index * 0.1}s` }}
               >
-                <div 
-                  className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" 
-                  style={{ boxShadow: shadowColor }}
-                />
-                
                 <div className="relative space-y-4">
-                  <div className={`w-14 h-14 rounded-lg ${iconBg} flex items-center justify-center group-hover:animate-glow-intense`}>
+                  <div className={`w-14 h-14 rounded-xl ${iconBg} flex items-center justify-center group-hover:scale-110 transition-transform`}>
                     <Icon className={`w-7 h-7 ${iconColor}`} />
                   </div>
 
@@ -84,7 +77,7 @@ const Accelerator = () => {
                     </p>
                   </div>
 
-                  <div className={`h-0.5 w-0 group-hover:w-full transition-all duration-500 ${iconColor === "text-primary" ? "bg-primary" : iconColor === "text-secondary" ? "bg-secondary" : "bg-accent"}`} />
+                  <div className={`h-1 w-0 group-hover:w-full transition-all duration-500 rounded-full ${iconColor === "text-primary" ? "bg-primary" : iconColor === "text-secondary" ? "bg-secondary" : "bg-accent"}`} />
                 </div>
               </Card>
             );
@@ -96,8 +89,7 @@ const Accelerator = () => {
           <Button 
             size="lg"
             onClick={() => setShowContactModal(true)}
-            className="bg-primary hover:bg-primary-glow text-primary-foreground font-semibold px-8 py-6 text-lg rounded-lg transition-all hover:scale-105"
-            style={{ boxShadow: "var(--shadow-glow)" }}
+            className="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold px-10 py-6 text-lg rounded-xl transition-all hover:scale-105 hover:shadow-hover"
           >
             Contact Us
           </Button>

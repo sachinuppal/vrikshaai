@@ -84,62 +84,17 @@ export default {
           "0%": { opacity: "0", transform: "scale(0.95)" },
           "100%": { opacity: "1", transform: "scale(1)" },
         },
-        "glow-pulse": {
-          "0%, 100%": { opacity: "0.5", transform: "scale(1)" },
-          "50%": { opacity: "1", transform: "scale(1.05)" },
+        "slide-up": {
+          "0%": { opacity: "0", transform: "translateY(10px)" },
+          "100%": { opacity: "1", transform: "translateY(0)" },
         },
-        "glow-intense": {
-          "0%, 100%": { 
-            filter: "drop-shadow(0 0 20px hsl(var(--primary) / 0.6))",
-          },
-          "50%": { 
-            filter: "drop-shadow(0 0 40px hsl(var(--primary) / 1))",
-          },
+        "bounce-subtle": {
+          "0%, 100%": { transform: "translateY(0)" },
+          "50%": { transform: "translateY(-5px)" },
         },
-        "electric-pulse": {
-          "0%": { 
-            opacity: "1",
-            transform: "translateX(0) scale(1)",
-          },
-          "100%": { 
-            opacity: "0",
-            transform: "translateX(100%) scale(0.5)",
-          },
-        },
-        "neural-flow": {
-          "0%": { 
-            backgroundPosition: "0% 50%",
-          },
-          "50%": { 
-            backgroundPosition: "100% 50%",
-          },
-          "100%": { 
-            backgroundPosition: "0% 50%",
-          },
-        },
-        "spark": {
-          "0%, 100%": { opacity: "0", transform: "scale(0)" },
-          "50%": { opacity: "1", transform: "scale(1)" },
-        },
-        "tree-grow": {
-          "0%": { 
-            strokeDashoffset: "1000",
-            opacity: "0",
-          },
-          "100%": { 
-            strokeDashoffset: "0",
-            opacity: "1",
-          },
-        },
-        "confetti": {
-          "0%": {
-            transform: "translateY(0) rotate(0deg)",
-            opacity: "1",
-          },
-          "100%": {
-            transform: "translateY(-200px) rotate(360deg)",
-            opacity: "0",
-          },
+        "pulse-soft": {
+          "0%, 100%": { opacity: "1" },
+          "50%": { opacity: "0.8" },
         },
       },
       animation: {
@@ -148,20 +103,16 @@ export default {
         "fade-in": "fade-in 0.6s ease-out",
         "fade-up": "fade-up 0.8s ease-out",
         "scale-in": "scale-in 0.5s ease-out",
-        "glow-pulse": "glow-pulse 3s ease-in-out infinite",
-        "glow-intense": "glow-intense 2s ease-in-out infinite",
-        "electric-pulse": "electric-pulse 2s linear infinite",
-        "neural-flow": "neural-flow 4s ease-in-out infinite",
-        "spark": "spark 1.5s ease-in-out infinite",
-        "tree-grow": "tree-grow 3s ease-out forwards",
-        "confetti": "confetti 1s ease-out forwards",
+        "slide-up": "slide-up 0.4s ease-out",
+        "bounce-subtle": "bounce-subtle 2s ease-in-out infinite",
+        "pulse-soft": "pulse-soft 2s ease-in-out infinite",
       },
       backgroundImage: {
         "gradient-primary": "var(--gradient-primary)",
         "gradient-neural": "var(--gradient-neural)",
         "gradient-hero": "var(--gradient-hero)",
         "gradient-accent": "var(--gradient-accent)",
-        "gradient-electric": "var(--gradient-electric)",
+        "gradient-warm": "var(--gradient-warm)",
       },
     },
   },
