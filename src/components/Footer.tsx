@@ -22,28 +22,6 @@ const Footer = () => {
               </p>
             </div>
 
-            {/* Divider */}
-            <div className="w-full max-w-md h-px bg-gradient-to-r from-transparent via-border to-transparent" />
-
-            {/* Links */}
-            <div className="flex flex-wrap justify-center gap-6 text-sm">
-              <span className="text-muted-foreground">
-                Ventures
-              </span>
-              <span className="text-muted-foreground">
-                Accelerator
-              </span>
-              <span className="text-muted-foreground">
-                Gamification
-              </span>
-              <span className="text-muted-foreground">
-                Docs
-              </span>
-              <span className="text-muted-foreground">
-                Contact
-              </span>
-            </div>
-
             {/* Copyright */}
             <div className="text-sm text-muted-foreground pt-4">
               © 2025 Vriksha.ai | Made in India for the world.
