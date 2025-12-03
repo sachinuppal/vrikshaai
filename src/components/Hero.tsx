@@ -3,6 +3,9 @@ import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import HubSpotFormModal from "@/components/HubSpotFormModal";
 
+const DESKTOP_VIDEO_URL = "https://vqglejkydwtopmllymuf.supabase.co/storage/v1/object/public/assets/vrikshaai.mp4";
+const MOBILE_VIDEO_URL = "https://zvkjvsrshjunxrojwpuh.supabase.co/storage/v1/object/public/common/VrikshaAIMobile.mp4";
+
 const Hero = () => {
   const [showContent, setShowContent] = useState(false);
   const [videoDuration, setVideoDuration] = useState(0);
@@ -10,6 +13,8 @@ const Hero = () => {
   const [useStaticBg, setUseStaticBg] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [showContactModal, setShowContactModal] = useState(false);
+
+  const videoSource = isMobile ? MOBILE_VIDEO_URL : DESKTOP_VIDEO_URL;
 
   useEffect(() => {
     const checkMobile = () => window.innerWidth < 768;
@@ -61,14 +66,15 @@ const Hero = () => {
       ) : (
         <div className={`absolute inset-0 transition-opacity duration-1000 ${showContent ? 'opacity-30' : 'opacity-60'}`}>
           <video
+            key={isMobile ? 'mobile' : 'desktop'}
             autoPlay
             loop
             muted
             playsInline
             preload={isMobile ? "metadata" : "auto"}
-            poster="https://vqglejkydwtopmllymuf.supabase.co/storage/v1/object/public/assets/vrikshaai.mp4"
-            className="w-full h-full object-contain sm:object-cover object-center"
-            src="https://vqglejkydwtopmllymuf.supabase.co/storage/v1/object/public/assets/vrikshaai.mp4"
+            poster={videoSource}
+            className="w-full h-full object-cover object-center"
+            src={videoSource}
             onLoadedMetadata={handleLoadedMetadata}
             onLoadedData={() => setIsVideoLoaded(true)}
             onTimeUpdate={handleTimeUpdate}
