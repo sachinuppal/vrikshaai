@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
@@ -9,11 +9,12 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { 
   Users, Building2, TrendingUp, Lightbulb, DollarSign, Calendar,
   Save, Send, Loader2, CheckCircle, Circle, Menu, X, Plus, Mail,
-  ChevronLeft, ChevronRight, Check
+  ChevronLeft, ChevronRight, Check, ArrowLeft
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { CofounderCard } from '@/components/application/CofounderCard';
@@ -22,10 +23,18 @@ import { InviteCofounderModal } from '@/components/application/InviteCofounderMo
 import { PendingInvites } from '@/components/application/PendingInvites';
 import { type Cofounder } from '@/lib/validations/applicationSchema';
 
+interface Cohort {
+  id: string;
+  name: string;
+  code: string;
+  deadline: string | null;
+}
+
 interface ApplicationData {
   id?: string;
   status: string;
-  batch: string;
+  cohort_id?: string;
+  cohort?: Cohort;
   cofounder_details: Cofounder[];
   company_name: string;
   company_description: string;
@@ -49,7 +58,6 @@ interface ApplicationData {
 
 const defaultApplication: ApplicationData = {
   status: 'draft',
-  batch: 'Winter 2026',
   cofounder_details: [],
   company_name: '',
   company_description: '',
@@ -77,7 +85,6 @@ const sections = [
   { id: 'progress', label: 'Progress', icon: TrendingUp },
   { id: 'idea', label: 'Idea', icon: Lightbulb },
   { id: 'equity', label: 'Equity', icon: DollarSign },
-  { id: 'batch', label: 'Batch', icon: Calendar },
 ];
 
 // Field validation rules
@@ -91,6 +98,8 @@ const fieldValidations: Record<string, { min?: number; required?: boolean; label
 export default function Apply() {
   const { user, signOut } = useAuth();
   const { toast } = useToast();
+  const { applicationId } = useParams<{ applicationId: string }>();
+  const navigate = useNavigate();
   const [application, setApplication] = useState<ApplicationData>(defaultApplication);
   const [activeSection, setActiveSection] = useState('founders');
   const [isLoading, setIsLoading] = useState(true);
@@ -110,56 +119,75 @@ export default function Apply() {
   // Debounce timer
   const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Load existing application
+  // Load application by ID
   useEffect(() => {
     const loadApplication = async () => {
-      if (!user) return;
+      if (!user || !applicationId) {
+        navigate('/applications');
+        return;
+      }
       
+      // Load application
       const { data, error } = await supabase
         .from('accelerator_applications')
         .select('*')
+        .eq('id', applicationId)
         .eq('user_id', user.id)
         .maybeSingle();
 
-      if (error && error.code !== 'PGRST116') {
+      if (error || !data) {
         toast({
           variant: 'destructive',
           title: 'Error',
-          description: 'Failed to load application',
+          description: 'Application not found',
         });
+        navigate('/applications');
+        return;
       }
 
-      if (data) {
-        setApplication({
-          id: data.id,
-          status: data.status,
-          batch: data.batch || 'Winter 2026',
-          cofounder_details: (data.cofounder_details as Cofounder[]) || [],
-          company_name: data.company_name || '',
-          company_description: data.company_description || '',
-          company_url: data.company_url || '',
-          company_location: data.company_location || '',
-          founding_date: data.founding_date || '',
-          company_registered: data.company_registered ?? true,
-          registration_status: data.registration_status || 'registered',
-          current_progress: data.current_progress || '',
-          tech_stack: data.tech_stack || '',
-          traction_metrics: data.traction_metrics || '',
-          problem_statement: data.problem_statement || '',
-          solution: data.solution || '',
-          competitors: data.competitors || '',
-          differentiation: data.differentiation || '',
-          business_model: data.business_model || '',
-          previous_funding: data.previous_funding || '',
-          equity_raised: data.equity_raised || '',
-          current_valuation: data.current_valuation || '',
-        });
+      // Load cohort data if exists
+      let cohort: Cohort | undefined;
+      if (data.cohort_id) {
+        const { data: cohortData } = await supabase
+          .from('cohorts')
+          .select('*')
+          .eq('id', data.cohort_id)
+          .single();
+        if (cohortData) {
+          cohort = cohortData;
+        }
       }
+
+      setApplication({
+        id: data.id,
+        status: data.status,
+        cohort_id: data.cohort_id || undefined,
+        cohort,
+        cofounder_details: (data.cofounder_details as Cofounder[]) || [],
+        company_name: data.company_name || '',
+        company_description: data.company_description || '',
+        company_url: data.company_url || '',
+        company_location: data.company_location || '',
+        founding_date: data.founding_date || '',
+        company_registered: data.company_registered ?? true,
+        registration_status: data.registration_status || 'registered',
+        current_progress: data.current_progress || '',
+        tech_stack: data.tech_stack || '',
+        traction_metrics: data.traction_metrics || '',
+        problem_statement: data.problem_statement || '',
+        solution: data.solution || '',
+        competitors: data.competitors || '',
+        differentiation: data.differentiation || '',
+        business_model: data.business_model || '',
+        previous_funding: data.previous_funding || '',
+        equity_raised: data.equity_raised || '',
+        current_valuation: data.current_valuation || '',
+      });
       setIsLoading(false);
     };
 
     loadApplication();
-  }, [user, toast]);
+  }, [user, applicationId, toast, navigate]);
 
   // Validate a single field
   const validateField = (field: string, value: string): string | null => {
@@ -207,7 +235,7 @@ export default function Apply() {
       const payload = {
         user_id: user.id,
         status: application.status as any,
-        batch: application.batch,
+        cohort_id: application.cohort_id,
         cofounder_details: application.cofounder_details,
         company_name: application.company_name,
         company_description: application.company_description,
@@ -262,7 +290,7 @@ export default function Apply() {
       const payload = {
         user_id: user.id,
         status: application.status as any,
-        batch: application.batch,
+        cohort_id: application.cohort_id,
         cofounder_details: application.cofounder_details,
         company_name: application.company_name,
         company_description: application.company_description,
@@ -389,8 +417,6 @@ export default function Apply() {
                   application.solution && application.solution.length >= 50);
       case 'equity':
         return !!(application.previous_funding);
-      case 'batch':
-        return !!application.batch;
       default:
         return false;
     }
@@ -451,12 +477,24 @@ export default function Apply() {
       <header className="sticky top-0 z-50 border-b border-border/50 bg-background/95 backdrop-blur-md">
         <div className="container mx-auto px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <Link to="/" className="flex items-center gap-2">
-              <img src="/images/vriksha-logo.png" alt="Vriksha.ai" className="w-10 h-10 rounded-lg" />
-              <span className="text-xl font-bold text-foreground hidden sm:inline">Vriksha.ai</span>
+            <Link 
+              to="/applications" 
+              className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              <span className="hidden sm:inline">Back</span>
             </Link>
             <span className="text-muted-foreground">/</span>
-            <span className="font-medium text-foreground">Application</span>
+            <div className="flex items-center gap-2">
+              {application.cohort && (
+                <Badge variant="outline" className="font-mono">
+                  {application.cohort.code}
+                </Badge>
+              )}
+              <span className="font-medium text-foreground">
+                {application.company_name || 'Application'}
+              </span>
+            </div>
           </div>
           <div className="flex items-center gap-2">
             {/* Save Status Indicator */}
@@ -979,36 +1017,6 @@ export default function Apply() {
               </Card>
             )}
 
-            {activeSection === 'batch' && (
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Calendar className="w-5 h-5 text-primary" />
-                    Batch Preference
-                  </CardTitle>
-                  <CardDescription>Which batch would you like to join?</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="batch">Preferred Batch</Label>
-                    <Select
-                      value={application.batch}
-                      onValueChange={(value) => updateField('batch', value)}
-                      disabled={isSubmitted}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select a batch" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="Winter 2026">Winter 2026</SelectItem>
-                        <SelectItem value="Summer 2026">Summer 2026</SelectItem>
-                        <SelectItem value="Winter 2027">Winter 2027</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
 
             {/* Navigation Buttons */}
             <div className="flex items-center justify-between pt-4">

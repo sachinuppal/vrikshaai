@@ -19,6 +19,7 @@ export type Database = {
           batch: string | null
           business_model: string | null
           cofounder_details: Json | null
+          cohort_id: string | null
           company_description: string | null
           company_location: string | null
           company_name: string | null
@@ -48,6 +49,7 @@ export type Database = {
           batch?: string | null
           business_model?: string | null
           cofounder_details?: Json | null
+          cohort_id?: string | null
           company_description?: string | null
           company_location?: string | null
           company_name?: string | null
@@ -77,6 +79,7 @@ export type Database = {
           batch?: string | null
           business_model?: string | null
           cofounder_details?: Json | null
+          cohort_id?: string | null
           company_description?: string | null
           company_location?: string | null
           company_name?: string | null
@@ -104,9 +107,16 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "accelerator_applications_cohort_id_fkey"
+            columns: ["cohort_id"]
+            isOneToOne: false
+            referencedRelation: "cohorts"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "accelerator_applications_user_id_fkey"
             columns: ["user_id"]
-            isOneToOne: true
+            isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
@@ -207,6 +217,42 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      cohorts: {
+        Row: {
+          code: string
+          created_at: string
+          deadline: string | null
+          description: string | null
+          id: string
+          is_active: boolean
+          late_deadline: string | null
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          deadline?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          late_deadline?: string | null
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          deadline?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          late_deadline?: string | null
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       lead_submissions: {
         Row: {
