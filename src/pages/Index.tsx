@@ -1,6 +1,7 @@
 import Header from "@/components/Header";
 import Hero from "@/components/Hero";
 import Philosophy from "@/components/Philosophy";
+import AIInfrastructure from "@/components/AIInfrastructure";
 import Accelerator from "@/components/Accelerator";
 import Ventures from "@/components/Ventures";
 import Gamification from "@/components/Gamification";
@@ -15,6 +16,7 @@ const Index = () => {
       <Header />
       <Hero />
       <Philosophy />
+      <AIInfrastructure />
       <Accelerator />
       <Ventures />
       <Gamification />
