@@ -1,13 +1,10 @@
-import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Brain, TrendingUp, Award, BarChart3 } from "lucide-react";
 import { motion } from "framer-motion";
-import HubSpotFormModal from "@/components/HubSpotFormModal";
 import { FadeInView, StaggerContainer, StaggerItem, ScaleInView } from "@/components/animations";
+import { openVoiceChat } from "@/lib/voiceChat";
 
 const Gamification = () => {
-  const [showContactModal, setShowContactModal] = useState(false);
-
   const highlights = [
     { icon: Brain, title: "Motivation mapping" },
     { icon: TrendingUp, title: "Progress visibility" },
@@ -69,15 +66,13 @@ const Gamification = () => {
         <FadeInView className="text-center space-y-6 pt-8 border-t border-border" delay={0.3}>
           <Button
             size="lg"
-            onClick={() => setShowContactModal(true)}
+            onClick={openVoiceChat}
             className="min-h-[48px] bg-gradient-to-r from-primary to-secondary hover:opacity-90 text-primary-foreground hover:scale-105 active:scale-95 transition-all text-base sm:text-lg px-10 py-6 rounded-xl shadow-hover"
           >
-            Contact Us
+            Let's Talk
           </Button>
         </FadeInView>
       </div>
-
-      <HubSpotFormModal open={showContactModal} onOpenChange={setShowContactModal} />
     </section>
   );
 };

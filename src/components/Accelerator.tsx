@@ -1,9 +1,8 @@
-import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Rocket, TrendingUp, Megaphone, Code, Cloud, CheckCircle, Star, Sparkles } from "lucide-react";
-import HubSpotFormModal from "@/components/HubSpotFormModal";
 import { FadeInView, SlideInView, StaggerContainer, StaggerItem } from "@/components/animations";
+import { openVoiceChat } from "@/lib/voiceChat";
 
 const phase1Allocations = [
   {
@@ -78,8 +77,6 @@ const differentiators = [
 ];
 
 const Accelerator = () => {
-  const [showContactModal, setShowContactModal] = useState(false);
-
   return (
     <section className="py-20 px-6 bg-muted/30">
       <div className="container mx-auto max-w-6xl">
@@ -232,15 +229,13 @@ const Accelerator = () => {
         <FadeInView className="text-center" delay={0.4}>
           <Button 
             size="lg"
-            onClick={() => setShowContactModal(true)}
+            onClick={openVoiceChat}
             className="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold px-10 py-6 text-lg rounded-xl transition-all hover:scale-105 hover:shadow-hover"
           >
-            Contact Us
+            Let's Talk
           </Button>
         </FadeInView>
       </div>
-
-      <HubSpotFormModal open={showContactModal} onOpenChange={setShowContactModal} />
     </section>
   );
 };

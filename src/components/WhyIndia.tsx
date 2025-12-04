@@ -1,12 +1,9 @@
-import { useState } from "react";
 import { Globe, Users, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import HubSpotFormModal from "@/components/HubSpotFormModal";
 import { FadeInView, ScaleInView } from "@/components/animations";
+import { openVoiceChat } from "@/lib/voiceChat";
 
 const WhyIndia = () => {
-  const [showContactModal, setShowContactModal] = useState(false);
-  
   const stats = [
     {
       icon: Globe,
@@ -85,15 +82,13 @@ const WhyIndia = () => {
           </p>
           <Button 
             size="lg"
-            onClick={() => setShowContactModal(true)}
+            onClick={openVoiceChat}
             className="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold px-10 py-6 text-lg rounded-xl transition-all hover:scale-105 hover:shadow-hover"
           >
-            Contact Us
+            Let's Talk
           </Button>
         </FadeInView>
       </div>
-
-      <HubSpotFormModal open={showContactModal} onOpenChange={setShowContactModal} />
     </section>
   );
 };
