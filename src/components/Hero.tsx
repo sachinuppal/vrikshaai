@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import HubSpotFormModal from "@/components/HubSpotFormModal";
+import { openVoiceChat } from "@/lib/voiceChat";
 
 const DESKTOP_VIDEO_URL = "https://vqglejkydwtopmllymuf.supabase.co/storage/v1/object/public/assets/vrikshaai.mp4";
 const MOBILE_VIDEO_URL = "https://zvkjvsrshjunxrojwpuh.supabase.co/storage/v1/object/public/common/VrikshaAIMobile.mp4";
@@ -12,7 +12,6 @@ const Hero = () => {
   const [isVideoLoaded, setIsVideoLoaded] = useState(false);
   const [useStaticBg, setUseStaticBg] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
-  const [showContactModal, setShowContactModal] = useState(false);
 
   const videoSource = isMobile ? MOBILE_VIDEO_URL : DESKTOP_VIDEO_URL;
 
@@ -140,51 +139,23 @@ const Hero = () => {
             ))}
           </motion.p>
 
-          {/* CTA Buttons */}
+          {/* CTA Button */}
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={showContent ? { opacity: 1, y: 0 } : {}}
             transition={{ duration: 0.6, delay: 1.5 }}
-            className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center pt-4"
+            className="flex justify-center pt-4"
           >
             <Button 
               size="lg"
-              onClick={() => setShowContactModal(true)}
+              onClick={openVoiceChat}
               className="min-h-[48px] bg-primary hover:bg-primary/90 text-primary-foreground font-semibold px-8 sm:px-10 py-4 sm:py-6 text-base sm:text-lg rounded-xl transition-all hover:scale-105 hover:shadow-hover active:scale-95"
             >
-              Contact Us
-            </Button>
-            <Button 
-              size="lg" 
-              variant="outline"
-              onClick={() => {
-                const selectors = [
-                  '[data-dv-agent-trigger]',
-                  '.dv-agent-button',
-                  '.ringg-widget-button',
-                  'button[class*="dv-"]',
-                  'button[class*="ringg"]'
-                ];
-                
-                for (const selector of selectors) {
-                  const trigger = document.querySelector(selector) as HTMLElement;
-                  if (trigger) {
-                    trigger.click();
-                    return;
-                  }
-                }
-                
-                console.warn('Ringg widget button not found');
-              }}
-              className="min-h-[48px] border-2 border-primary/30 text-primary hover:bg-primary hover:text-primary-foreground font-semibold px-8 sm:px-10 py-4 sm:py-6 text-base sm:text-lg rounded-xl transition-all hover:scale-105 active:scale-95"
-            >
-              Talk to Us
+              Let's Talk
             </Button>
           </motion.div>
         </div>
       </div>
-
-      <HubSpotFormModal open={showContactModal} onOpenChange={setShowContactModal} />
     </section>
   );
 };

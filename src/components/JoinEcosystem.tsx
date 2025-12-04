@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import HubSpotFormModal from "@/components/HubSpotFormModal";
 import { Code2, Rocket, Building2, TrendingUp, Check } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { FadeInView } from "@/components/animations";
+import { openVoiceChat } from "@/lib/voiceChat";
 
 const audiences = [
   {
@@ -72,7 +72,6 @@ const audiences = [
 ];
 
 const JoinEcosystem = () => {
-  const [showContactModal, setShowContactModal] = useState(false);
   const [selectedAudience, setSelectedAudience] = useState<string | null>('developers');
 
   const selectedData = audiences.find(a => a.id === selectedAudience);
@@ -103,40 +102,14 @@ const JoinEcosystem = () => {
             </p>
           </FadeInView>
 
-          {/* CTA Buttons */}
-          <FadeInView delay={0.3} className="flex flex-col sm:flex-row gap-4 justify-center pt-8">
+          {/* CTA Button */}
+          <FadeInView delay={0.3} className="pt-8">
             <Button 
               size="lg"
-              onClick={() => setShowContactModal(true)}
+              onClick={openVoiceChat}
               className="group bg-primary hover:bg-primary/90 text-primary-foreground font-semibold px-10 py-6 text-lg rounded-xl shadow-hover transition-all hover:scale-105"
             >
-              Contact Us
-            </Button>
-            <Button 
-              size="lg" 
-              variant="outline"
-              onClick={() => {
-                const selectors = [
-                  '[data-dv-agent-trigger]',
-                  '.dv-agent-button',
-                  '.ringg-widget-button',
-                  'button[class*="dv-"]',
-                  'button[class*="ringg"]'
-                ];
-                
-                for (const selector of selectors) {
-                  const trigger = document.querySelector(selector) as HTMLElement;
-                  if (trigger) {
-                    trigger.click();
-                    return;
-                  }
-                }
-                
-                console.warn('Ringg widget button not found');
-              }}
-              className="group border-2 border-secondary/30 text-secondary hover:border-secondary hover:bg-secondary hover:text-secondary-foreground font-semibold px-10 py-6 text-lg rounded-xl transition-all hover:scale-105"
-            >
-              Talk to Us
+              Let's Talk
             </Button>
           </FadeInView>
 
@@ -223,8 +196,6 @@ const JoinEcosystem = () => {
           </FadeInView>
         </div>
       </div>
-
-      <HubSpotFormModal open={showContactModal} onOpenChange={setShowContactModal} />
     </section>
   );
 };
