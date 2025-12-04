@@ -21,7 +21,14 @@ const Footer = () => {
             </div>
 
             {/* Legal Links */}
-            <div className="flex items-center gap-4 text-sm">
+            <div className="flex items-center gap-4 text-sm flex-wrap justify-center">
+              <Link 
+                to="/contact" 
+                className="text-muted-foreground hover:text-primary transition-colors"
+              >
+                Contact Us
+              </Link>
+              <span className="text-muted-foreground">|</span>
               <Link 
                 to="/terms" 
                 className="text-muted-foreground hover:text-primary transition-colors"
