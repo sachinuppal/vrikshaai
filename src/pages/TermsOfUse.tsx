@@ -37,6 +37,7 @@ const TermsOfUse = () => {
               "Changes to Terms",
               "Use of Services — License & Restrictions",
               "Services That Involve Payment",
+              "AI Calling & Voice Communications",
               "Intellectual Property",
               "Termination & Suspension",
               "Disclaimers & Limitation of Liability",
@@ -147,10 +148,49 @@ const TermsOfUse = () => {
             </div>
           </section>
 
-          {/* Section 6 */}
+          {/* Section 6 - AI Calling */}
           <section id="section-6" className="scroll-mt-8">
             <h2 className="text-2xl font-bold text-foreground mb-4">
-              <span className="text-primary">6.</span> Intellectual Property
+              <span className="text-primary">6.</span> AI Calling & Voice Communications
+            </h2>
+            <div className="bg-card rounded-xl border border-border p-6 shadow-sm space-y-6">
+              <div>
+                <h3 className="text-lg font-semibold text-foreground mb-2">6.1 Consent Acknowledgment</h3>
+                <p className="text-foreground leading-relaxed">
+                  By providing your contact information and consenting to AI calling through our forms, you acknowledge and agree to receive automated voice calls powered by artificial intelligence technology from VRIKSHA.ai. These calls may include service-related communications, follow-ups, demonstrations, and promotional content.
+                </p>
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold text-foreground mb-2">6.2 Nature of AI Communications</h3>
+                <p className="text-foreground leading-relaxed">
+                  You understand that AI-powered calls use synthetic voice technology and automated systems. While we strive for natural conversation experiences, these calls are not conducted by human agents. The AI may process and respond to your verbal inputs during calls.
+                </p>
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold text-foreground mb-2">6.3 Call Recording & Monitoring</h3>
+                <p className="text-foreground leading-relaxed">
+                  AI calls may be recorded, monitored, and analyzed for quality assurance, training purposes, and service improvement. By consenting to AI calls, you agree to such recording and processing of call data.
+                </p>
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold text-foreground mb-2">6.4 Opt-Out Rights</h3>
+                <p className="text-foreground leading-relaxed">
+                  You may withdraw your consent and opt-out of AI calls at any time by contacting us at support@vriksha.ai or by requesting during any AI call. Opt-out requests will be processed within a reasonable timeframe.
+                </p>
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold text-foreground mb-2">6.5 Accuracy & Limitations</h3>
+                <p className="text-foreground leading-relaxed">
+                  While our AI technology is designed to provide accurate and helpful communications, you acknowledge that AI systems may occasionally misinterpret inputs or provide imperfect responses. Critical decisions should not be based solely on AI call interactions without human verification.
+                </p>
+              </div>
+            </div>
+          </section>
+
+          {/* Section 7 */}
+          <section id="section-7" className="scroll-mt-8">
+            <h2 className="text-2xl font-bold text-foreground mb-4">
+              <span className="text-primary">7.</span> Intellectual Property
             </h2>
             <div className="bg-card rounded-xl border border-border p-6 shadow-sm space-y-3">
               <p className="text-foreground leading-relaxed">
@@ -162,10 +202,10 @@ const TermsOfUse = () => {
             </div>
           </section>
 
-          {/* Section 7 */}
-          <section id="section-7" className="scroll-mt-8">
+          {/* Section 8 */}
+          <section id="section-8" className="scroll-mt-8">
             <h2 className="text-2xl font-bold text-foreground mb-4">
-              <span className="text-primary">7.</span> Termination & Suspension
+              <span className="text-primary">8.</span> Termination & Suspension
             </h2>
             <div className="bg-card rounded-xl border border-border p-6 shadow-sm space-y-3">
               <p className="text-foreground leading-relaxed">
@@ -177,26 +217,26 @@ const TermsOfUse = () => {
             </div>
           </section>
 
-          {/* Section 8 */}
-          <section id="section-8" className="scroll-mt-8">
+          {/* Section 9 */}
+          <section id="section-9" className="scroll-mt-8">
             <h2 className="text-2xl font-bold text-foreground mb-4">
-              <span className="text-primary">8.</span> Disclaimers & Limitation of Liability
+              <span className="text-primary">9.</span> Disclaimers & Limitation of Liability
             </h2>
             <div className="bg-card rounded-xl border border-border p-6 shadow-sm space-y-6">
               <div>
-                <h3 className="text-lg font-semibold text-foreground mb-2">8.1 No Warranty</h3>
+                <h3 className="text-lg font-semibold text-foreground mb-2">9.1 No Warranty</h3>
                 <p className="text-foreground leading-relaxed">
                   The Services are provided "as is." We disclaim all warranties — express, implied or statutory, including warranties of fitness for a particular purpose, merchantability, security, or non-infringement.
                 </p>
               </div>
               <div>
-                <h3 className="text-lg font-semibold text-foreground mb-2">8.2 Limitation of Liability</h3>
+                <h3 className="text-lg font-semibold text-foreground mb-2">9.2 Limitation of Liability</h3>
                 <p className="text-foreground leading-relaxed">
                   To the maximum extent permitted by law, VRIKSHA.ai (and its team, affiliates, partners) will not be liable for any indirect, incidental, special, consequential or punitive damages — including lost profits, data loss, downtime, or business interruption — arising from or relating to use of or inability to use Services, even if advised of the possibility of such damages.
                 </p>
               </div>
               <div>
-                <h3 className="text-lg font-semibold text-foreground mb-2">8.3 Cap on Liability</h3>
+                <h3 className="text-lg font-semibold text-foreground mb-2">9.3 Cap on Liability</h3>
                 <p className="text-foreground leading-relaxed">
                   Our total aggregate liability under or in connection with these Terms is limited to the amount you paid us in the preceding 12 months (if any), or INR 1,00,000 (One Lakh INR), whichever is lower.
                 </p>
@@ -204,10 +244,10 @@ const TermsOfUse = () => {
             </div>
           </section>
 
-          {/* Section 9 */}
-          <section id="section-9" className="scroll-mt-8">
+          {/* Section 10 */}
+          <section id="section-10" className="scroll-mt-8">
             <h2 className="text-2xl font-bold text-foreground mb-4">
-              <span className="text-primary">9.</span> Indemnification
+              <span className="text-primary">10.</span> Indemnification
             </h2>
             <div className="bg-card rounded-xl border border-border p-6 shadow-sm">
               <p className="text-foreground leading-relaxed">
@@ -216,10 +256,10 @@ const TermsOfUse = () => {
             </div>
           </section>
 
-          {/* Section 10 */}
-          <section id="section-10" className="scroll-mt-8">
+          {/* Section 11 */}
+          <section id="section-11" className="scroll-mt-8">
             <h2 className="text-2xl font-bold text-foreground mb-4">
-              <span className="text-primary">10.</span> Governing Law & Dispute Resolution
+              <span className="text-primary">11.</span> Governing Law & Dispute Resolution
             </h2>
             <div className="bg-card rounded-xl border border-border p-6 shadow-sm space-y-3">
               <p className="text-foreground leading-relaxed">
@@ -231,10 +271,10 @@ const TermsOfUse = () => {
             </div>
           </section>
 
-          {/* Section 11 */}
-          <section id="section-11" className="scroll-mt-8">
+          {/* Section 12 */}
+          <section id="section-12" className="scroll-mt-8">
             <h2 className="text-2xl font-bold text-foreground mb-4">
-              <span className="text-primary">11.</span> Third-Party Services & Links
+              <span className="text-primary">12.</span> Third-Party Services & Links
             </h2>
             <div className="bg-card rounded-xl border border-border p-6 shadow-sm">
               <p className="text-foreground leading-relaxed">
@@ -243,10 +283,10 @@ const TermsOfUse = () => {
             </div>
           </section>
 
-          {/* Section 12 */}
-          <section id="section-12" className="scroll-mt-8">
+          {/* Section 13 */}
+          <section id="section-13" className="scroll-mt-8">
             <h2 className="text-2xl font-bold text-foreground mb-4">
-              <span className="text-primary">12.</span> Privacy Policy & Data Protection
+              <span className="text-primary">13.</span> Privacy Policy & Data Protection
             </h2>
             <div className="bg-card rounded-xl border border-border p-6 shadow-sm">
               <p className="text-foreground leading-relaxed">
@@ -255,10 +295,10 @@ const TermsOfUse = () => {
             </div>
           </section>
 
-          {/* Section 13 */}
-          <section id="section-13" className="scroll-mt-8">
+          {/* Section 14 */}
+          <section id="section-14" className="scroll-mt-8">
             <h2 className="text-2xl font-bold text-foreground mb-4">
-              <span className="text-primary">13.</span> Export / Compliance / Data Residency
+              <span className="text-primary">14.</span> Export / Compliance / Data Residency
             </h2>
             <div className="bg-card rounded-xl border border-border p-6 shadow-sm space-y-3">
               <p className="text-foreground leading-relaxed">
@@ -270,10 +310,10 @@ const TermsOfUse = () => {
             </div>
           </section>
 
-          {/* Section 14 */}
-          <section id="section-14" className="scroll-mt-8">
+          {/* Section 15 */}
+          <section id="section-15" className="scroll-mt-8">
             <h2 className="text-2xl font-bold text-foreground mb-4">
-              <span className="text-primary">14.</span> Changes to Services & Disclaimers
+              <span className="text-primary">15.</span> Changes to Services & Disclaimers
             </h2>
             <div className="bg-card rounded-xl border border-border p-6 shadow-sm">
               <p className="text-foreground leading-relaxed">
@@ -282,10 +322,10 @@ const TermsOfUse = () => {
             </div>
           </section>
 
-          {/* Section 15 */}
-          <section id="section-15" className="scroll-mt-8">
+          {/* Section 16 */}
+          <section id="section-16" className="scroll-mt-8">
             <h2 className="text-2xl font-bold text-foreground mb-4">
-              <span className="text-primary">15.</span> Severability & Waiver
+              <span className="text-primary">16.</span> Severability & Waiver
             </h2>
             <div className="bg-card rounded-xl border border-border p-6 shadow-sm">
               <p className="text-foreground leading-relaxed">
@@ -294,10 +334,10 @@ const TermsOfUse = () => {
             </div>
           </section>
 
-          {/* Section 16 */}
-          <section id="section-16" className="scroll-mt-8">
+          {/* Section 17 */}
+          <section id="section-17" className="scroll-mt-8">
             <h2 className="text-2xl font-bold text-foreground mb-4">
-              <span className="text-primary">16.</span> Contact Info
+              <span className="text-primary">17.</span> Contact Info
             </h2>
             <div className="bg-card rounded-xl border border-border p-6 shadow-sm">
               <p className="text-foreground leading-relaxed mb-4">
@@ -310,10 +350,10 @@ const TermsOfUse = () => {
             </div>
           </section>
 
-          {/* Section 17 */}
-          <section id="section-17" className="scroll-mt-8">
+          {/* Section 18 */}
+          <section id="section-18" className="scroll-mt-8">
             <h2 className="text-2xl font-bold text-foreground mb-4">
-              <span className="text-primary">17.</span> Entire Agreement
+              <span className="text-primary">18.</span> Entire Agreement
             </h2>
             <div className="bg-card rounded-xl border border-border p-6 shadow-sm">
               <p className="text-foreground leading-relaxed">

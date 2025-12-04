@@ -8,6 +8,7 @@ import NotFound from "./pages/NotFound";
 import TermsOfUse from "./pages/TermsOfUse";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import Contact from "./pages/Contact";
+import AICallingConsentModal from "./components/AICallingConsentModal";
 
 const queryClient = new QueryClient();
 
@@ -17,6 +18,7 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
+        <AICallingConsentModal />
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/terms" element={<TermsOfUse />} />
