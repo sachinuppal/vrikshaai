@@ -22,7 +22,7 @@ export const CookieConsent = () => {
     localStorage.setItem(COOKIE_CONSENT_KEY, JSON.stringify({ 
       accepted: true, 
       timestamp: new Date().toISOString(),
-      preferences: { essential: true, analytics: true, marketing: true }
+      preferences: { essential: true, functional: true, analytics: true, marketing: true }
     }));
     setIsVisible(false);
   };
@@ -31,7 +31,7 @@ export const CookieConsent = () => {
     localStorage.setItem(COOKIE_CONSENT_KEY, JSON.stringify({ 
       accepted: true, 
       timestamp: new Date().toISOString(),
-      preferences: { essential: true, analytics: false, marketing: false }
+      preferences: { essential: true, functional: false, analytics: false, marketing: false }
     }));
     setIsVisible(false);
   };
@@ -92,9 +92,9 @@ export const CookieConsent = () => {
                     >
                       Essential Only
                     </Button>
-                    <Link to="/privacy" className="sm:ml-auto">
+                    <Link to="/cookies" className="sm:ml-auto">
                       <Button variant="ghost" className="w-full text-muted-foreground hover:text-foreground">
-                        Cookie Policy
+                        Manage Preferences
                       </Button>
                     </Link>
                   </div>

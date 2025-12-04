@@ -42,6 +42,13 @@ const Footer = () => {
               >
                 Privacy Policy
               </Link>
+              <span className="text-muted-foreground">|</span>
+              <Link 
+                to="/cookies" 
+                className="text-muted-foreground hover:text-primary transition-colors"
+              >
+                Cookie Settings
+              </Link>
             </div>
 
             {/* Copyright */}
