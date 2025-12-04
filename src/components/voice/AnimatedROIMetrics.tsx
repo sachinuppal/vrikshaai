@@ -96,11 +96,10 @@ export const AnimatedROIMetrics = () => {
         return (
           <motion.div
             key={index}
-            className="relative p-6 rounded-2xl bg-card border border-border overflow-hidden group"
+            className="relative p-6 rounded-2xl bg-card border border-border overflow-hidden group hover:-translate-y-1 transition-transform duration-200 will-change-transform"
             initial={{ opacity: 0, y: 30 }}
             animate={isInView ? { opacity: 1, y: 0 } : {}}
             transition={{ delay: index * 0.15, duration: 0.5 }}
-            whileHover={{ y: -4 }}
           >
             {/* Background gradient */}
             <div className={`absolute inset-0 bg-gradient-to-br ${metric.color} opacity-0 group-hover:opacity-5 transition-opacity duration-300`} />

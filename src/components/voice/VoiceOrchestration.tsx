@@ -196,7 +196,7 @@ export const VoiceOrchestration = () => {
 
       {/* Central Brain */}
       <motion.div
-        className="relative z-20 w-24 h-24 rounded-full bg-gradient-to-br from-primary via-orange-500 to-primary flex items-center justify-center"
+        className="relative z-20 w-24 h-24 rounded-full bg-gradient-to-br from-primary via-orange-500 to-primary flex items-center justify-center will-change-transform"
         animate={{
           scale: isPulsing ? [1, 1.1, 1] : 1,
           boxShadow: isPulsing
@@ -207,7 +207,7 @@ export const VoiceOrchestration = () => {
               ]
             : '0 0 30px rgba(249, 115, 22, 0.3)',
         }}
-        transition={{ duration: 0.8 }}
+        transition={{ type: "tween", duration: 0.8 }}
       >
         <Brain className="w-12 h-12 text-white" />
         
