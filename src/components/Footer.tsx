@@ -2,8 +2,19 @@ import { Link } from "react-router-dom";
 
 const Footer = () => {
   return (
-    <footer className="bg-background border-t-2 border-primary/20">
-      <div className="container mx-auto px-6 py-12">
+    <footer className="relative bg-background border-t-2 border-primary/20 overflow-hidden">
+      {/* Watermark Brand Text */}
+      <div 
+        className="absolute inset-0 flex items-center justify-center pointer-events-none select-none z-0"
+        aria-hidden="true"
+      >
+        <span className="text-[8rem] sm:text-[12rem] md:text-[16rem] lg:text-[20rem] font-bold text-primary/[0.06] whitespace-nowrap tracking-tight">
+          Vriksha.AI
+        </span>
+      </div>
+
+      {/* Footer Content */}
+      <div className="container mx-auto px-6 py-12 relative z-10">
         <div className="max-w-6xl mx-auto">
           {/* Main Content */}
           <div className="flex flex-col items-center text-center space-y-8">
