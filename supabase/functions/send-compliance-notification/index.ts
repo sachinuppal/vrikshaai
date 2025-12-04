@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { Resend } from "https://esm.sh/resend@2.0.0";
+import { z } from "https://deno.land/x/zod@v3.22.4/mod.ts";
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
 
@@ -9,26 +10,50 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type",
 };
 
-interface ComplianceNotificationRequest {
-  companyName: string;
-  industry?: string;
-  complianceFocus?: string[];
-  deploymentPreference?: string;
-  contactName?: string;
-  email: string;
-  phone?: string;
-  requestType: "governance_pilot" | "checklist_download";
-}
+// HTML escape function to prevent injection
+const escapeHtml = (str: string): string => {
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+};
+
+// Server-side validation schema
+const complianceSchema = z.object({
+  companyName: z.string().min(1).max(200).transform(escapeHtml),
+  industry: z.string().max(100).optional().transform(val => val ? escapeHtml(val) : undefined),
+  complianceFocus: z.array(z.string().max(200).transform(escapeHtml)).max(20).optional(),
+  deploymentPreference: z.string().max(100).optional().transform(val => val ? escapeHtml(val) : undefined),
+  contactName: z.string().max(100).optional().transform(val => val ? escapeHtml(val) : undefined),
+  email: z.string().email().max(255),
+  phone: z.string().max(20).optional().transform(val => val ? escapeHtml(val) : undefined),
+  requestType: z.enum(["governance_pilot", "checklist_download"]),
+});
 
 const handler = async (req: Request): Promise<Response> => {
-  // Handle CORS preflight requests
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const data: ComplianceNotificationRequest = await req.json();
-    console.log("Received compliance notification request:", data);
+    const rawData = await req.json();
+    
+    // Validate and sanitize input
+    const validationResult = complianceSchema.safeParse(rawData);
+    if (!validationResult.success) {
+      console.error("Validation failed:", validationResult.error.flatten());
+      return new Response(
+        JSON.stringify({ error: "Invalid input data", details: validationResult.error.flatten() }),
+        { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders } }
+      );
+    }
+
+    const data = validationResult.data;
+    
+    // Log with masked email
+    console.log("Received compliance notification request for:", data.email.replace(/(.{2}).*@/, '$1***@'));
 
     const isPilotRequest = data.requestType === "governance_pilot";
 
@@ -73,7 +98,7 @@ const handler = async (req: Request): Promise<Response> => {
       html: internalHtml,
     });
 
-    console.log("Internal notification sent:", internalEmail);
+    console.log("Internal notification sent successfully");
 
     // Send confirmation to user
     const userSubject = isPilotRequest
@@ -139,7 +164,7 @@ const handler = async (req: Request): Promise<Response> => {
       html: userHtml,
     });
 
-    console.log("User confirmation sent:", userEmail);
+    console.log("User confirmation sent successfully");
 
     return new Response(
       JSON.stringify({ success: true, internalEmail, userEmail }),
@@ -149,9 +174,9 @@ const handler = async (req: Request): Promise<Response> => {
       }
     );
   } catch (error: any) {
-    console.error("Error in send-compliance-notification:", error);
+    console.error("Error in send-compliance-notification:", error.message);
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ error: "An error occurred processing your request" }),
       {
         status: 500,
         headers: { "Content-Type": "application/json", ...corsHeaders },

@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
+import { z } from "https://deno.land/x/zod@v3.22.4/mod.ts";
 
 const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
 
@@ -7,17 +8,28 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-interface VoiceNotificationRequest {
-  full_name: string;
-  company_name: string;
-  email: string;
-  phone: string;
-  industry: string;
-  use_case?: string;
-  current_solution?: string;
-  estimated_call_volume?: string;
-  comments?: string;
-}
+// HTML escape function to prevent injection
+const escapeHtml = (str: string): string => {
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+};
+
+// Server-side validation schema
+const voiceLeadSchema = z.object({
+  full_name: z.string().min(1).max(100).transform(escapeHtml),
+  company_name: z.string().min(1).max(200).transform(escapeHtml),
+  email: z.string().email().max(255),
+  phone: z.string().min(1).max(20).transform(escapeHtml),
+  industry: z.string().min(1).max(100).transform(escapeHtml),
+  use_case: z.string().max(500).optional().transform(val => val ? escapeHtml(val) : undefined),
+  current_solution: z.string().max(500).optional().transform(val => val ? escapeHtml(val) : undefined),
+  estimated_call_volume: z.string().max(100).optional().transform(val => val ? escapeHtml(val) : undefined),
+  comments: z.string().max(2000).optional().transform(val => val ? escapeHtml(val) : undefined),
+});
 
 const handler = async (req: Request): Promise<Response> => {
   if (req.method === "OPTIONS") {
@@ -25,8 +37,22 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
-    const data: VoiceNotificationRequest = await req.json();
-    console.log("Received voice lead notification request:", data);
+    const rawData = await req.json();
+    
+    // Validate and sanitize input
+    const validationResult = voiceLeadSchema.safeParse(rawData);
+    if (!validationResult.success) {
+      console.error("Validation failed:", validationResult.error.flatten());
+      return new Response(
+        JSON.stringify({ error: "Invalid input data", details: validationResult.error.flatten() }),
+        { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders } }
+      );
+    }
+
+    const data = validationResult.data;
+    
+    // Log with masked email and phone
+    console.log("Received voice lead notification for:", data.email.replace(/(.{2}).*@/, '$1***@'));
 
     // Send admin notification
     const adminEmailResponse = await fetch("https://api.resend.com/emails", {
@@ -119,7 +145,7 @@ const handler = async (req: Request): Promise<Response> => {
     });
 
     const adminResult = await adminEmailResponse.json();
-    console.log("Admin email sent:", adminResult);
+    console.log("Admin email sent successfully");
 
     // Send user confirmation
     const userEmailResponse = await fetch("https://api.resend.com/emails", {
@@ -191,7 +217,7 @@ const handler = async (req: Request): Promise<Response> => {
     });
 
     const userResult = await userEmailResponse.json();
-    console.log("User confirmation email sent:", userResult);
+    console.log("User confirmation email sent successfully");
 
     return new Response(
       JSON.stringify({ 
@@ -205,9 +231,9 @@ const handler = async (req: Request): Promise<Response> => {
       }
     );
   } catch (error: any) {
-    console.error("Error in send-voice-notification:", error);
+    console.error("Error in send-voice-notification:", error.message);
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ error: "An error occurred processing your request" }),
       {
         status: 500,
         headers: { "Content-Type": "application/json", ...corsHeaders },
