@@ -2,3 +2,6 @@ project_id = "kqaullpjkeiopgfhqans"
 
 [functions.send-contact-notification]
 verify_jwt = false
+
+[functions.send-cofounder-invite]
+verify_jwt = false

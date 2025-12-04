@@ -22,6 +22,7 @@ export type Database = {
           company_description: string | null
           company_location: string | null
           company_name: string | null
+          company_registered: boolean | null
           company_url: string | null
           competitors: string | null
           created_at: string
@@ -34,6 +35,7 @@ export type Database = {
           logo_url: string | null
           previous_funding: string | null
           problem_statement: string | null
+          registration_status: string | null
           solution: string | null
           status: Database["public"]["Enums"]["application_status"]
           submitted_at: string | null
@@ -49,6 +51,7 @@ export type Database = {
           company_description?: string | null
           company_location?: string | null
           company_name?: string | null
+          company_registered?: boolean | null
           company_url?: string | null
           competitors?: string | null
           created_at?: string
@@ -61,6 +64,7 @@ export type Database = {
           logo_url?: string | null
           previous_funding?: string | null
           problem_statement?: string | null
+          registration_status?: string | null
           solution?: string | null
           status?: Database["public"]["Enums"]["application_status"]
           submitted_at?: string | null
@@ -76,6 +80,7 @@ export type Database = {
           company_description?: string | null
           company_location?: string | null
           company_name?: string | null
+          company_registered?: boolean | null
           company_url?: string | null
           competitors?: string | null
           created_at?: string
@@ -88,6 +93,7 @@ export type Database = {
           logo_url?: string | null
           previous_funding?: string | null
           problem_statement?: string | null
+          registration_status?: string | null
           solution?: string | null
           status?: Database["public"]["Enums"]["application_status"]
           submitted_at?: string | null
@@ -101,6 +107,102 @@ export type Database = {
             foreignKeyName: "accelerator_applications_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      application_collaborators: {
+        Row: {
+          application_id: string
+          created_at: string
+          id: string
+          role: string
+          user_id: string
+        }
+        Insert: {
+          application_id: string
+          created_at?: string
+          id?: string
+          role?: string
+          user_id: string
+        }
+        Update: {
+          application_id?: string
+          created_at?: string
+          id?: string
+          role?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "application_collaborators_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "accelerator_applications"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "application_collaborators_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      cofounder_invites: {
+        Row: {
+          application_id: string
+          created_at: string
+          email: string
+          expires_at: string
+          id: string
+          invited_by: string
+          name: string | null
+          role: string | null
+          status: string
+          token: string
+          updated_at: string
+        }
+        Insert: {
+          application_id: string
+          created_at?: string
+          email: string
+          expires_at?: string
+          id?: string
+          invited_by: string
+          name?: string | null
+          role?: string | null
+          status?: string
+          token?: string
+          updated_at?: string
+        }
+        Update: {
+          application_id?: string
+          created_at?: string
+          email?: string
+          expires_at?: string
+          id?: string
+          invited_by?: string
+          name?: string | null
+          role?: string | null
+          status?: string
+          token?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cofounder_invites_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "accelerator_applications"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cofounder_invites_invited_by_fkey"
+            columns: ["invited_by"]
+            isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },

@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -8,23 +8,32 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { useToast } from '@/hooks/use-toast';
 import { 
   Users, Building2, TrendingUp, Lightbulb, DollarSign, Calendar,
-  ArrowLeft, Save, Send, Loader2, CheckCircle, Circle, Menu, X
+  Save, Send, Loader2, CheckCircle, Circle, Menu, X, Plus, Mail,
+  ChevronLeft, ChevronRight, Check
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { CofounderCard } from '@/components/application/CofounderCard';
+import { AddCofounderModal } from '@/components/application/AddCofounderModal';
+import { InviteCofounderModal } from '@/components/application/InviteCofounderModal';
+import { PendingInvites } from '@/components/application/PendingInvites';
+import { type Cofounder } from '@/lib/validations/applicationSchema';
 
 interface ApplicationData {
   id?: string;
   status: string;
   batch: string;
-  cofounder_details: any[];
+  cofounder_details: Cofounder[];
   company_name: string;
   company_description: string;
   company_url: string;
   company_location: string;
   founding_date: string;
+  company_registered: boolean;
+  registration_status: string;
   current_progress: string;
   tech_stack: string;
   traction_metrics: string;
@@ -47,6 +56,8 @@ const defaultApplication: ApplicationData = {
   company_url: '',
   company_location: '',
   founding_date: '',
+  company_registered: true,
+  registration_status: 'registered',
   current_progress: '',
   tech_stack: '',
   traction_metrics: '',
@@ -69,6 +80,14 @@ const sections = [
   { id: 'batch', label: 'Batch', icon: Calendar },
 ];
 
+// Field validation rules
+const fieldValidations: Record<string, { min?: number; required?: boolean; label: string }> = {
+  company_description: { min: 50, label: 'Company description' },
+  current_progress: { min: 20, label: 'Current progress' },
+  problem_statement: { min: 50, label: 'Problem statement' },
+  solution: { min: 50, label: 'Solution' },
+};
+
 export default function Apply() {
   const { user, signOut } = useAuth();
   const { toast } = useToast();
@@ -78,6 +97,18 @@ export default function Apply() {
   const [isSaving, setIsSaving] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved'>('idle');
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+  
+  // Co-founder modals
+  const [showAddCofounder, setShowAddCofounder] = useState(false);
+  const [showInviteCofounder, setShowInviteCofounder] = useState(false);
+  const [editingCofounder, setEditingCofounder] = useState<Cofounder | null>(null);
+  const [editingIndex, setEditingIndex] = useState<number | null>(null);
+  const [inviteRefreshTrigger, setInviteRefreshTrigger] = useState(0);
+  
+  // Debounce timer
+  const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Load existing application
   useEffect(() => {
@@ -103,12 +134,14 @@ export default function Apply() {
           id: data.id,
           status: data.status,
           batch: data.batch || 'Winter 2026',
-          cofounder_details: (data.cofounder_details as any[]) || [],
+          cofounder_details: (data.cofounder_details as Cofounder[]) || [],
           company_name: data.company_name || '',
           company_description: data.company_description || '',
           company_url: data.company_url || '',
           company_location: data.company_location || '',
           founding_date: data.founding_date || '',
+          company_registered: data.company_registered ?? true,
+          registration_status: data.registration_status || 'registered',
           current_progress: data.current_progress || '',
           tech_stack: data.tech_stack || '',
           traction_metrics: data.traction_metrics || '',
@@ -128,13 +161,102 @@ export default function Apply() {
     loadApplication();
   }, [user, toast]);
 
+  // Validate a single field
+  const validateField = (field: string, value: string): string | null => {
+    const rules = fieldValidations[field];
+    if (!rules) return null;
+    
+    if (rules.min && value.length > 0 && value.length < rules.min) {
+      return `${rules.label} must be at least ${rules.min} characters`;
+    }
+    return null;
+  };
+
   const updateField = (field: keyof ApplicationData, value: any) => {
     setApplication(prev => ({ ...prev, [field]: value }));
+    
+    // Validate on change
+    if (typeof value === 'string') {
+      const error = validateField(field, value);
+      setFieldErrors(prev => {
+        if (error) return { ...prev, [field]: error };
+        const { [field]: _, ...rest } = prev;
+        return rest;
+      });
+    }
+    
+    // Trigger auto-save with debounce
+    triggerAutoSave();
+  };
+
+  const triggerAutoSave = () => {
+    if (saveTimeoutRef.current) {
+      clearTimeout(saveTimeoutRef.current);
+    }
+    setSaveStatus('idle');
+    saveTimeoutRef.current = setTimeout(() => {
+      autoSave();
+    }, 1500);
+  };
+
+  const autoSave = async () => {
+    if (!user || application.status === 'submitted') return;
+    
+    setSaveStatus('saving');
+    try {
+      const payload = {
+        user_id: user.id,
+        status: application.status as any,
+        batch: application.batch,
+        cofounder_details: application.cofounder_details,
+        company_name: application.company_name,
+        company_description: application.company_description,
+        company_url: application.company_url,
+        company_location: application.company_location,
+        founding_date: application.founding_date || null,
+        company_registered: application.company_registered,
+        registration_status: application.registration_status,
+        current_progress: application.current_progress,
+        tech_stack: application.tech_stack,
+        traction_metrics: application.traction_metrics,
+        problem_statement: application.problem_statement,
+        solution: application.solution,
+        competitors: application.competitors,
+        differentiation: application.differentiation,
+        business_model: application.business_model,
+        previous_funding: application.previous_funding,
+        equity_raised: application.equity_raised,
+        current_valuation: application.current_valuation,
+      };
+
+      if (application.id) {
+        const { error } = await supabase
+          .from('accelerator_applications')
+          .update(payload)
+          .eq('id', application.id);
+        if (error) throw error;
+      } else {
+        const { data, error } = await supabase
+          .from('accelerator_applications')
+          .insert(payload)
+          .select()
+          .single();
+        if (error) throw error;
+        setApplication(prev => ({ ...prev, id: data.id }));
+      }
+
+      setSaveStatus('saved');
+      setTimeout(() => setSaveStatus('idle'), 2000);
+    } catch (error: any) {
+      setSaveStatus('idle');
+      console.error('Auto-save failed:', error);
+    }
   };
 
   const saveApplication = useCallback(async () => {
     if (!user) return;
     setIsSaving(true);
+    setSaveStatus('saving');
 
     try {
       const payload = {
@@ -147,6 +269,8 @@ export default function Apply() {
         company_url: application.company_url,
         company_location: application.company_location,
         founding_date: application.founding_date || null,
+        company_registered: application.company_registered,
+        registration_status: application.registration_status,
         current_progress: application.current_progress,
         tech_stack: application.tech_stack,
         traction_metrics: application.traction_metrics,
@@ -178,6 +302,7 @@ export default function Apply() {
         setApplication(prev => ({ ...prev, id: data.id }));
       }
 
+      setSaveStatus('saved');
       toast({
         title: 'Saved',
         description: 'Your application has been saved as draft.',
@@ -190,15 +315,33 @@ export default function Apply() {
       });
     } finally {
       setIsSaving(false);
+      setTimeout(() => setSaveStatus('idle'), 2000);
     }
   }, [user, application, toast]);
 
   const submitApplication = async () => {
-    if (!application.company_name || !application.problem_statement) {
+    // Validate required fields
+    const errors: string[] = [];
+    
+    if (!application.company_registered && !application.company_name) {
+      // Company name is optional if not registered
+    } else if (application.company_registered && !application.company_name) {
+      errors.push('Company name is required for registered companies');
+    }
+    
+    if (!application.problem_statement || application.problem_statement.length < 50) {
+      errors.push('Problem statement must be at least 50 characters');
+    }
+    
+    if (!application.solution || application.solution.length < 50) {
+      errors.push('Solution must be at least 50 characters');
+    }
+
+    if (errors.length > 0) {
       toast({
         variant: 'destructive',
         title: 'Incomplete Application',
-        description: 'Please fill in at least Company Name and Problem Statement before submitting.',
+        description: errors[0],
       });
       return;
     }
@@ -236,11 +379,14 @@ export default function Apply() {
       case 'founders':
         return application.cofounder_details.length > 0;
       case 'company':
-        return !!(application.company_name && application.company_description);
+        return application.company_registered 
+          ? !!(application.company_name && application.company_description)
+          : !!application.company_description;
       case 'progress':
-        return !!(application.current_progress);
+        return !!(application.current_progress && application.current_progress.length >= 20);
       case 'idea':
-        return !!(application.problem_statement && application.solution);
+        return !!(application.problem_statement && application.problem_statement.length >= 50 && 
+                  application.solution && application.solution.length >= 50);
       case 'equity':
         return !!(application.previous_funding);
       case 'batch':
@@ -248,6 +394,45 @@ export default function Apply() {
       default:
         return false;
     }
+  };
+
+  // Navigation functions
+  const currentSectionIndex = sections.findIndex(s => s.id === activeSection);
+  
+  const goToNextSection = () => {
+    if (currentSectionIndex < sections.length - 1) {
+      setActiveSection(sections[currentSectionIndex + 1].id);
+    }
+  };
+  
+  const goToPreviousSection = () => {
+    if (currentSectionIndex > 0) {
+      setActiveSection(sections[currentSectionIndex - 1].id);
+    }
+  };
+
+  // Co-founder management
+  const handleAddCofounder = (cofounder: Cofounder) => {
+    if (editingIndex !== null) {
+      const updated = [...application.cofounder_details];
+      updated[editingIndex] = cofounder;
+      updateField('cofounder_details', updated);
+      setEditingIndex(null);
+      setEditingCofounder(null);
+    } else {
+      updateField('cofounder_details', [...application.cofounder_details, cofounder]);
+    }
+  };
+
+  const handleEditCofounder = (index: number) => {
+    setEditingIndex(index);
+    setEditingCofounder(application.cofounder_details[index]);
+    setShowAddCofounder(true);
+  };
+
+  const handleRemoveCofounder = (index: number) => {
+    const updated = application.cofounder_details.filter((_, i) => i !== index);
+    updateField('cofounder_details', updated);
   };
 
   if (isLoading) {
@@ -274,6 +459,20 @@ export default function Apply() {
             <span className="font-medium text-foreground">Application</span>
           </div>
           <div className="flex items-center gap-2">
+            {/* Save Status Indicator */}
+            <span className={cn(
+              "text-xs transition-opacity",
+              saveStatus === 'idle' && "opacity-0",
+              saveStatus === 'saving' && "text-muted-foreground",
+              saveStatus === 'saved' && "text-green-600 dark:text-green-400"
+            )}>
+              {saveStatus === 'saving' && 'Saving...'}
+              {saveStatus === 'saved' && (
+                <span className="flex items-center gap-1">
+                  <Check className="w-3 h-3" /> Saved
+                </span>
+              )}
+            </span>
             <Button
               variant="outline"
               size="sm"
@@ -299,7 +498,7 @@ export default function Apply() {
         {/* Sidebar - Desktop */}
         <aside className="hidden lg:block w-64 border-r border-border/50 min-h-[calc(100vh-57px)] sticky top-[57px] bg-muted/30">
           <nav className="p-4 space-y-1">
-            {sections.map((section) => {
+            {sections.map((section, index) => {
               const Icon = section.icon;
               const isComplete = getSectionCompletion(section.id);
               return (
@@ -313,7 +512,9 @@ export default function Apply() {
                       : "hover:bg-muted text-muted-foreground hover:text-foreground"
                   )}
                 >
-                  <Icon className="w-5 h-5 flex-shrink-0" />
+                  <span className="w-6 h-6 rounded-full bg-background/20 flex items-center justify-center text-xs font-medium">
+                    {index + 1}
+                  </span>
                   <span className="flex-1 font-medium">{section.label}</span>
                   {isComplete ? (
                     <CheckCircle className="w-4 h-4 text-green-500" />
@@ -324,6 +525,19 @@ export default function Apply() {
               );
             })}
           </nav>
+          
+          {/* Progress indicator */}
+          <div className="px-4 mt-4">
+            <div className="text-xs text-muted-foreground mb-2">
+              Progress: {sections.filter(s => getSectionCompletion(s.id)).length}/{sections.length} sections complete
+            </div>
+            <div className="h-2 bg-muted rounded-full overflow-hidden">
+              <div 
+                className="h-full bg-primary transition-all duration-300"
+                style={{ width: `${(sections.filter(s => getSectionCompletion(s.id)).length / sections.length) * 100}%` }}
+              />
+            </div>
+          </div>
         </aside>
 
         {/* Mobile Navigation */}
@@ -335,13 +549,14 @@ export default function Apply() {
             className="w-full bg-background shadow-lg"
           >
             {mobileMenuOpen ? <X className="w-4 h-4 mr-2" /> : <Menu className="w-4 h-4 mr-2" />}
-            {sections.find(s => s.id === activeSection)?.label}
+            {currentSectionIndex + 1}/{sections.length}: {sections.find(s => s.id === activeSection)?.label}
           </Button>
           {mobileMenuOpen && (
             <Card className="absolute bottom-full mb-2 w-full shadow-xl">
               <CardContent className="p-2">
-                {sections.map((section) => {
+                {sections.map((section, index) => {
                   const Icon = section.icon;
+                  const isComplete = getSectionCompletion(section.id);
                   return (
                     <button
                       key={section.id}
@@ -356,8 +571,11 @@ export default function Apply() {
                           : "hover:bg-muted"
                       )}
                     >
-                      <Icon className="w-5 h-5" />
+                      <span className="w-6 h-6 rounded-full bg-background/20 flex items-center justify-center text-xs font-medium">
+                        {index + 1}
+                      </span>
                       <span className="font-medium">{section.label}</span>
+                      {isComplete && <CheckCircle className="w-4 h-4 text-green-500 ml-auto" />}
                     </button>
                   );
                 })}
@@ -393,8 +611,8 @@ export default function Apply() {
                 </CardHeader>
                 <CardContent className="space-y-6">
                   <div className="p-4 rounded-lg bg-muted/50 border border-border/50">
-                    <p className="text-sm text-muted-foreground mb-4">
-                      Your profile was created from your signup info. Add co-founder details below.
+                    <p className="text-sm text-muted-foreground mb-2">
+                      Your profile was created from your signup info.
                     </p>
                     <div className="grid gap-4 sm:grid-cols-2">
                       <div>
@@ -404,26 +622,62 @@ export default function Apply() {
                     </div>
                   </div>
                   
-                  <div className="space-y-2">
-                    <Label>Co-founder Details (JSON format)</Label>
-                    <Textarea
-                      placeholder='[{"name": "John Doe", "role": "CTO", "linkedin": "..."}]'
-                      value={JSON.stringify(application.cofounder_details, null, 2)}
-                      onChange={(e) => {
-                        try {
-                          const parsed = JSON.parse(e.target.value);
-                          updateField('cofounder_details', parsed);
-                        } catch {
-                          // Invalid JSON, ignore
-                        }
-                      }}
-                      disabled={isSubmitted}
-                      rows={4}
+                  {/* Co-founder list */}
+                  {application.cofounder_details.length > 0 && (
+                    <div className="space-y-3">
+                      <h4 className="text-sm font-medium text-muted-foreground">Co-founders ({application.cofounder_details.length})</h4>
+                      {application.cofounder_details.map((cofounder, index) => (
+                        <CofounderCard
+                          key={index}
+                          cofounder={cofounder}
+                          index={index}
+                          onEdit={handleEditCofounder}
+                          onRemove={handleRemoveCofounder}
+                          disabled={isSubmitted}
+                        />
+                      ))}
+                    </div>
+                  )}
+                  
+                  {/* Pending invites */}
+                  {application.id && (
+                    <PendingInvites 
+                      applicationId={application.id} 
+                      refreshTrigger={inviteRefreshTrigger}
                     />
-                    <p className="text-xs text-muted-foreground">
-                      Enter co-founder information in JSON array format
+                  )}
+                  
+                  {/* Add/Invite buttons */}
+                  {!isSubmitted && (
+                    <div className="flex flex-wrap gap-3">
+                      <Button
+                        variant="outline"
+                        onClick={() => {
+                          setEditingCofounder(null);
+                          setEditingIndex(null);
+                          setShowAddCofounder(true);
+                        }}
+                      >
+                        <Plus className="w-4 h-4 mr-2" />
+                        Add Co-founder
+                      </Button>
+                      {application.id && (
+                        <Button
+                          variant="outline"
+                          onClick={() => setShowInviteCofounder(true)}
+                        >
+                          <Mail className="w-4 h-4 mr-2" />
+                          Invite Co-founder
+                        </Button>
+                      )}
+                    </div>
+                  )}
+                  
+                  {!application.id && (
+                    <p className="text-sm text-muted-foreground">
+                      Save your application first to invite co-founders via email.
                     </p>
-                  </div>
+                  )}
                 </CardContent>
               </Card>
             )}
@@ -437,17 +691,58 @@ export default function Apply() {
                   </CardTitle>
                   <CardDescription>Basic information about your startup</CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-4">
+                <CardContent className="space-y-6">
+                  {/* Registration status toggle */}
+                  <div className="space-y-3">
+                    <Label>Company Registration Status</Label>
+                    <RadioGroup
+                      value={application.registration_status}
+                      onValueChange={(value) => {
+                        updateField('registration_status', value);
+                        updateField('company_registered', value === 'registered');
+                      }}
+                      disabled={isSubmitted}
+                      className="grid gap-3"
+                    >
+                      <div className="flex items-center space-x-3 p-3 rounded-lg border border-border/50 hover:bg-muted/50 transition-colors">
+                        <RadioGroupItem value="not_started" id="not_started" />
+                        <Label htmlFor="not_started" className="flex-1 cursor-pointer">
+                          <span className="font-medium">Not registered yet</span>
+                          <p className="text-xs text-muted-foreground">We're still in the idea stage</p>
+                        </Label>
+                      </div>
+                      <div className="flex items-center space-x-3 p-3 rounded-lg border border-border/50 hover:bg-muted/50 transition-colors">
+                        <RadioGroupItem value="in_progress" id="in_progress" />
+                        <Label htmlFor="in_progress" className="flex-1 cursor-pointer">
+                          <span className="font-medium">Registration in progress</span>
+                          <p className="text-xs text-muted-foreground">Currently registering the company</p>
+                        </Label>
+                      </div>
+                      <div className="flex items-center space-x-3 p-3 rounded-lg border border-border/50 hover:bg-muted/50 transition-colors">
+                        <RadioGroupItem value="registered" id="registered" />
+                        <Label htmlFor="registered" className="flex-1 cursor-pointer">
+                          <span className="font-medium">Registered company</span>
+                          <p className="text-xs text-muted-foreground">Company is legally registered</p>
+                        </Label>
+                      </div>
+                    </RadioGroup>
+                  </div>
+
                   <div className="grid gap-4 sm:grid-cols-2">
                     <div className="space-y-2">
-                      <Label htmlFor="company_name">Company Name *</Label>
+                      <Label htmlFor="company_name">
+                        {application.company_registered ? 'Company Name *' : 'Working Name (Optional)'}
+                      </Label>
                       <Input
                         id="company_name"
                         value={application.company_name}
                         onChange={(e) => updateField('company_name', e.target.value)}
                         disabled={isSubmitted}
-                        placeholder="Acme Inc."
+                        placeholder={application.company_registered ? "Acme Inc." : "Project name or working title"}
                       />
+                      {!application.company_registered && (
+                        <p className="text-xs text-muted-foreground">You can update this later once registered</p>
+                      )}
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="company_url">Website</Label>
@@ -461,7 +756,9 @@ export default function Apply() {
                     </div>
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="company_description">Company Description *</Label>
+                    <Label htmlFor="company_description">
+                      Company Description {application.company_description.length > 0 && `(${application.company_description.length}/50 min)`}
+                    </Label>
                     <Textarea
                       id="company_description"
                       value={application.company_description}
@@ -469,7 +766,11 @@ export default function Apply() {
                       disabled={isSubmitted}
                       placeholder="Describe what your company does in 2-3 sentences..."
                       rows={3}
+                      className={cn(fieldErrors.company_description && "border-destructive")}
                     />
+                    {fieldErrors.company_description && (
+                      <p className="text-xs text-destructive">{fieldErrors.company_description}</p>
+                    )}
                   </div>
                   <div className="grid gap-4 sm:grid-cols-2">
                     <div className="space-y-2">
@@ -508,7 +809,9 @@ export default function Apply() {
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="current_progress">Current Progress *</Label>
+                    <Label htmlFor="current_progress">
+                      Current Progress * {application.current_progress.length > 0 && `(${application.current_progress.length}/20 min)`}
+                    </Label>
                     <Textarea
                       id="current_progress"
                       value={application.current_progress}
@@ -516,7 +819,11 @@ export default function Apply() {
                       disabled={isSubmitted}
                       placeholder="Describe your current stage: idea, prototype, MVP, launched, etc."
                       rows={4}
+                      className={cn(fieldErrors.current_progress && "border-destructive")}
                     />
+                    {fieldErrors.current_progress && (
+                      <p className="text-xs text-destructive">{fieldErrors.current_progress}</p>
+                    )}
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="tech_stack">Tech Stack</Label>
@@ -555,7 +862,9 @@ export default function Apply() {
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="problem_statement">Problem Statement *</Label>
+                    <Label htmlFor="problem_statement">
+                      Problem Statement * {application.problem_statement.length > 0 && `(${application.problem_statement.length}/50 min)`}
+                    </Label>
                     <Textarea
                       id="problem_statement"
                       value={application.problem_statement}
@@ -563,10 +872,16 @@ export default function Apply() {
                       disabled={isSubmitted}
                       placeholder="What problem are you solving? Who has this problem?"
                       rows={4}
+                      className={cn(fieldErrors.problem_statement && "border-destructive")}
                     />
+                    {fieldErrors.problem_statement && (
+                      <p className="text-xs text-destructive">{fieldErrors.problem_statement}</p>
+                    )}
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="solution">Solution *</Label>
+                    <Label htmlFor="solution">
+                      Solution * {application.solution.length > 0 && `(${application.solution.length}/50 min)`}
+                    </Label>
                     <Textarea
                       id="solution"
                       value={application.solution}
@@ -574,7 +889,11 @@ export default function Apply() {
                       disabled={isSubmitted}
                       placeholder="How does your product solve this problem?"
                       rows={4}
+                      className={cn(fieldErrors.solution && "border-destructive")}
                     />
+                    {fieldErrors.solution && (
+                      <p className="text-xs text-destructive">{fieldErrors.solution}</p>
+                    )}
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="competitors">Competitors</Label>
@@ -691,8 +1010,37 @@ export default function Apply() {
               </Card>
             )}
 
+            {/* Navigation Buttons */}
+            <div className="flex items-center justify-between pt-4">
+              <Button
+                variant="outline"
+                onClick={goToPreviousSection}
+                disabled={currentSectionIndex === 0}
+                className="gap-2"
+              >
+                <ChevronLeft className="w-4 h-4" />
+                Back
+              </Button>
+              
+              <span className="text-sm text-muted-foreground">
+                {currentSectionIndex + 1} of {sections.length}
+              </span>
+              
+              {currentSectionIndex < sections.length - 1 ? (
+                <Button
+                  onClick={goToNextSection}
+                  className="gap-2"
+                >
+                  Continue
+                  <ChevronRight className="w-4 h-4" />
+                </Button>
+              ) : (
+                <div className="w-[100px]" /> // Spacer for alignment
+              )}
+            </div>
+
             {/* Submit Section */}
-            {!isSubmitted && application.id && (
+            {!isSubmitted && application.id && activeSection === 'batch' && (
               <Card className="border-primary/20 bg-primary/5">
                 <CardContent className="py-6 flex flex-col sm:flex-row items-center justify-between gap-4">
                   <div>
@@ -724,6 +1072,25 @@ export default function Apply() {
           </div>
         </main>
       </div>
+
+      {/* Modals */}
+      <AddCofounderModal
+        open={showAddCofounder}
+        onOpenChange={setShowAddCofounder}
+        onAdd={handleAddCofounder}
+        editingCofounder={editingCofounder}
+        editingIndex={editingIndex}
+      />
+      
+      {application.id && user && (
+        <InviteCofounderModal
+          open={showInviteCofounder}
+          onOpenChange={setShowInviteCofounder}
+          applicationId={application.id}
+          userId={user.id}
+          onInviteSent={() => setInviteRefreshTrigger(prev => prev + 1)}
+        />
+      )}
     </div>
   );
 }
