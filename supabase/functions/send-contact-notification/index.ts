@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
+import { z } from "https://deno.land/x/zod@v3.22.4/mod.ts";
 
 const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
 
@@ -7,25 +8,48 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-interface ContactNotificationRequest {
-  firstName: string;
-  lastName: string;
-  email: string;
-  countryCode: string;
-  mobile: string;
-  message?: string;
-}
+// HTML escape function to prevent injection
+const escapeHtml = (str: string): string => {
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+};
+
+// Server-side validation schema
+const contactSchema = z.object({
+  firstName: z.string().min(1).max(100).transform(escapeHtml),
+  lastName: z.string().min(1).max(100).transform(escapeHtml),
+  email: z.string().email().max(255),
+  countryCode: z.string().min(1).max(10).transform(escapeHtml),
+  mobile: z.string().min(1).max(20).transform(escapeHtml),
+  message: z.string().max(2000).optional().transform(val => val ? escapeHtml(val) : undefined),
+});
 
 const handler = async (req: Request): Promise<Response> => {
-  // Handle CORS preflight requests
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const { firstName, lastName, email, countryCode, mobile, message }: ContactNotificationRequest = await req.json();
+    const rawData = await req.json();
+    
+    // Validate and sanitize input
+    const validationResult = contactSchema.safeParse(rawData);
+    if (!validationResult.success) {
+      console.error("Validation failed:", validationResult.error.flatten());
+      return new Response(
+        JSON.stringify({ error: "Invalid input data", details: validationResult.error.flatten() }),
+        { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders } }
+      );
+    }
+    
+    const { firstName, lastName, email, countryCode, mobile, message } = validationResult.data;
 
-    console.log("Sending contact notification email for:", email);
+    // Log with masked email
+    console.log("Sending contact notification for:", email.replace(/(.{2}).*@/, '$1***@'));
 
     // Send notification to admin
     const adminEmailRes = await fetch("https://api.resend.com/emails", {
@@ -52,7 +76,7 @@ const handler = async (req: Request): Promise<Response> => {
     });
 
     const adminEmailData = await adminEmailRes.json();
-    console.log("Admin notification response:", adminEmailData);
+    console.log("Admin notification sent successfully");
 
     // Send confirmation to user
     const userEmailRes = await fetch("https://api.resend.com/emails", {
@@ -81,7 +105,7 @@ const handler = async (req: Request): Promise<Response> => {
     });
 
     const userEmailData = await userEmailRes.json();
-    console.log("User confirmation response:", userEmailData);
+    console.log("User confirmation sent successfully");
 
     return new Response(
       JSON.stringify({ success: true, adminEmail: adminEmailData, userEmail: userEmailData }),
@@ -91,9 +115,9 @@ const handler = async (req: Request): Promise<Response> => {
       }
     );
   } catch (error: any) {
-    console.error("Error in send-contact-notification function:", error);
+    console.error("Error in send-contact-notification function:", error.message);
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ error: "An error occurred processing your request" }),
       {
         status: 500,
         headers: { "Content-Type": "application/json", ...corsHeaders },

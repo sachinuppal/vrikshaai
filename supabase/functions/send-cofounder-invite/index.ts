@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
+import { z } from "https://deno.land/x/zod@v3.22.4/mod.ts";
 
 const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
 
@@ -8,29 +9,52 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type",
 };
 
-interface InviteRequest {
-  email: string;
-  name?: string;
-  role?: string;
-  token: string;
-}
+// HTML escape function to prevent injection
+const escapeHtml = (str: string): string => {
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+};
+
+// Server-side validation schema
+const inviteSchema = z.object({
+  email: z.string().email().max(255),
+  name: z.string().max(100).optional().transform(val => val ? escapeHtml(val) : undefined),
+  role: z.string().max(100).optional().transform(val => val ? escapeHtml(val) : undefined),
+  token: z.string().uuid(),
+});
 
 const handler = async (req: Request): Promise<Response> => {
-  // Handle CORS preflight requests
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const { email, name, role, token }: InviteRequest = await req.json();
+    const rawData = await req.json();
+    
+    // Validate and sanitize input
+    const validationResult = inviteSchema.safeParse(rawData);
+    if (!validationResult.success) {
+      console.error("Validation failed:", validationResult.error.flatten());
+      return new Response(
+        JSON.stringify({ error: "Invalid input data", details: validationResult.error.flatten() }),
+        { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders } }
+      );
+    }
 
-    console.log("Sending co-founder invite to:", email);
+    const { email, name, role, token } = validationResult.data;
+
+    // Log with masked email
+    console.log("Sending co-founder invite to:", email.replace(/(.{2}).*@/, '$1***@'));
 
     // Get the origin from the request or use a default
     const origin = req.headers.get("origin") || "https://vriksha.ai";
     const inviteLink = `${origin}/accept-invite?token=${token}`;
 
-    const displayName = name || email.split("@")[0];
+    const displayName = name || escapeHtml(email.split("@")[0]);
     const roleText = role ? ` as ${role}` : "";
 
     const res = await fetch("https://api.resend.com/emails", {
@@ -90,12 +114,12 @@ const handler = async (req: Request): Promise<Response> => {
 
     if (!res.ok) {
       const error = await res.text();
-      console.error("Resend API error:", error);
-      throw new Error(`Failed to send email: ${error}`);
+      console.error("Resend API error");
+      throw new Error(`Failed to send email`);
     }
 
     const data = await res.json();
-    console.log("Email sent successfully:", data);
+    console.log("Email sent successfully");
 
     return new Response(JSON.stringify(data), {
       status: 200,
@@ -105,9 +129,9 @@ const handler = async (req: Request): Promise<Response> => {
       },
     });
   } catch (error: any) {
-    console.error("Error in send-cofounder-invite function:", error);
+    console.error("Error in send-cofounder-invite function:", error.message);
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ error: "An error occurred processing your request" }),
       {
         status: 500,
         headers: { "Content-Type": "application/json", ...corsHeaders },
