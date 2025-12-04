@@ -61,9 +61,9 @@ const Header = () => {
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-48">
                   <DropdownMenuItem asChild>
-                    <Link to="/apply" className="flex items-center gap-2">
+                    <Link to="/applications" className="flex items-center gap-2">
                       <FileText className="w-4 h-4" />
-                      My Application
+                      My Applications
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
@@ -106,12 +106,12 @@ const Header = () => {
                   {user && (
                     <>
                       <Link
-                        to="/apply"
+                        to="/applications"
                         onClick={() => setIsOpen(false)}
                         className="flex items-center gap-3 px-4 py-3 rounded-lg text-foreground hover:bg-primary/10 hover:text-primary transition-colors"
                       >
                         <FileText className="w-5 h-5" />
-                        <span className="font-medium">My Application</span>
+                        <span className="font-medium">My Applications</span>
                       </Link>
                       <div className="border-t border-border my-2" />
                     </>
