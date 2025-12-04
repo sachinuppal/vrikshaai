@@ -32,6 +32,7 @@ interface Application {
   created_at: string;
   updated_at: string;
   submitted_at: string | null;
+  edit_count: number;
   cohort?: Cohort;
 }
 
@@ -198,6 +199,20 @@ export default function Applications() {
                       key={app.id} 
                       application={app} 
                       onClick={() => navigate(`/apply/${app.id}`)}
+                      onUnlockForEdit={async () => {
+                        // Unlock for one-time edit
+                        const { error } = await supabase
+                          .from('accelerator_applications')
+                          .update({ 
+                            status: 'draft' as any, 
+                            edit_count: app.edit_count + 1 
+                          })
+                          .eq('id', app.id);
+                        
+                        if (!error) {
+                          navigate(`/apply/${app.id}`);
+                        }
+                      }}
                     />
                   ))
                 )}
@@ -220,6 +235,19 @@ export default function Applications() {
                       key={app.id} 
                       application={app} 
                       onClick={() => navigate(`/apply/${app.id}`)}
+                      onUnlockForEdit={app.status === 'submitted' && app.edit_count < 1 ? async () => {
+                        const { error } = await supabase
+                          .from('accelerator_applications')
+                          .update({ 
+                            status: 'draft' as any, 
+                            edit_count: app.edit_count + 1 
+                          })
+                          .eq('id', app.id);
+                        
+                        if (!error) {
+                          navigate(`/apply/${app.id}`);
+                        }
+                      } : undefined}
                     />
                   ))
                 )}
@@ -325,10 +353,21 @@ export default function Applications() {
   );
 }
 
-function ApplicationCard({ application, onClick }: { application: Application; onClick: () => void }) {
+function ApplicationCard({ 
+  application, 
+  onClick,
+  onUnlockForEdit 
+}: { 
+  application: Application; 
+  onClick: () => void;
+  onUnlockForEdit?: () => void;
+}) {
   const status = statusConfig[application.status] || statusConfig.draft;
   const StatusIcon = status.icon;
   const cofounderCount = Array.isArray(application.cofounder_details) ? application.cofounder_details.length : 0;
+  
+  // Can edit if submitted and hasn't used the one-time edit yet
+  const canEdit = application.status === 'submitted' && application.edit_count < 1;
 
   return (
     <Card 
@@ -362,10 +401,24 @@ function ApplicationCard({ application, onClick }: { application: Application; o
               </span>
             </div>
           </div>
-          <Button variant="outline" size="sm">
-            {application.status === 'draft' ? 'Continue' : 'View'}
-            <ChevronRight className="w-4 h-4 ml-1" />
-          </Button>
+          <div className="flex gap-2">
+            {canEdit && onUnlockForEdit && (
+              <Button 
+                variant="default" 
+                size="sm"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onUnlockForEdit();
+                }}
+              >
+                Edit
+              </Button>
+            )}
+            <Button variant="outline" size="sm">
+              {application.status === 'draft' ? 'Continue' : 'View'}
+              <ChevronRight className="w-4 h-4 ml-1" />
+            </Button>
+          </div>
         </div>
       </CardContent>
     </Card>

@@ -36,6 +36,7 @@ interface ApplicationData {
   cohort_id?: string;
   cohort?: Cohort;
   cofounder_details: Cofounder[];
+  edit_count: number;
   company_name: string;
   company_description: string;
   company_url: string;
@@ -59,6 +60,7 @@ interface ApplicationData {
 const defaultApplication: ApplicationData = {
   status: 'draft',
   cofounder_details: [],
+  edit_count: 0,
   company_name: '',
   company_description: '',
   company_url: '',
@@ -164,6 +166,7 @@ export default function Apply() {
         cohort_id: data.cohort_id || undefined,
         cohort,
         cofounder_details: (data.cofounder_details as Cofounder[]) || [],
+        edit_count: data.edit_count || 0,
         company_name: data.company_name || '',
         company_description: data.company_description || '',
         company_url: data.company_url || '',
@@ -627,12 +630,65 @@ export default function Apply() {
           <div className="max-w-3xl mx-auto space-y-6">
             {/* Status Banner */}
             {isSubmitted && (
-              <Card className="bg-green-500/10 border-green-500/20">
-                <CardContent className="py-4 flex items-center gap-3">
-                  <CheckCircle className="w-5 h-5 text-green-500" />
-                  <span className="text-green-700 dark:text-green-300 font-medium">
-                    Application submitted! We'll review it and get back to you soon.
-                  </span>
+              <Card className={cn(
+                "border",
+                application.edit_count < 1 
+                  ? "bg-blue-500/10 border-blue-500/20" 
+                  : "bg-green-500/10 border-green-500/20"
+              )}>
+                <CardContent className="py-4">
+                  <div className="flex items-center justify-between gap-4">
+                    <div className="flex items-center gap-3">
+                      <CheckCircle className={cn(
+                        "w-5 h-5",
+                        application.edit_count < 1 ? "text-blue-500" : "text-green-500"
+                      )} />
+                      <div>
+                        <span className={cn(
+                          "font-medium",
+                          application.edit_count < 1 
+                            ? "text-blue-700 dark:text-blue-300" 
+                            : "text-green-700 dark:text-green-300"
+                        )}>
+                          Application submitted!
+                        </span>
+                        {application.edit_count < 1 && (
+                          <p className="text-sm text-muted-foreground mt-0.5">
+                            You can edit your application once before final review.
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                    {application.edit_count < 1 && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={async () => {
+                          const { error } = await supabase
+                            .from('accelerator_applications')
+                            .update({ 
+                              status: 'draft' as any, 
+                              edit_count: application.edit_count + 1 
+                            })
+                            .eq('id', application.id);
+                          
+                          if (!error) {
+                            setApplication(prev => ({ 
+                              ...prev, 
+                              status: 'draft', 
+                              edit_count: prev.edit_count + 1 
+                            }));
+                            toast({
+                              title: 'Application unlocked',
+                              description: 'You can now make changes. Remember to submit again when done.',
+                            });
+                          }
+                        }}
+                      >
+                        Edit Application
+                      </Button>
+                    )}
+                  </div>
                 </CardContent>
               </Card>
             )}

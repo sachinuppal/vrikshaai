@@ -30,6 +30,7 @@ export type Database = {
           current_progress: string | null
           current_valuation: string | null
           differentiation: string | null
+          edit_count: number
           equity_raised: string | null
           founding_date: string | null
           id: string
@@ -60,6 +61,7 @@ export type Database = {
           current_progress?: string | null
           current_valuation?: string | null
           differentiation?: string | null
+          edit_count?: number
           equity_raised?: string | null
           founding_date?: string | null
           id?: string
@@ -90,6 +92,7 @@ export type Database = {
           current_progress?: string | null
           current_valuation?: string | null
           differentiation?: string | null
+          edit_count?: number
           equity_raised?: string | null
           founding_date?: string | null
           id?: string
