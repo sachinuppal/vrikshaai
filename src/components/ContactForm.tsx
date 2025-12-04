@@ -75,6 +75,20 @@ const ContactForm = ({ source = "contact_form", onSuccess }: ContactFormProps) =
 
       if (error) throw error;
 
+      // Send email notification (fire and forget - don't block on it)
+      supabase.functions.invoke("send-contact-notification", {
+        body: {
+          firstName: data.firstName,
+          lastName: data.lastName,
+          email: data.email,
+          countryCode: data.countryCode,
+          mobile: fullPhone,
+          message: data.message,
+        },
+      }).catch((emailError) => {
+        console.error("Email notification failed:", emailError);
+      });
+
       toast({
         title: "Message sent!",
         description: "We'll get back to you shortly.",
