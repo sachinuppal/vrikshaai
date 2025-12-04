@@ -17,14 +17,6 @@ import {
   TrendingUp,
   Users,
   CheckCircle,
-  Building2,
-  Landmark,
-  Home,
-  ShoppingCart,
-  HeartPulse,
-  GraduationCap,
-  Briefcase,
-  ClipboardList,
   ChevronDown,
   ChevronUp,
   ArrowRight,
@@ -41,7 +33,16 @@ import { supabase } from '@/integrations/supabase/client';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { FadeInView, ScaleInView, StaggerContainer, StaggerItem } from '@/components/animations';
-import { VoiceWaveformHero, ArchitectureFlow } from '@/components/voice';
+import { 
+  VoiceWaveformHero, 
+  ArchitectureFlow,
+  VoiceCallDemo,
+  VoiceJourneyPipeline,
+  VoiceOrchestration,
+  AnimatedROIMetrics,
+  BeforeAfterVoice,
+  InteractiveIndustryGrid
+} from '@/components/voice';
 
 const Voice = () => {
   const { toast } = useToast();
@@ -81,18 +82,18 @@ const Voice = () => {
     { icon: CheckCircle, title: "Consistent Quality", description: "Every conversation on-brand, compliant, and quality-controlled" },
     { icon: Users, title: "Higher Conversion", description: "24/7 availability, quick responses, context preservation" },
     { icon: BarChart3, title: "Data-Driven Decisions", description: "Rich voice + behavioral data enables smarter business choices" },
-    { icon: Building2, title: "Multi-Industry Ready", description: "Sales, support, collections, surveys — any vertical" },
+    { icon: Shield, title: "Multi-Industry Ready", description: "Sales, support, collections, surveys — any vertical" },
   ];
 
-  const industries = [
-    { icon: Landmark, name: "Financial Services & FinTech", useCases: "Loan eligibility calls, reminders, KYC verification, compliance calls, payment reminders, customer support" },
-    { icon: Phone, name: "Telecom / Utilities", useCases: "Billing follow-ups, outage notifications, customer support, plan upgrades, churn management" },
-    { icon: Home, name: "Real Estate / PropTech", useCases: "Lead qualification, property inquiry calls, booking visits, follow-ups, loan & finance reminders" },
-    { icon: ShoppingCart, name: "Retail / E-commerce / D2C", useCases: "Abandoned cart reminders, payment follow-ups, order confirmations, customer support & feedback" },
-    { icon: HeartPulse, name: "Healthcare / Wellness", useCases: "Appointment booking & reminders, tele-consultation scheduling, follow-up calls, prescription reminders" },
-    { icon: GraduationCap, name: "Education / EdTech", useCases: "Admission calls, reminders, fee collection, feedback calls, student support, course suggestions" },
-    { icon: Briefcase, name: "SaaS / B2B Services", useCases: "Client onboarding calls, demos scheduling, renewal reminders, support calls, NPS / feedback" },
-    { icon: ClipboardList, name: "Surveys / Market Research", useCases: "Outbound survey calls, automated data capture, sentiment analysis, feedback loops, callback scheduling" },
+  const industryNames = [
+    'Financial Services & FinTech',
+    'Telecom / Utilities',
+    'Real Estate / PropTech',
+    'Retail / E-commerce / D2C',
+    'Healthcare / Wellness',
+    'Education / EdTech',
+    'SaaS / B2B Services',
+    'Surveys / Market Research',
   ];
 
   const differentiators = [
@@ -102,13 +103,6 @@ const Voice = () => {
     { title: "Automation-First", description: "From first call to follow-up to conversion — minimal human load" },
     { title: "Flexible Deployment", description: "Integrate with existing systems, CRMs, databases, marketing tools" },
     { title: "ROI-First Approach", description: "Cost reduction, higher throughput, better conversion" },
-  ];
-
-  const roiMetrics = [
-    { value: "1000s", label: "Simultaneous Calls", description: "Handle without increasing headcount" },
-    { value: "60-80%", label: "Workload Reduction", description: "Automation of L1/L2 calls" },
-    { value: "24/7", label: "Availability", description: "Never miss a lead or call" },
-    { value: "3-6 mo", label: "ROI Timeline", description: "Visible returns" },
   ];
 
   const steps = [
@@ -147,7 +141,6 @@ const Voice = () => {
 
       if (dbError) throw dbError;
 
-      // Send notification email
       try {
         await supabase.functions.invoke('send-voice-notification', {
           body: formData,
@@ -243,14 +236,19 @@ const Voice = () => {
           </FadeInView>
 
           <VoiceWaveformHero />
+          
+          {/* Voice Journey Pipeline - NEW */}
+          <div className="mt-12">
+            <VoiceJourneyPipeline />
+          </div>
         </div>
       </section>
 
-      {/* What Voice AI Means */}
+      {/* What Voice AI Means - with BeforeAfter */}
       <section className="py-20 px-4 bg-muted/30">
         <div className="max-w-6xl mx-auto">
           <FadeInView>
-            <div className="text-center mb-12">
+            <div className="text-center mb-8">
               <h2 className="text-3xl md:text-4xl font-bold mb-4">
                 A New Era of <span className="text-primary">Customer Engagement</span>
               </h2>
@@ -260,52 +258,31 @@ const Voice = () => {
             </div>
           </FadeInView>
 
-          <div className="grid md:grid-cols-2 gap-8">
-            <ScaleInView>
-              <div className="p-6 rounded-2xl bg-destructive/10 border border-destructive/20">
-                <h3 className="text-xl font-semibold mb-4 text-destructive">Traditional Call Centers</h3>
-                <ul className="space-y-3 text-muted-foreground">
-                  <li className="flex items-start gap-2">
-                    <span className="text-destructive">✗</span> Expensive human agents
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <span className="text-destructive">✗</span> Manual processes & disjointed systems
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <span className="text-destructive">✗</span> Limited hours & scalability
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <span className="text-destructive">✗</span> Inconsistent quality
-                  </li>
-                </ul>
-              </div>
-            </ScaleInView>
+          {/* Before/After Scroll Animation - NEW */}
+          <BeforeAfterVoice />
+        </div>
+      </section>
 
-            <ScaleInView>
-              <div className="p-6 rounded-2xl bg-primary/10 border border-primary/20">
-                <h3 className="text-xl font-semibold mb-4 text-primary">Vriksha Voice AI</h3>
-                <ul className="space-y-3 text-muted-foreground">
-                  <li className="flex items-start gap-2">
-                    <span className="text-primary">✓</span> AI-powered agents at scale
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <span className="text-primary">✓</span> Unified data & automation
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <span className="text-primary">✓</span> 24/7, multi-language, no fatigue
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <span className="text-primary">✓</span> Voice becomes a growth engine
-                  </li>
-                </ul>
-              </div>
-            </ScaleInView>
-          </div>
+      {/* Live Voice Call Demo - NEW */}
+      <section className="py-20 px-4">
+        <div className="max-w-6xl mx-auto">
+          <FadeInView>
+            <div className="text-center mb-12">
+              <h2 className="text-3xl md:text-4xl font-bold mb-4">
+                See Voice AI <span className="text-primary">in Action</span>
+              </h2>
+              <p className="text-muted-foreground max-w-2xl mx-auto">
+                Watch how our AI handles a live call — real-time transcription, sentiment analysis, and auto-triggered actions
+              </p>
+            </div>
+          </FadeInView>
+
+          <VoiceCallDemo />
         </div>
       </section>
 
       {/* Core Capabilities */}
-      <section className="py-20 px-4">
+      <section className="py-20 px-4 bg-muted/30">
         <div className="max-w-6xl mx-auto">
           <FadeInView>
             <div className="text-center mb-12">
@@ -334,6 +311,24 @@ const Voice = () => {
               </StaggerItem>
             ))}
           </StaggerContainer>
+        </div>
+      </section>
+
+      {/* Voice Orchestration - NEW */}
+      <section className="py-20 px-4">
+        <div className="max-w-6xl mx-auto">
+          <FadeInView>
+            <div className="text-center mb-8">
+              <h2 className="text-3xl md:text-4xl font-bold mb-4">
+                One Call. <span className="text-primary">Multiple Actions.</span>
+              </h2>
+              <p className="text-muted-foreground max-w-2xl mx-auto">
+                Our AI automatically triggers follow-ups across all channels
+              </p>
+            </div>
+          </FadeInView>
+
+          <VoiceOrchestration />
         </div>
       </section>
 
@@ -367,7 +362,7 @@ const Voice = () => {
         </div>
       </section>
 
-      {/* Industry Use Cases */}
+      {/* Industry Use Cases - Interactive Grid - REPLACED */}
       <section className="py-20 px-4">
         <div className="max-w-6xl mx-auto">
           <FadeInView>
@@ -376,43 +371,12 @@ const Voice = () => {
                 Industry <span className="text-primary">Use Cases</span>
               </h2>
               <p className="text-muted-foreground max-w-2xl mx-auto">
-                Voice AI works across sales, support, compliance, reminders, and feedback
+                Click on any industry to explore specific voice AI applications
               </p>
             </div>
           </FadeInView>
 
-          <div className="overflow-x-auto">
-            <table className="w-full border-collapse">
-              <thead>
-                <tr className="border-b border-border">
-                  <th className="text-left p-4 font-semibold">Industry</th>
-                  <th className="text-left p-4 font-semibold">Use Cases / Applications</th>
-                </tr>
-              </thead>
-              <tbody>
-                {industries.map((ind, index) => (
-                  <motion.tr
-                    key={index}
-                    className="border-b border-border hover:bg-primary/5 transition-colors"
-                    initial={{ opacity: 0, x: -20 }}
-                    whileInView={{ opacity: 1, x: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ delay: index * 0.05 }}
-                  >
-                    <td className="p-4">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                          <ind.icon className="w-5 h-5 text-primary" />
-                        </div>
-                        <span className="font-medium">{ind.name}</span>
-                      </div>
-                    </td>
-                    <td className="p-4 text-muted-foreground">{ind.useCases}</td>
-                  </motion.tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          <InteractiveIndustryGrid />
         </div>
       </section>
 
@@ -446,7 +410,7 @@ const Voice = () => {
         </div>
       </section>
 
-      {/* ROI Metrics */}
+      {/* ROI Metrics - Animated - REPLACED */}
       <section className="py-20 px-4">
         <div className="max-w-6xl mx-auto">
           <FadeInView>
@@ -457,22 +421,7 @@ const Voice = () => {
             </div>
           </FadeInView>
 
-          <StaggerContainer className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {roiMetrics.map((metric, index) => (
-              <StaggerItem key={index}>
-                <motion.div
-                  className="p-6 rounded-xl bg-gradient-to-br from-primary/10 to-orange-500/10 border border-primary/20 text-center"
-                  whileHover={{ scale: 1.05 }}
-                >
-                  <div className="text-4xl md:text-5xl font-bold text-primary mb-2">
-                    {metric.value}
-                  </div>
-                  <div className="font-semibold mb-1">{metric.label}</div>
-                  <div className="text-sm text-muted-foreground">{metric.description}</div>
-                </motion.div>
-              </StaggerItem>
-            ))}
-          </StaggerContainer>
+          <AnimatedROIMetrics />
         </div>
       </section>
 
@@ -648,9 +597,9 @@ const Voice = () => {
                     <SelectValue placeholder="Select your industry" />
                   </SelectTrigger>
                   <SelectContent>
-                    {industries.map((ind) => (
-                      <SelectItem key={ind.name} value={ind.name}>
-                        {ind.name}
+                    {industryNames.map((name) => (
+                      <SelectItem key={name} value={name}>
+                        {name}
                       </SelectItem>
                     ))}
                     <SelectItem value="Other">Other</SelectItem>
