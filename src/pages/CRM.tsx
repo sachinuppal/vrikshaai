@@ -28,6 +28,14 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { FadeInView, ScaleInView, StaggerContainer } from "@/components/animations";
 import {
+  HeroPipeline,
+  RelationshipTimeline,
+  IndustryGraph,
+  VoiceToProfileDemo,
+  NextBestActionAnimation,
+} from "@/components/crm";
+import { motion } from "framer-motion";
+import {
   TreeDeciduous,
   Shield,
   Phone,
@@ -280,7 +288,7 @@ const CRM = () => {
       <Header />
 
       {/* Hero Section */}
-      <section className="pt-32 pb-20 px-4 relative overflow-hidden">
+      <section className="pt-32 pb-12 px-4 relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-primary/10" />
         <div className="container mx-auto max-w-6xl relative z-10">
           <FadeInView>
@@ -294,18 +302,26 @@ const CRM = () => {
               <p className="text-2xl md:text-3xl text-primary font-semibold mb-6">
                 The World's First AI Relationship Engine
               </p>
-              <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto">
-                Where every customer interaction begins with consent, flows through voice intelligence,
-                and grows into a connected network of opportunities.
+              <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto mb-8">
+                From Consent → Conversation → Relationship
               </p>
-              <Button
-                size="lg"
-                className="mt-8 gap-2"
-                onClick={() => document.getElementById("pilot-form")?.scrollIntoView({ behavior: "smooth" })}
+              
+              {/* Hero Pipeline Animation */}
+              <HeroPipeline />
+              
+              <motion.div
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
               >
-                <Rocket className="w-5 h-5" />
-                Start Your AI CRM Pilot
-              </Button>
+                <Button
+                  size="lg"
+                  className="mt-4 gap-2"
+                  onClick={() => document.getElementById("pilot-form")?.scrollIntoView({ behavior: "smooth" })}
+                >
+                  <Rocket className="w-5 h-5" />
+                  Start Your AI CRM Pilot
+                </Button>
+              </motion.div>
             </div>
           </FadeInView>
         </div>
@@ -382,24 +398,65 @@ const CRM = () => {
           <StaggerContainer className="grid md:grid-cols-2 lg:grid-cols-3 gap-6" staggerDelay={0.1}>
             {features.map((feature, index) => (
               <ScaleInView key={index}>
-                <Card className="p-6 h-full hover:border-primary/30 transition-colors group">
-                  <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4 group-hover:bg-primary/20 transition-colors">
-                    <feature.icon className="w-6 h-6 text-primary" />
-                  </div>
-                  <h3 className="text-lg font-semibold text-foreground mb-2">
-                    {feature.title}
-                  </h3>
-                  <p className="text-muted-foreground text-sm">
-                    {feature.description}
-                  </p>
-                </Card>
+                <motion.div
+                  whileHover={{ y: -4, boxShadow: "0 8px 30px hsl(var(--primary) / 0.15)" }}
+                  whileTap={{ scale: 0.98 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  <Card className="p-6 h-full hover:border-primary/30 transition-colors group">
+                    <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4 group-hover:bg-primary/20 transition-colors">
+                      <feature.icon className="w-6 h-6 text-primary" />
+                    </div>
+                    <h3 className="text-lg font-semibold text-foreground mb-2">
+                      {feature.title}
+                    </h3>
+                    <p className="text-muted-foreground text-sm">
+                      {feature.description}
+                    </p>
+                  </Card>
+                </motion.div>
               </ScaleInView>
             ))}
           </StaggerContainer>
         </div>
       </section>
 
-      {/* Industry Graph Example */}
+      {/* Voice to Profile Demo Section */}
+      <section className="py-20 px-4 bg-card/50">
+        <div className="container mx-auto max-w-6xl">
+          <FadeInView>
+            <div className="text-center mb-12">
+              <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
+                🎙️ Voice Call → Transcript → Profile Auto-Update
+              </h2>
+              <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
+                Watch AI listen, understand, and update customer profiles in real-time. No typing required.
+              </p>
+            </div>
+          </FadeInView>
+          
+          <VoiceToProfileDemo />
+        </div>
+      </section>
+
+      {/* Relationship Timeline Section */}
+      <section className="py-20 px-4">
+        <div className="container mx-auto max-w-4xl">
+          <FadeInView>
+            <div className="text-center mb-12">
+              <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
+                📊 Beautiful Vertical Timeline of Every Interaction
+              </h2>
+              <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
+                One view. One truth. Zero silos. See the complete journey from first contact to lifetime value.
+              </p>
+            </div>
+          </FadeInView>
+          
+          <RelationshipTimeline />
+        </div>
+      </section>
+      {/* Industry Graph Example - Now with Animation */}
       <section className="py-20 px-4 bg-card/50">
         <div className="container mx-auto max-w-6xl">
           <FadeInView>
@@ -408,40 +465,55 @@ const CRM = () => {
                 🌐 Industry Graph — Connected Opportunities Auto-Expand
               </h2>
               <p className="text-muted-foreground text-lg max-w-3xl mx-auto">
-                This is where Vriksha AI CRM becomes magical. One lead becomes a network of revenue nodes.
+                One lead becomes a network of revenue nodes. Watch opportunities expand automatically.
               </p>
             </div>
           </FadeInView>
 
-          <Card className="p-8 bg-gradient-to-br from-primary/5 to-primary/10 border-primary/20">
-            <h3 className="text-xl font-semibold text-foreground mb-6 text-center">
-              Example: A Real-Estate Lead
-            </h3>
-            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
-              {[
-                "Home Loan",
-                "Legal Checks",
-                "Interior Designer",
-                "Architect",
-                "Modular Kitchen",
-                "HVAC",
-                "Plumbing",
-                "Painting",
-                "Smart Home",
-                "Moving Services",
-              ].map((service, index) => (
-                <div
-                  key={index}
-                  className="p-3 rounded-lg bg-background/50 border border-primary/20 text-center text-sm font-medium text-foreground hover:bg-primary/10 transition-colors"
-                >
-                  {service}
-                </div>
-              ))}
+          <div className="grid md:grid-cols-2 gap-8 items-center">
+            <div>
+              <h3 className="text-xl font-semibold text-foreground mb-4">
+                Example: A Real-Estate Lead
+              </h3>
+              <p className="text-muted-foreground mb-6">
+                When a buyer expresses interest in a 3BHK apartment, our AI automatically identifies and triggers workflows for 10+ allied services.
+              </p>
+              <ul className="space-y-3">
+                {["Home Loan → Partner bank outreach", "Interior Design → Consultation scheduling", "Legal Services → Document verification", "Smart Home → Automation quote"].map((item, i) => (
+                  <motion.li
+                    key={i}
+                    className="flex items-center gap-2 text-foreground"
+                    initial={{ opacity: 0, x: -20 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: i * 0.1 }}
+                  >
+                    <Check className="w-5 h-5 text-primary flex-shrink-0" />
+                    {item}
+                  </motion.li>
+                ))}
+              </ul>
             </div>
-            <p className="text-center text-muted-foreground mt-6">
-              Each node triggers AI workflows: Calls, WhatsApp, Email sequences, Ads, Partner introductions.
-            </p>
-          </Card>
+            <IndustryGraph />
+          </div>
+        </div>
+      </section>
+
+      {/* Next Best Action Animation */}
+      <section className="py-20 px-4">
+        <div className="container mx-auto max-w-5xl">
+          <FadeInView>
+            <div className="text-center mb-12">
+              <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
+                🧠 AI Decides. Channels Execute. You Scale.
+              </h2>
+              <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
+                Watch the AI brain analyze context and orchestrate multi-channel actions autonomously.
+              </p>
+            </div>
+          </FadeInView>
+          
+          <NextBestActionAnimation />
         </div>
       </section>
 
@@ -462,15 +534,21 @@ const CRM = () => {
           <StaggerContainer className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6" staggerDelay={0.08}>
             {industryCards.map((industry, index) => (
               <ScaleInView key={index}>
-                <Card className={`p-6 h-full bg-gradient-to-br ${industry.color} border-0 hover:scale-105 transition-transform`}>
-                  <industry.icon className="w-10 h-10 text-primary mb-4" />
-                  <h3 className="text-lg font-semibold text-foreground mb-2">
-                    {industry.title}
-                  </h3>
-                  <p className="text-muted-foreground text-sm">
-                    {industry.description}
-                  </p>
-                </Card>
+                <motion.div
+                  whileHover={{ scale: 1.05, y: -4 }}
+                  whileTap={{ scale: 0.98 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  <Card className={`p-6 h-full bg-gradient-to-br ${industry.color} border-0`}>
+                    <industry.icon className="w-10 h-10 text-primary mb-4" />
+                    <h3 className="text-lg font-semibold text-foreground mb-2">
+                      {industry.title}
+                    </h3>
+                    <p className="text-muted-foreground text-sm">
+                      {industry.description}
+                    </p>
+                  </Card>
+                </motion.div>
               </ScaleInView>
             ))}
           </StaggerContainer>
