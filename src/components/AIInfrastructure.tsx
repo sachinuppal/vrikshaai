@@ -1,4 +1,4 @@
-import { Mic, Eye, Satellite, Database, Leaf, Zap, Clock, Shield } from "lucide-react";
+import { Mic, Eye, Satellite, Database, Leaf, Zap, Clock, Shield, Bot } from "lucide-react";
 import { FadeInView, StaggerContainer, StaggerItem } from "@/components/animations";
 
 const technologies = [
@@ -16,6 +16,11 @@ const technologies = [
     icon: Satellite,
     title: "Geo-Satellite & Remote Imaging AI",
     description: "Scalable satellite/remote-sensing pipelines for land, energy, environment, and infrastructure analysis."
+  },
+  {
+    icon: Bot,
+    title: "AI Robotics",
+    description: "Intelligent robotics systems, autonomous navigation, robotic process automation, and AI-powered physical automation solutions."
   },
   {
     icon: Database,
