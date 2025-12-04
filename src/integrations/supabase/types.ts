@@ -479,6 +479,51 @@ export type Database = {
         }
         Relationships: []
       }
+      voice_leads: {
+        Row: {
+          comments: string | null
+          company_name: string
+          consent: boolean
+          created_at: string
+          current_solution: string | null
+          email: string
+          estimated_call_volume: string | null
+          full_name: string
+          id: string
+          industry: string
+          phone: string
+          use_case: string | null
+        }
+        Insert: {
+          comments?: string | null
+          company_name: string
+          consent?: boolean
+          created_at?: string
+          current_solution?: string | null
+          email: string
+          estimated_call_volume?: string | null
+          full_name: string
+          id?: string
+          industry: string
+          phone: string
+          use_case?: string | null
+        }
+        Update: {
+          comments?: string | null
+          company_name?: string
+          consent?: boolean
+          created_at?: string
+          current_solution?: string | null
+          email?: string
+          estimated_call_volume?: string | null
+          full_name?: string
+          id?: string
+          industry?: string
+          phone?: string
+          use_case?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

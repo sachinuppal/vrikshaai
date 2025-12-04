@@ -59,7 +59,7 @@ const products = [
   {
     title: "Vriksha Voice",
     description: "AI-powered calling platform",
-    href: "/#voice",
+    href: "/voice",
     icon: Phone,
   },
 ];
