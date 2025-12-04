@@ -87,7 +87,10 @@ export const BentoCard3D = ({ children, className = "" }: BentoCard3DProps) => {
           }}
         />
         
-        {children}
+        {/* Content wrapper - z-20 ensures it's above overlay effects */}
+        <div className="relative z-20 h-full">
+          {children}
+        </div>
       </motion.div>
     </motion.div>
   );
