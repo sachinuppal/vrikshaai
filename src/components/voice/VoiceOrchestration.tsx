@@ -52,7 +52,7 @@ export const VoiceOrchestration = () => {
   return (
     <div className="relative h-[400px] flex items-center justify-center">
       {/* SVG for connection lines */}
-      <svg className="absolute inset-0 w-full h-full pointer-events-none">
+      <svg className="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 400 400" preserveAspectRatio="xMidYMid meet">
         <defs>
           {channels.map((_, index) => (
             <linearGradient
