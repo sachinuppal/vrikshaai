@@ -1,2 +1,8 @@
 export { VoiceWaveformHero } from './VoiceWaveformHero';
 export { ArchitectureFlow } from './ArchitectureFlow';
+export { VoiceCallDemo } from './VoiceCallDemo';
+export { VoiceJourneyPipeline } from './VoiceJourneyPipeline';
+export { VoiceOrchestration } from './VoiceOrchestration';
+export { AnimatedROIMetrics } from './AnimatedROIMetrics';
+export { BeforeAfterVoice } from './BeforeAfterVoice';
+export { InteractiveIndustryGrid } from './InteractiveIndustryGrid';
