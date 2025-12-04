@@ -68,35 +68,32 @@ export const ArchitectureFlow = () => {
       />
 
       {/* Architecture Nodes */}
-      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4 relative z-10">
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-4 relative z-10">
         {architectureLayers.map((layer, index) => (
           <motion.div
             key={layer.title}
-            className="flex flex-col items-center text-center group"
+            className={`flex flex-col items-center text-center group ${
+              // Center the last item when odd number on mobile
+              index === architectureLayers.length - 1 ? 'col-span-2 sm:col-span-1' : ''
+            }`}
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ delay: index * 0.1, duration: 0.5 }}
           >
             <motion.div
-              className={`w-16 h-16 md:w-20 md:h-20 rounded-2xl bg-gradient-to-br ${layer.color} flex items-center justify-center shadow-lg mb-3 cursor-pointer`}
-              whileHover={{ scale: 1.15, rotate: 5 }}
-              transition={{ type: "spring", stiffness: 300 }}
+              className={`w-14 h-14 sm:w-16 sm:h-16 md:w-20 md:h-20 rounded-2xl bg-gradient-to-br ${layer.color} flex items-center justify-center shadow-lg mb-3 cursor-pointer transition-transform duration-200 hover:scale-110 hover:rotate-3`}
             >
-              <layer.icon className="w-8 h-8 md:w-10 md:h-10 text-white" />
+              <layer.icon className="w-7 h-7 sm:w-8 sm:h-8 md:w-10 md:h-10 text-white" />
             </motion.div>
             
-            <h4 className="font-semibold text-foreground text-sm md:text-base mb-1">
+            <h4 className="font-semibold text-foreground text-xs sm:text-sm md:text-base mb-1">
               {layer.title}
             </h4>
             
-            <motion.p
-              className="text-xs text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity duration-300 max-w-[120px]"
-              initial={{ y: 5 }}
-              whileHover={{ y: 0 }}
-            >
+            <p className="text-xs text-muted-foreground opacity-70 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-300 max-w-[100px] sm:max-w-[120px]">
               {layer.description}
-            </motion.p>
+            </p>
           </motion.div>
         ))}
       </div>
@@ -104,7 +101,7 @@ export const ArchitectureFlow = () => {
       {/* Flow Direction Indicator */}
       <div className="flex justify-center mt-8">
         <motion.div
-          className="flex items-center gap-2 text-muted-foreground text-sm"
+          className="flex items-center gap-2 text-muted-foreground text-xs sm:text-sm"
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
           viewport={{ once: true }}

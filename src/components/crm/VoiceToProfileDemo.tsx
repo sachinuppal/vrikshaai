@@ -73,10 +73,10 @@ export const VoiceToProfileDemo = () => {
   }, []);
 
   return (
-    <div className="grid md:grid-cols-3 gap-6 items-start max-w-5xl mx-auto">
+    <div className="grid md:grid-cols-3 gap-4 md:gap-6 items-start max-w-5xl mx-auto">
       {/* Phone Card */}
       <motion.div
-        className="bg-card rounded-2xl border border-border p-6 relative overflow-hidden"
+        className="bg-card rounded-2xl border border-border p-4 md:p-6 relative overflow-hidden"
         animate={{
           borderColor: activePhase === 0 || activePhase === 1 
             ? "hsl(var(--primary))" 
@@ -87,7 +87,7 @@ export const VoiceToProfileDemo = () => {
         }}
         transition={{ duration: 0.3 }}
       >
-        <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center justify-between mb-4 md:mb-6">
           <span className="text-sm font-medium text-muted-foreground">Incoming Call</span>
           <motion.div
             className="w-3 h-3 rounded-full bg-green-500"
@@ -99,27 +99,27 @@ export const VoiceToProfileDemo = () => {
           />
         </div>
 
-        <div className="flex justify-center mb-6">
+        <div className="flex justify-center mb-4 md:mb-6">
           <motion.div
-            className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center"
+            className="w-16 h-16 md:w-20 md:h-20 rounded-full bg-primary/10 flex items-center justify-center"
             animate={{
               scale: activePhase <= 1 ? [1, 1.05, 1] : 1,
             }}
             transition={{ duration: 1.5, repeat: activePhase <= 1 ? Infinity : 0 }}
           >
-            <Phone className="w-10 h-10 text-primary" />
+            <Phone className="w-8 h-8 md:w-10 md:h-10 text-primary" />
           </motion.div>
         </div>
 
         {/* Waveform Animation */}
-        <div className="flex items-center justify-center gap-1 h-12">
+        <div className="flex items-center justify-center gap-1 h-10 md:h-12">
           {[...Array(12)].map((_, i) => (
             <motion.div
               key={i}
-              className="w-1.5 bg-primary rounded-full"
+              className="w-1 md:w-1.5 bg-primary rounded-full"
               animate={{
                 height: activePhase <= 1 
-                  ? [8, Math.random() * 32 + 8, 8] 
+                  ? [8, Math.random() * 24 + 8, 8] 
                   : 8,
               }}
               transition={{
@@ -131,7 +131,7 @@ export const VoiceToProfileDemo = () => {
           ))}
         </div>
 
-        <div className="text-center mt-4">
+        <div className="text-center mt-3 md:mt-4">
           <motion.span
             className="text-sm text-muted-foreground"
             animate={{ opacity: activePhase <= 1 ? [0.5, 1, 0.5] : 0.5 }}
@@ -144,7 +144,7 @@ export const VoiceToProfileDemo = () => {
 
       {/* Transcript Card */}
       <motion.div
-        className="bg-card rounded-2xl border border-border p-6 min-h-[280px]"
+        className="bg-card rounded-2xl border border-border p-4 md:p-6 min-h-[200px] md:min-h-[280px]"
         animate={{
           borderColor: activePhase === 1 
             ? "hsl(var(--secondary))" 
@@ -155,19 +155,19 @@ export const VoiceToProfileDemo = () => {
         }}
         transition={{ duration: 0.3 }}
       >
-        <div className="flex items-center gap-2 mb-4">
+        <div className="flex items-center gap-2 mb-3 md:mb-4">
           <Mic className="w-4 h-4 text-secondary" />
           <span className="text-sm font-medium text-muted-foreground">Live Transcript</span>
         </div>
 
-        <div className="space-y-3">
+        <div className="space-y-2 md:space-y-3">
           <AnimatePresence>
             {visibleLines.map((lineIndex) => (
               <motion.div
                 key={lineIndex}
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="text-sm text-foreground bg-muted/50 rounded-lg p-3"
+                className="text-xs md:text-sm text-foreground bg-muted/50 rounded-lg p-2 md:p-3"
               >
                 <span className="text-primary font-medium">Customer:</span>{" "}
                 {transcriptLines[lineIndex]}
@@ -176,7 +176,7 @@ export const VoiceToProfileDemo = () => {
           </AnimatePresence>
           
           {visibleLines.length === 0 && (
-            <div className="text-sm text-muted-foreground italic">
+            <div className="text-xs md:text-sm text-muted-foreground italic">
               Waiting for transcript...
             </div>
           )}
@@ -185,7 +185,7 @@ export const VoiceToProfileDemo = () => {
 
       {/* Profile Card */}
       <motion.div
-        className="bg-card rounded-2xl border border-border p-6 min-h-[280px]"
+        className="bg-card rounded-2xl border border-border p-4 md:p-6 min-h-[200px] md:min-h-[280px]"
         animate={{
           borderColor: activePhase >= 2 
             ? "hsl(var(--primary))" 
@@ -196,12 +196,12 @@ export const VoiceToProfileDemo = () => {
         }}
         transition={{ duration: 0.3 }}
       >
-        <div className="flex items-center gap-2 mb-4">
+        <div className="flex items-center gap-2 mb-3 md:mb-4">
           <User className="w-4 h-4 text-primary" />
           <span className="text-sm font-medium text-muted-foreground">Profile Auto-Update</span>
         </div>
 
-        <div className="space-y-3">
+        <div className="space-y-2 md:space-y-3">
           <AnimatePresence>
             {visibleFields.map((fieldIndex) => {
               const field = profileFields[fieldIndex];
@@ -210,14 +210,14 @@ export const VoiceToProfileDemo = () => {
                   key={fieldIndex}
                   initial={{ opacity: 0, x: 20 }}
                   animate={{ opacity: 1, x: 0 }}
-                  className="flex items-center gap-3 p-2 rounded-lg bg-primary/5"
+                  className="flex items-center gap-2 md:gap-3 p-1.5 md:p-2 rounded-lg bg-primary/5"
                 >
-                  <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
-                    <field.icon className="w-4 h-4 text-primary" />
+                  <div className="w-7 h-7 md:w-8 md:h-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                    <field.icon className="w-3.5 h-3.5 md:w-4 md:h-4 text-primary" />
                   </div>
-                  <div className="flex-1">
+                  <div className="flex-1 min-w-0">
                     <div className="text-xs text-muted-foreground">{field.label}</div>
-                    <div className="text-sm font-medium text-foreground">{field.value}</div>
+                    <div className="text-xs md:text-sm font-medium text-foreground truncate">{field.value}</div>
                   </div>
                 </motion.div>
               );
@@ -225,7 +225,7 @@ export const VoiceToProfileDemo = () => {
           </AnimatePresence>
 
           {visibleFields.length === 0 && (
-            <div className="text-sm text-muted-foreground italic">
+            <div className="text-xs md:text-sm text-muted-foreground italic">
               Profile updating soon...
             </div>
           )}

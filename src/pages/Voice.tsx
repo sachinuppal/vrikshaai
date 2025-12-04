@@ -298,16 +298,15 @@ const Voice = () => {
           <StaggerContainer className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {capabilities.map((cap, index) => (
               <StaggerItem key={index}>
-                <motion.div
-                  className="p-5 rounded-xl bg-card border border-border hover:border-primary/50 transition-all h-full"
-                  whileHover={{ y: -4, scale: 1.02 }}
+                <div
+                  className="p-5 rounded-xl bg-card border border-border hover:border-primary/50 hover:-translate-y-1 hover:scale-[1.02] transition-all duration-200 h-full"
                 >
                   <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4">
                     <cap.icon className="w-6 h-6 text-primary" />
                   </div>
                   <h3 className="font-semibold mb-2">{cap.title}</h3>
                   <p className="text-sm text-muted-foreground">{cap.description}</p>
-                </motion.div>
+                </div>
               </StaggerItem>
             ))}
           </StaggerContainer>
@@ -346,16 +345,15 @@ const Voice = () => {
           <StaggerContainer className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {whyChoose.map((item, index) => (
               <StaggerItem key={index}>
-                <motion.div
-                  className="p-6 rounded-xl bg-card border border-border hover:border-primary/50 transition-all"
-                  whileHover={{ y: -4 }}
+                <div
+                  className="p-6 rounded-xl bg-card border border-border hover:border-primary/50 hover:-translate-y-1 transition-all duration-200"
                 >
                   <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-primary to-orange-400 flex items-center justify-center mb-4">
                     <item.icon className="w-7 h-7 text-white" />
                   </div>
                   <h3 className="text-xl font-semibold mb-2">{item.title}</h3>
                   <p className="text-muted-foreground">{item.description}</p>
-                </motion.div>
+                </div>
               </StaggerItem>
             ))}
           </StaggerContainer>
@@ -394,16 +392,15 @@ const Voice = () => {
           <StaggerContainer className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {differentiators.map((diff, index) => (
               <StaggerItem key={index}>
-                <motion.div
-                  className="p-6 rounded-xl bg-card border border-border"
-                  whileHover={{ scale: 1.02 }}
+                <div
+                  className="p-6 rounded-xl bg-card border border-border hover:scale-[1.02] transition-transform duration-200"
                 >
                   <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center mb-4">
                     <CheckCircle className="w-5 h-5 text-primary" />
                   </div>
                   <h3 className="font-semibold mb-2">{diff.title}</h3>
                   <p className="text-sm text-muted-foreground">{diff.description}</p>
-                </motion.div>
+                </div>
               </StaggerItem>
             ))}
           </StaggerContainer>
