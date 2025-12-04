@@ -17,7 +17,7 @@ const PrivacyPolicy = () => {
         {/* Header */}
         <div className="mb-12">
           <h1 className="text-4xl font-bold text-foreground mb-4">Vriksha.ai — Privacy Policy</h1>
-          <p className="text-muted-foreground">Effective Date: [Insert date]</p>
+          <p className="text-muted-foreground">Effective Date: 1st December 2025</p>
         </div>
 
         {/* Table of Contents */}
