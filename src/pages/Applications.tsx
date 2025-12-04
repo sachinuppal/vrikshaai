@@ -8,8 +8,20 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { 
   Plus, FileText, Clock, CheckCircle, AlertCircle, Loader2, 
-  ChevronRight, Calendar, Users, LogOut
+  ChevronRight, Calendar, Users, LogOut, Trash2, Pencil
 } from 'lucide-react';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
+import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 
@@ -47,6 +59,7 @@ const statusConfig: Record<string, { label: string; color: string; icon: any }> 
 export default function Applications() {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
+  const { toast } = useToast();
   const [applications, setApplications] = useState<Application[]>([]);
   const [cohorts, setCohorts] = useState<Cohort[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -125,6 +138,28 @@ export default function Applications() {
     navigate(`/apply/${data.id}`);
   };
 
+  const handleDeleteApplication = async (appId: string) => {
+    const { error } = await supabase
+      .from('accelerator_applications')
+      .delete()
+      .eq('id', appId);
+
+    if (error) {
+      toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: 'Failed to delete application',
+      });
+      return;
+    }
+
+    setApplications(prev => prev.filter(app => app.id !== appId));
+    toast({
+      title: 'Deleted',
+      description: 'Application has been deleted.',
+    });
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
@@ -199,7 +234,8 @@ export default function Applications() {
                       key={app.id} 
                       application={app} 
                       onClick={() => navigate(`/apply/${app.id}`)}
-                      onUnlockForEdit={async () => {
+                      onDelete={app.status === 'draft' ? () => handleDeleteApplication(app.id) : undefined}
+                      onUnlockForEdit={app.status === 'submitted' && app.edit_count < 1 ? async () => {
                         // Unlock for one-time edit
                         const { error } = await supabase
                           .from('accelerator_applications')
@@ -212,7 +248,7 @@ export default function Applications() {
                         if (!error) {
                           navigate(`/apply/${app.id}`);
                         }
-                      }}
+                      } : undefined}
                     />
                   ))
                 )}
@@ -356,16 +392,19 @@ export default function Applications() {
 function ApplicationCard({ 
   application, 
   onClick,
-  onUnlockForEdit 
+  onUnlockForEdit,
+  onDelete
 }: { 
   application: Application; 
   onClick: () => void;
   onUnlockForEdit?: () => void;
+  onDelete?: () => void;
 }) {
   const status = statusConfig[application.status] || statusConfig.draft;
   const StatusIcon = status.icon;
   const cofounderCount = Array.isArray(application.cofounder_details) ? application.cofounder_details.length : 0;
   
+  const isDraft = application.status === 'draft';
   // Can edit if submitted and hasn't used the one-time edit yet
   const canEdit = application.status === 'submitted' && application.edit_count < 1;
 
@@ -402,6 +441,48 @@ function ApplicationCard({
             </div>
           </div>
           <div className="flex gap-2">
+            {isDraft && onDelete && (
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={(e) => e.stopPropagation()}
+                    className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent onClick={(e) => e.stopPropagation()}>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Delete Application?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      This will permanently delete your draft application for{' '}
+                      <strong>{application.company_name || 'Untitled Application'}</strong>.
+                      This action cannot be undone.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onDelete();
+                      }}
+                      className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                    >
+                      Delete
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            )}
+            {isDraft && (
+              <Button variant="outline" size="sm">
+                <Pencil className="w-4 h-4 mr-1" />
+                Edit
+              </Button>
+            )}
             {canEdit && onUnlockForEdit && (
               <Button 
                 variant="default" 
@@ -411,13 +492,16 @@ function ApplicationCard({
                   onUnlockForEdit();
                 }}
               >
-                Edit
+                <Pencil className="w-4 h-4 mr-1" />
+                Edit (1 left)
               </Button>
             )}
-            <Button variant="outline" size="sm">
-              {application.status === 'draft' ? 'Continue' : 'View'}
-              <ChevronRight className="w-4 h-4 ml-1" />
-            </Button>
+            {!isDraft && (
+              <Button variant="outline" size="sm">
+                View
+                <ChevronRight className="w-4 h-4 ml-1" />
+              </Button>
+            )}
           </div>
         </div>
       </CardContent>

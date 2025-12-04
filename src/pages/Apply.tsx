@@ -1098,13 +1098,31 @@ export default function Apply() {
                   Continue
                   <ChevronRight className="w-4 h-4" />
                 </Button>
+              ) : !isSubmitted && application.id ? (
+                <Button
+                  onClick={submitApplication}
+                  disabled={isSubmitting}
+                  className="gap-2"
+                >
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      Submitting...
+                    </>
+                  ) : (
+                    <>
+                      <Send className="w-4 h-4" />
+                      Submit Application
+                    </>
+                  )}
+                </Button>
               ) : (
-                <div className="w-[100px]" /> // Spacer for alignment
+                <div className="w-[100px]" />
               )}
             </div>
 
             {/* Submit Section */}
-            {!isSubmitted && application.id && activeSection === 'batch' && (
+            {!isSubmitted && application.id && activeSection === 'equity' && (
               <Card className="border-primary/20 bg-primary/5">
                 <CardContent className="py-6 flex flex-col sm:flex-row items-center justify-between gap-4">
                   <div>
