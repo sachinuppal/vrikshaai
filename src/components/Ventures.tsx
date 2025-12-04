@@ -2,13 +2,14 @@ import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Mic, Database, Eye, Satellite, Bot, Phone, BarChart3, Headphones, Shield, Users, Clipboard, BadgeCheck, Camera, Sun, ExternalLink } from "lucide-react";
+import { Mic, Database, Eye, Satellite, Bot, Phone, BarChart3, Headphones, Shield, Users, Clipboard, BadgeCheck, Camera, Sun, ExternalLink, Scale, FileSearch, ClipboardList } from "lucide-react";
 import { FadeInView, StaggerContainer, StaggerItem, BentoCard3D } from "@/components/animations";
 import { openVoiceChat } from "@/lib/voiceChat";
 import TelecallersModal from "./TelecallersModal";
 import SignalBoxModal from "./SignalBoxModal";
+import ComplianceModal from "./ComplianceModal";
 
-type CTAType = 'voice-chat' | 'link' | 'modal-phone' | 'modal-email' | 'coming-soon' | 'feature-link';
+type CTAType = 'voice-chat' | 'link' | 'modal-phone' | 'modal-email' | 'coming-soon' | 'feature-link' | 'modal-compliance' | 'modal-checklist';
 
 interface CTA {
   type: CTAType;
@@ -122,11 +123,39 @@ const ventureCategories: VentureCategory[] = [
       },
     ]
   },
+  {
+    technology: "Compliance & Governance AI",
+    icon: Scale,
+    color: "accent",
+    categoryCta: { type: 'modal-compliance', label: "Schedule Governance Assessment" },
+    ventures: [
+      {
+        name: "GovAI Suite",
+        description: "Comprehensive governance stack: audit trails, data-privacy controls, regulatory compliance tracking, risk assessment, model versioning, explainability dashboards, and granular access control. No vendor lock-in — deploy on-prem, hybrid, or cloud.",
+        icon: Shield,
+        cta: { type: 'modal-compliance', label: "Request Governance Pilot" },
+      },
+      {
+        name: "RegTrack",
+        description: "Real-time regulatory tracking & alerts for evolving compliance requirements across jurisdictions — finance (RBI, SEBI), healthcare (HIPAA), energy (ESG), municipal regulations.",
+        icon: FileSearch,
+        cta: { type: 'coming-soon', label: "Coming Soon" },
+      },
+      {
+        name: "AuditFlow",
+        description: "Automated audit-log generation, evidence collection, and compliance reporting — reduces manual audit preparation by 80%. Immutable, timestamped records for every AI decision.",
+        icon: ClipboardList,
+        cta: { type: 'modal-compliance', label: "Request Compliance Audit" },
+      },
+    ]
+  },
 ];
 
 const Ventures = () => {
   const [telecallersModalOpen, setTelecallersModalOpen] = useState(false);
   const [signalBoxModalOpen, setSignalBoxModalOpen] = useState(false);
+  const [complianceModalOpen, setComplianceModalOpen] = useState(false);
+  const [complianceModalMode, setComplianceModalMode] = useState<"pilot" | "checklist">("pilot");
 
   const handleCTAClick = (cta: CTA) => {
     switch (cta.type) {
@@ -143,6 +172,14 @@ const Ventures = () => {
         break;
       case 'modal-email':
         setSignalBoxModalOpen(true);
+        break;
+      case 'modal-compliance':
+        setComplianceModalMode("pilot");
+        setComplianceModalOpen(true);
+        break;
+      case 'modal-checklist':
+        setComplianceModalMode("checklist");
+        setComplianceModalOpen(true);
         break;
       case 'feature-link':
         // Placeholder for future feature pages
@@ -277,6 +314,11 @@ const Ventures = () => {
       {/* Modals */}
       <TelecallersModal open={telecallersModalOpen} onOpenChange={setTelecallersModalOpen} />
       <SignalBoxModal open={signalBoxModalOpen} onOpenChange={setSignalBoxModalOpen} />
+      <ComplianceModal 
+        open={complianceModalOpen} 
+        onOpenChange={setComplianceModalOpen} 
+        initialMode={complianceModalMode}
+      />
     </section>
   );
 };
