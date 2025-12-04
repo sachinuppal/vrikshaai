@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Rocket, TrendingUp, Megaphone, Code, Cloud, CheckCircle, Star, Sparkles } from "lucide-react";
@@ -227,13 +228,23 @@ const Accelerator = () => {
 
         {/* CTA */}
         <FadeInView className="text-center" delay={0.4}>
-          <Button 
-            size="lg"
-            onClick={openVoiceChat}
-            className="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold px-10 py-6 text-lg rounded-xl transition-all hover:scale-105 hover:shadow-hover"
-          >
-            Let's Talk
-          </Button>
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+            <Button 
+              size="lg"
+              asChild
+              className="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold px-10 py-6 text-lg rounded-xl transition-all hover:scale-105 hover:shadow-hover"
+            >
+              <Link to="/auth">Apply Now</Link>
+            </Button>
+            <Button 
+              size="lg"
+              variant="outline"
+              onClick={openVoiceChat}
+              className="font-semibold px-10 py-6 text-lg rounded-xl transition-all hover:scale-105"
+            >
+              Let's Talk
+            </Button>
+          </div>
         </FadeInView>
       </div>
     </section>
