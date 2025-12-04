@@ -5,3 +5,9 @@ verify_jwt = false
 
 [functions.send-cofounder-invite]
 verify_jwt = false
+
+[functions.send-enterprise-notification]
+verify_jwt = false
+
+[functions.send-compliance-notification]
+verify_jwt = false

@@ -81,19 +81,20 @@ const useCases = [
   { id: "satellite", name: "Geo-Satellite & Remote Imaging AI", icon: Satellite },
   { id: "analytics", name: "Data & Analytics Backbone", icon: BarChart3 },
   { id: "hybrid", name: "Hybrid / Multi-Modal Deployments", icon: Layers },
+  { id: "compliance", name: "Compliance & Governance AI", icon: Scale },
 ];
 
 // Industry to use case mapping
 const industryUseCaseMapping: Record<string, string[]> = {
-  finance: ["voice", "analytics", "hybrid"],
+  finance: ["voice", "analytics", "hybrid", "compliance"],
   retail: ["voice", "video", "analytics"],
   logistics: ["video", "satellite", "analytics"],
-  energy: ["voice", "satellite", "analytics", "hybrid"],
-  realestate: ["video", "satellite", "hybrid"],
-  government: ["voice", "video", "satellite", "analytics"],
-  healthcare: ["voice", "video", "analytics"],
-  manufacturing: ["video", "analytics", "hybrid"],
-  telecom: ["voice", "analytics"],
+  energy: ["voice", "satellite", "analytics", "hybrid", "compliance"],
+  realestate: ["video", "satellite", "hybrid", "compliance"],
+  government: ["voice", "video", "satellite", "analytics", "compliance"],
+  healthcare: ["voice", "video", "analytics", "compliance"],
+  manufacturing: ["video", "analytics", "hybrid", "compliance"],
+  telecom: ["voice", "analytics", "compliance"],
 };
 
 // Form schema
@@ -184,6 +185,21 @@ const useCaseCards = [
     value: "Enables end-to-end AI transformation, not just isolated tools — reduce silos, integrate workflows, and future-proof operations.",
     cta: "Talk to Enterprise Architect",
     color: "from-rose-500/20 to-pink-500/20",
+  },
+  {
+    id: "compliance",
+    title: "Compliance & Governance AI",
+    icon: Scale,
+    useCases: [
+      "Automated audit-log generation & evidence collection",
+      "Data privacy controls & consent management",
+      "Regulatory tracking & compliance alerts",
+      "Risk assessment & model explainability",
+    ],
+    industries: ["Finance", "Healthcare", "Energy", "Government", "Law Enforcement", "ESG/Infra"],
+    value: "Ensures AI deployments meet regulatory requirements, reduces compliance risk, provides audit-ready documentation, and builds trust through transparency and explainability. No vendor lock-in — hybrid deployment options.",
+    cta: "Request Governance Pilot",
+    color: "from-slate-500/20 to-gray-500/20",
   },
 ];
 
