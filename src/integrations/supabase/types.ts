@@ -257,6 +257,54 @@ export type Database = {
         }
         Relationships: []
       }
+      crm_leads: {
+        Row: {
+          company_name: string
+          consent: boolean
+          created_at: string
+          current_crm: string | null
+          email: string
+          estimated_lead_volume: string | null
+          full_name: string
+          id: string
+          industry: string
+          key_pain_point: string
+          phone: string
+          pilot_path: string
+          preferred_time: string | null
+        }
+        Insert: {
+          company_name: string
+          consent?: boolean
+          created_at?: string
+          current_crm?: string | null
+          email: string
+          estimated_lead_volume?: string | null
+          full_name: string
+          id?: string
+          industry: string
+          key_pain_point: string
+          phone: string
+          pilot_path: string
+          preferred_time?: string | null
+        }
+        Update: {
+          company_name?: string
+          consent?: boolean
+          created_at?: string
+          current_crm?: string | null
+          email?: string
+          estimated_lead_volume?: string | null
+          full_name?: string
+          id?: string
+          industry?: string
+          key_pain_point?: string
+          phone?: string
+          pilot_path?: string
+          preferred_time?: string | null
+        }
+        Relationships: []
+      }
       enterprise_leads: {
         Row: {
           additional_notes: string | null
