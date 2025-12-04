@@ -34,7 +34,7 @@ export default function Auth() {
   const location = useLocation();
   const { toast } = useToast();
 
-  const from = (location.state as { from?: { pathname: string } })?.from?.pathname || '/apply';
+  const from = (location.state as { from?: { pathname: string } })?.from?.pathname || '/applications';
 
   useEffect(() => {
     if (user) {
