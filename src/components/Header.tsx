@@ -24,9 +24,8 @@ const Header = () => {
 
   const navLinks = [
     { name: "For Investors", path: "/investors" },
+    { name: "For Enterprises", path: "/enterprises" },
     { name: "Contact Us", path: "/contact" },
-    { name: "Terms of Use", path: "/terms" },
-    { name: "Privacy Policy", path: "/privacy" },
   ];
 
   return (
