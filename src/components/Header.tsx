@@ -14,6 +14,7 @@ const Header = () => {
   const [isOpen, setIsOpen] = useState(false);
 
   const navLinks = [
+    { name: "Contact Us", path: "/contact" },
     { name: "Terms of Use", path: "/terms" },
     { name: "Privacy Policy", path: "/privacy" },
   ];
