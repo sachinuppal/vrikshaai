@@ -16,7 +16,7 @@ const Footer = () => {
             {/* Brand Line */}
             <div className="space-y-2">
               <p className="text-xl font-semibold text-foreground">
-                Vriksha.ai — Rooted in India. Growing the Future of AI.
+                Vriksha.ai — Rooted in India. Co-Building AI that People Want.
               </p>
             </div>
 
