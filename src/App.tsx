@@ -9,6 +9,7 @@ import TermsOfUse from "./pages/TermsOfUse";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import Contact from "./pages/Contact";
 import AICallingConsentModal from "./components/AICallingConsentModal";
+import { CookieConsent } from "./components/CookieConsent";
 
 const queryClient = new QueryClient();
 
@@ -19,6 +20,7 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <AICallingConsentModal />
+        <CookieConsent />
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/terms" element={<TermsOfUse />} />
