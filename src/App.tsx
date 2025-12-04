@@ -14,6 +14,7 @@ import CookieSettings from "./pages/CookieSettings";
 import Auth from "./pages/Auth";
 import Apply from "./pages/Apply";
 import Applications from "./pages/Applications";
+import Investors from "./pages/Investors";
 import AICallingConsentModal from "./components/AICallingConsentModal";
 import { CookieConsent } from "./components/CookieConsent";
 
@@ -35,6 +36,7 @@ const App = () => (
             <Route path="/contact" element={<Contact />} />
             <Route path="/cookies" element={<CookieSettings />} />
             <Route path="/auth" element={<Auth />} />
+            <Route path="/investors" element={<Investors />} />
             <Route
               path="/applications"
               element={

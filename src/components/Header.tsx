@@ -23,6 +23,7 @@ const Header = () => {
   const { user, signOut } = useAuth();
 
   const navLinks = [
+    { name: "For Investors", path: "/investors" },
     { name: "Contact Us", path: "/contact" },
     { name: "Terms of Use", path: "/terms" },
     { name: "Privacy Policy", path: "/privacy" },
