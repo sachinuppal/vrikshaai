@@ -51,9 +51,7 @@ const Gamification = () => {
           {stats.map((stat, index) => (
             <ScaleInView key={index} delay={index * 0.15}>
               <motion.div
-                className="text-center p-6 rounded-2xl bg-card border border-border shadow-card"
-                whileHover={{ scale: 1.05 }}
-                transition={{ duration: 0.2 }}
+                className="text-center p-6 rounded-2xl bg-card border border-border shadow-card hover:scale-105 transition-transform duration-200"
               >
                 <div className={`text-5xl font-bold ${stat.color} mb-2`}>{stat.value}</div>
                 <div className="text-lg text-muted-foreground">{stat.label}</div>

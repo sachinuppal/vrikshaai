@@ -246,22 +246,26 @@ const Ventures = () => {
               <FadeInView key={catIndex} delay={catIndex * 0.1}>
                 <div className="space-y-6">
                   {/* Category Header */}
-                  <div className={`flex items-center justify-between gap-4 p-4 rounded-xl ${categoryBg} border ${categoryBorder}`}>
-                    <div className="flex items-center gap-4">
-                      <div className={`w-12 h-12 rounded-lg ${categoryBg} flex items-center justify-center`}>
-                        <CategoryIcon className={`w-6 h-6 ${categoryColor}`} />
+                  <div className={`flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4 p-4 rounded-xl ${categoryBg} border ${categoryBorder}`}>
+                    <div className="flex items-center gap-3 sm:gap-4">
+                      <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-lg ${categoryBg} flex items-center justify-center flex-shrink-0`}>
+                        <CategoryIcon className={`w-5 h-5 sm:w-6 sm:h-6 ${categoryColor}`} />
                       </div>
-                      <h3 className={`text-xl md:text-2xl font-bold ${categoryColor}`}>
+                      <h3 className={`text-lg sm:text-xl md:text-2xl font-bold ${categoryColor}`}>
                         {category.technology}
                       </h3>
                     </div>
                     {category.categoryCta && (
                       <Button
                         variant="outline"
-                        className={`${categoryColor} border-current hover:bg-current/10`}
+                        size="sm"
+                        className={`${categoryColor} border-current hover:bg-current/10 w-full sm:w-auto text-sm whitespace-nowrap`}
                         onClick={() => handleCTAClick(category.categoryCta!)}
                       >
-                        {category.categoryCta.label}
+                        <span className="hidden sm:inline">{category.categoryCta.label}</span>
+                        <span className="sm:hidden">
+                          {category.categoryCta.label.includes('Assessment') ? 'Schedule Assessment' : category.categoryCta.label}
+                        </span>
                       </Button>
                     )}
                   </div>
