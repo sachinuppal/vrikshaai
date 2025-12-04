@@ -50,8 +50,8 @@ const Header = () => {
               </Link>
             ))}
             
-            {/* Auth Section */}
-            {user ? (
+            {/* Auth Section - Only show when logged in */}
+            {user && (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" size="sm" className="gap-2">
@@ -73,20 +73,11 @@ const Header = () => {
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
-            ) : (
-              <Button asChild size="sm">
-                <Link to="/auth">Apply Now</Link>
-              </Button>
             )}
           </nav>
 
           {/* Mobile Menu */}
           <div className="flex items-center gap-2 md:hidden">
-            {!user && (
-              <Button asChild size="sm">
-                <Link to="/auth">Apply</Link>
-              </Button>
-            )}
             <Sheet open={isOpen} onOpenChange={setIsOpen}>
               <SheetTrigger asChild>
                 <Button variant="ghost" size="icon" className="text-foreground">
