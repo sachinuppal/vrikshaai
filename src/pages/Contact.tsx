@@ -60,10 +60,10 @@ const Contact = () => {
             </div>
             <h3 className="font-semibold text-foreground mb-2">Phone</h3>
             <a 
-              href="tel:+919876543210" 
+              href="tel:+919987723454" 
               className="text-muted-foreground hover:text-primary transition-colors"
             >
-              +91 98765 43210
+              +91 99877 23454
             </a>
           </div>
 
@@ -73,7 +73,8 @@ const Contact = () => {
             </div>
             <h3 className="font-semibold text-foreground mb-2">Office</h3>
             <p className="text-muted-foreground">
-              Bangalore, Karnataka, India
+              Bangalore South, Karnataka<br />
+              PIN Code: 560083
             </p>
           </div>
         </div>
