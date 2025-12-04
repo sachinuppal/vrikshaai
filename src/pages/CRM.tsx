@@ -398,23 +398,17 @@ const CRM = () => {
           <StaggerContainer className="grid md:grid-cols-2 lg:grid-cols-3 gap-6" staggerDelay={0.1}>
             {features.map((feature, index) => (
               <ScaleInView key={index}>
-                <motion.div
-                  whileHover={{ y: -4, boxShadow: "0 8px 30px hsl(var(--primary) / 0.15)" }}
-                  whileTap={{ scale: 0.98 }}
-                  transition={{ duration: 0.2 }}
-                >
-                  <Card className="p-6 h-full hover:border-primary/30 transition-colors group">
-                    <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4 group-hover:bg-primary/20 transition-colors">
-                      <feature.icon className="w-6 h-6 text-primary" />
-                    </div>
-                    <h3 className="text-lg font-semibold text-foreground mb-2">
-                      {feature.title}
-                    </h3>
-                    <p className="text-muted-foreground text-sm">
-                      {feature.description}
-                    </p>
-                  </Card>
-                </motion.div>
+                <Card className="p-6 h-full hover:border-primary/30 hover:-translate-y-1 hover:shadow-[0_8px_30px_hsl(var(--primary)/0.15)] active:scale-[0.98] transition-all duration-200 group">
+                  <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4 group-hover:bg-primary/20 transition-colors">
+                    <feature.icon className="w-6 h-6 text-primary" />
+                  </div>
+                  <h3 className="text-lg font-semibold text-foreground mb-2">
+                    {feature.title}
+                  </h3>
+                  <p className="text-muted-foreground text-sm">
+                    {feature.description}
+                  </p>
+                </Card>
               </ScaleInView>
             ))}
           </StaggerContainer>
