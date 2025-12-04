@@ -7,9 +7,7 @@ import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import {
   Dialog,
@@ -17,13 +15,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import {
   Accordion,
   AccordionContent,
@@ -109,13 +100,8 @@ const industryUseCaseMapping: Record<string, string[]> = {
 const formSchema = z.object({
   company_name: z.string().min(1, "Company name is required").max(200),
   contact_name: z.string().min(1, "Contact name is required").max(100),
-  role: z.string().max(100).optional(),
   email: z.string().email("Invalid email address").max(255),
   phone: z.string().max(20).optional(),
-  deployment_mode: z.string().optional(),
-  estimated_scale: z.string().max(500).optional(),
-  additional_notes: z.string().max(2000).optional(),
-  best_time_for_demo: z.string().optional(),
   nda_accepted: z.boolean().refine((val) => val === true, {
     message: "You must accept the data privacy agreement",
   }),
@@ -281,13 +267,8 @@ const Enterprises = () => {
     defaultValues: {
       company_name: "",
       contact_name: "",
-      role: "",
       email: "",
       phone: "",
-      deployment_mode: "",
-      estimated_scale: "",
-      additional_notes: "",
-      best_time_for_demo: "",
       nda_accepted: false,
     },
   });
@@ -356,19 +337,13 @@ const Enterprises = () => {
         industry: industryName,
         use_cases: useCaseNames,
         contact_name: data.contact_name,
-        role: data.role || null,
         email: data.email,
         phone: data.phone || null,
-        deployment_mode: data.deployment_mode || null,
-        estimated_scale: data.estimated_scale || null,
-        additional_notes: data.additional_notes || null,
-        best_time_for_demo: data.best_time_for_demo || null,
         nda_accepted: data.nda_accepted,
       });
 
       if (error) throw error;
 
-      // Send email notification
       try {
         await supabase.functions.invoke("send-enterprise-notification", {
           body: {
@@ -376,13 +351,8 @@ const Enterprises = () => {
             industry: industryName,
             useCases: useCaseNames,
             contactName: data.contact_name,
-            role: data.role,
             email: data.email,
             phone: data.phone,
-            deploymentMode: data.deployment_mode,
-            estimatedScale: data.estimated_scale,
-            additionalNotes: data.additional_notes,
-            bestTimeForDemo: data.best_time_for_demo,
           },
         });
       } catch (emailError) {
@@ -836,102 +806,6 @@ const Enterprises = () => {
                   />
                 </div>
 
-                <FormField
-                  control={form.control}
-                  name="role"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Role / Designation</FormLabel>
-                      <FormControl>
-                        <Input placeholder="CTO, VP Engineering, etc." {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="deployment_mode"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Preferred Deployment Mode</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select deployment preference" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="cloud">Cloud (Managed)</SelectItem>
-                          <SelectItem value="on-prem">On-Premises</SelectItem>
-                          <SelectItem value="on-device">On-Device (Edge)</SelectItem>
-                          <SelectItem value="hybrid">Hybrid</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="estimated_scale"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Estimated Scale / Volume</FormLabel>
-                      <FormControl>
-                        <Input
-                          placeholder="e.g., 10K calls/month, 50 cameras, 100 sites"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="additional_notes"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Additional Notes / Requirements</FormLabel>
-                      <FormControl>
-                        <Textarea
-                          placeholder="Any specific requirements, integrations, or questions..."
-                          className="min-h-[80px]"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="best_time_for_demo"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Best Time for Demo / Call</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select preferred time" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="morning">Morning (9 AM - 12 PM)</SelectItem>
-                          <SelectItem value="afternoon">Afternoon (12 PM - 5 PM)</SelectItem>
-                          <SelectItem value="evening">Evening (5 PM - 8 PM)</SelectItem>
-                          <SelectItem value="flexible">Flexible</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
 
                 <FormField
                   control={form.control}

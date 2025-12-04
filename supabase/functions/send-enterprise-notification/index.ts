@@ -12,13 +12,8 @@ interface EnterpriseNotificationRequest {
   industry: string;
   useCases: string[];
   contactName: string;
-  role?: string;
   email: string;
   phone?: string;
-  deploymentMode?: string;
-  estimatedScale?: string;
-  additionalNotes?: string;
-  bestTimeForDemo?: string;
 }
 
 const handler = async (req: Request): Promise<Response> => {
@@ -55,15 +50,8 @@ const handler = async (req: Request): Promise<Response> => {
           
           <h3>Contact Information</h3>
           <p><strong>Name:</strong> ${data.contactName}</p>
-          ${data.role ? `<p><strong>Role:</strong> ${data.role}</p>` : ''}
           <p><strong>Email:</strong> ${data.email}</p>
           ${data.phone ? `<p><strong>Phone:</strong> ${data.phone}</p>` : ''}
-          
-          <h3>Requirements</h3>
-          ${data.deploymentMode ? `<p><strong>Deployment Mode:</strong> ${data.deploymentMode}</p>` : ''}
-          ${data.estimatedScale ? `<p><strong>Estimated Scale:</strong> ${data.estimatedScale}</p>` : ''}
-          ${data.bestTimeForDemo ? `<p><strong>Best Time for Demo:</strong> ${data.bestTimeForDemo}</p>` : ''}
-          ${data.additionalNotes ? `<p><strong>Additional Notes:</strong></p><p>${data.additionalNotes}</p>` : ''}
           
           <hr>
           <p style="color: #666; font-size: 12px;">This email was sent from the Vriksha.ai Enterprise Portal.</p>
@@ -93,7 +81,6 @@ const handler = async (req: Request): Promise<Response> => {
           <p><strong>Industry:</strong> ${data.industry}</p>
           <p><strong>Use Cases:</strong></p>
           <ul>${useCasesList}</ul>
-          ${data.deploymentMode ? `<p><strong>Deployment Preference:</strong> ${data.deploymentMode}</p>` : ''}
           
           <p>Our team will review your requirements and prepare a tailored proposal for your pilot program.</p>
           
