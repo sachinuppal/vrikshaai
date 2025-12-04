@@ -22,7 +22,7 @@ export const VoiceJourneyPipeline = () => {
   }, []);
 
   return (
-    <div className="py-8">
+    <div className="py-8 min-h-[220px] md:min-h-[180px]">
       {/* Desktop View */}
       <div className="hidden md:block">
         <div className="relative flex items-center justify-between max-w-4xl mx-auto">
@@ -56,44 +56,34 @@ export const VoiceJourneyPipeline = () => {
 
             return (
               <div key={index} className="relative z-10 flex flex-col items-center">
-                <motion.div
-                  className={`w-16 h-16 rounded-2xl flex items-center justify-center transition-all duration-300 ${
+                <div
+                  className={`w-16 h-16 rounded-2xl flex items-center justify-center transition-all duration-300 will-change-transform ${
                     isActive
-                      ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/30'
+                      ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/30 scale-115 -translate-y-1'
                       : isPast
-                      ? 'bg-primary/20 text-primary'
-                      : 'bg-card border border-border text-muted-foreground'
+                      ? 'bg-primary/20 text-primary scale-100 translate-y-0'
+                      : 'bg-card border border-border text-muted-foreground scale-100 translate-y-0'
                   }`}
-                  animate={{
-                    scale: isActive ? 1.15 : 1,
-                    y: isActive ? -4 : 0,
-                  }}
-                  transition={{ duration: 0.3 }}
                 >
                   <Icon className="w-7 h-7" />
-                </motion.div>
+                </div>
 
-                <motion.p
-                  className={`mt-3 text-sm font-medium text-center max-w-[100px] ${
-                    isActive ? 'text-primary' : 'text-muted-foreground'
+                <p
+                  className={`mt-3 text-sm font-medium text-center max-w-[100px] transition-opacity duration-300 ${
+                    isActive ? 'text-primary opacity-100' : 'text-muted-foreground opacity-70'
                   }`}
-                  animate={{ opacity: isActive ? 1 : 0.7 }}
                 >
                   {step.label}
-                </motion.p>
+                </p>
 
-                {/* Tooltip */}
-                <motion.div
-                  className="absolute -bottom-14 px-3 py-1.5 bg-card border border-border rounded-lg text-xs text-muted-foreground whitespace-nowrap shadow-lg"
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{
-                    opacity: isActive ? 1 : 0,
-                    y: isActive ? 0 : -10,
-                  }}
-                  transition={{ duration: 0.2 }}
+                {/* Tooltip - absolutely positioned */}
+                <div
+                  className={`absolute -bottom-14 px-3 py-1.5 bg-card border border-border rounded-lg text-xs text-muted-foreground whitespace-nowrap shadow-lg transition-all duration-200 pointer-events-none ${
+                    isActive ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-2'
+                  }`}
                 >
                   {step.tooltip}
-                </motion.div>
+                </div>
               </div>
             );
           })}
@@ -120,36 +110,29 @@ export const VoiceJourneyPipeline = () => {
             const isPast = index < activeStep;
 
             return (
-              <motion.div
+              <div
                 key={index}
-                className="relative flex items-center gap-4"
-                animate={{ opacity: isActive ? 1 : 0.6 }}
+                className={`relative flex items-center gap-4 transition-opacity duration-300 ${isActive ? 'opacity-100' : 'opacity-60'}`}
               >
                 {/* Dot on line */}
-                <motion.div
-                  className={`absolute -left-8 w-6 h-6 rounded-full flex items-center justify-center ${
+                <div
+                  className={`absolute -left-8 w-6 h-6 rounded-full flex items-center justify-center transition-all duration-300 will-change-transform ${
                     isActive
-                      ? 'bg-primary shadow-lg shadow-primary/50'
+                      ? 'bg-primary shadow-lg shadow-primary/50 scale-120'
                       : isPast
-                      ? 'bg-primary/50'
-                      : 'bg-border'
+                      ? 'bg-primary/50 scale-100'
+                      : 'bg-border scale-100'
                   }`}
-                  animate={{ scale: isActive ? 1.2 : 1 }}
                 >
                   {isPast && (
-                    <motion.div
-                      className="w-2 h-2 bg-white rounded-full"
-                      initial={{ scale: 0 }}
-                      animate={{ scale: 1 }}
-                    />
+                    <div className="w-2 h-2 bg-white rounded-full" />
                   )}
-                </motion.div>
+                </div>
 
-                <motion.div
-                  className={`flex items-center gap-3 p-3 rounded-xl ${
-                    isActive ? 'bg-primary/10 border border-primary/20' : 'bg-card border border-border'
+                <div
+                  className={`flex items-center gap-3 p-3 rounded-xl transition-transform duration-300 will-change-transform ${
+                    isActive ? 'bg-primary/10 border border-primary/20 translate-x-1' : 'bg-card border border-border translate-x-0'
                   }`}
-                  animate={{ x: isActive ? 4 : 0 }}
                 >
                   <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
                     isActive ? 'bg-primary text-primary-foreground' : 'bg-muted'
@@ -162,8 +145,8 @@ export const VoiceJourneyPipeline = () => {
                     </p>
                     <p className="text-xs text-muted-foreground">{step.tooltip}</p>
                   </div>
-                </motion.div>
-              </motion.div>
+                </div>
+              </div>
             );
           })}
         </div>

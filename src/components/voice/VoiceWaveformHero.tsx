@@ -6,14 +6,14 @@ const waveformBars = Array.from({ length: 24 }, (_, i) => i);
 export const VoiceWaveformHero = () => {
   return (
     <div className="relative py-12">
-      {/* Animated Waveform */}
-      <div className="flex items-center justify-center gap-1 mb-12">
+      {/* Animated Waveform - Fixed height container */}
+      <div className="flex items-end justify-center gap-1 h-20 mb-12">
         {waveformBars.map((i) => (
           <motion.div
             key={i}
-            className="w-1.5 bg-gradient-to-t from-primary to-primary/50 rounded-full"
+            className="w-1.5 h-16 bg-gradient-to-t from-primary to-primary/50 rounded-full origin-bottom will-change-transform"
             animate={{
-              height: [20, Math.random() * 60 + 20, 20],
+              scaleY: [0.3, 1, 0.3],
             }}
             transition={{
               duration: 1.2,
@@ -41,13 +41,11 @@ export const VoiceWaveformHero = () => {
             transition={{ delay: index * 0.2 + 0.5 }}
           >
             <div className="flex flex-col items-center gap-2">
-              <motion.div
-                className={`w-16 h-16 md:w-20 md:h-20 rounded-2xl bg-gradient-to-br ${item.color} flex items-center justify-center shadow-lg`}
-                whileHover={{ scale: 1.1, rotate: 5 }}
-                transition={{ type: "spring", stiffness: 300 }}
+              <div
+                className={`w-16 h-16 md:w-20 md:h-20 rounded-2xl bg-gradient-to-br ${item.color} flex items-center justify-center shadow-lg hover:scale-110 hover:rotate-[5deg] transition-transform duration-300 will-change-transform`}
               >
                 <item.icon className="w-8 h-8 md:w-10 md:h-10 text-white" />
-              </motion.div>
+              </div>
               <span className="text-sm md:text-base font-medium text-muted-foreground">
                 {item.label}
               </span>
@@ -62,7 +60,7 @@ export const VoiceWaveformHero = () => {
               >
                 <div className="w-12 h-0.5 bg-gradient-to-r from-muted-foreground/50 to-muted-foreground/20" />
                 <motion.div
-                  className="w-2 h-2 rounded-full bg-primary"
+                  className="w-2 h-2 rounded-full bg-primary will-change-transform"
                   animate={{ x: [0, 8, 0] }}
                   transition={{ duration: 1.5, repeat: Infinity, delay: index * 0.3 }}
                 />
