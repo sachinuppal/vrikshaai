@@ -52,5 +52,4 @@ export const inviteSchema = z.object({
   role: z.string().optional(),
 });
 
-export type Cofounder = z.infer<typeof cofounderSchema>;
 export type InviteData = z.infer<typeof inviteSchema>;
