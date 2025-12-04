@@ -23,6 +23,7 @@ const Header = () => {
   const { user, signOut } = useAuth();
 
   const navLinks = [
+    { name: "AI CRM", path: "/crm" },
     { name: "For Investors", path: "/investors" },
     { name: "For Enterprises", path: "/enterprises" },
     { name: "Contact Us", path: "/contact" },

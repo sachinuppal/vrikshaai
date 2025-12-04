@@ -11,3 +11,6 @@ verify_jwt = false
 
 [functions.send-compliance-notification]
 verify_jwt = false
+
+[functions.send-crm-notification]
+verify_jwt = false
