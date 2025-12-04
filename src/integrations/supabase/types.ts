@@ -14,6 +14,98 @@ export type Database = {
   }
   public: {
     Tables: {
+      accelerator_applications: {
+        Row: {
+          batch: string | null
+          business_model: string | null
+          cofounder_details: Json | null
+          company_description: string | null
+          company_location: string | null
+          company_name: string | null
+          company_url: string | null
+          competitors: string | null
+          created_at: string
+          current_progress: string | null
+          current_valuation: string | null
+          differentiation: string | null
+          equity_raised: string | null
+          founding_date: string | null
+          id: string
+          logo_url: string | null
+          previous_funding: string | null
+          problem_statement: string | null
+          solution: string | null
+          status: Database["public"]["Enums"]["application_status"]
+          submitted_at: string | null
+          tech_stack: string | null
+          traction_metrics: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          batch?: string | null
+          business_model?: string | null
+          cofounder_details?: Json | null
+          company_description?: string | null
+          company_location?: string | null
+          company_name?: string | null
+          company_url?: string | null
+          competitors?: string | null
+          created_at?: string
+          current_progress?: string | null
+          current_valuation?: string | null
+          differentiation?: string | null
+          equity_raised?: string | null
+          founding_date?: string | null
+          id?: string
+          logo_url?: string | null
+          previous_funding?: string | null
+          problem_statement?: string | null
+          solution?: string | null
+          status?: Database["public"]["Enums"]["application_status"]
+          submitted_at?: string | null
+          tech_stack?: string | null
+          traction_metrics?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          batch?: string | null
+          business_model?: string | null
+          cofounder_details?: Json | null
+          company_description?: string | null
+          company_location?: string | null
+          company_name?: string | null
+          company_url?: string | null
+          competitors?: string | null
+          created_at?: string
+          current_progress?: string | null
+          current_valuation?: string | null
+          differentiation?: string | null
+          equity_raised?: string | null
+          founding_date?: string | null
+          id?: string
+          logo_url?: string | null
+          previous_funding?: string | null
+          problem_statement?: string | null
+          solution?: string | null
+          status?: Database["public"]["Enums"]["application_status"]
+          submitted_at?: string | null
+          tech_stack?: string | null
+          traction_metrics?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "accelerator_applications_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       lead_submissions: {
         Row: {
           ai_calling_consent: boolean
@@ -56,6 +148,39 @@ export type Database = {
         }
         Relationships: []
       }
+      profiles: {
+        Row: {
+          country_code: string | null
+          created_at: string
+          email: string | null
+          first_name: string | null
+          id: string
+          last_name: string | null
+          phone: string | null
+          updated_at: string
+        }
+        Insert: {
+          country_code?: string | null
+          created_at?: string
+          email?: string | null
+          first_name?: string | null
+          id: string
+          last_name?: string | null
+          phone?: string | null
+          updated_at?: string
+        }
+        Update: {
+          country_code?: string | null
+          created_at?: string
+          email?: string | null
+          first_name?: string | null
+          id?: string
+          last_name?: string | null
+          phone?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -64,7 +189,12 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      application_status:
+        | "draft"
+        | "submitted"
+        | "under_review"
+        | "accepted"
+        | "rejected"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -191,6 +321,14 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      application_status: [
+        "draft",
+        "submitted",
+        "under_review",
+        "accepted",
+        "rejected",
+      ],
+    },
   },
 } as const
