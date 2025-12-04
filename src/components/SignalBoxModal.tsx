@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
 interface SignalBoxModalProps {
@@ -31,19 +32,37 @@ const SignalBoxModal = ({ open, onOpenChange }: SignalBoxModalProps) => {
 
     setIsSubmitting(true);
     
-    // Store submission (could be sent to backend later)
-    console.log("Signal Box use case submission:", { email, useCase });
-    
-    toast({
-      title: "Thank you!",
-      description: "We've received your use case. Our team will reach out soon.",
-    });
+    try {
+      // Store in database
+      const { error } = await supabase
+        .from('lead_submissions')
+        .insert({
+          source: 'signal_box',
+          email: email.trim(),
+          use_case: useCase.trim() || null,
+        });
 
-    // Close modal and reset
-    onOpenChange(false);
-    setEmail("");
-    setUseCase("");
-    setIsSubmitting(false);
+      if (error) throw error;
+
+      toast({
+        title: "Thank you!",
+        description: "We've received your use case. Our team will reach out soon.",
+      });
+
+      // Close modal and reset
+      onOpenChange(false);
+      setEmail("");
+      setUseCase("");
+    } catch (error) {
+      console.error("Error saving lead:", error);
+      toast({
+        title: "Error",
+        description: "Something went wrong. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (

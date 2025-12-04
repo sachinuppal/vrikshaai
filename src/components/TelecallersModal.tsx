@@ -3,7 +3,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { openVoiceChat } from "@/lib/voiceChat";
+import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
 interface TelecallersModalProps {
@@ -31,24 +31,42 @@ const TelecallersModal = ({ open, onOpenChange }: TelecallersModalProps) => {
 
     setIsSubmitting(true);
     
-    // Store user info (could be sent to backend later)
-    console.log("Telecallers pilot request:", { name, mobile });
-    
-    toast({
-      title: "Starting Voice Pilot",
-      description: "Connecting you to our AI voice assistant...",
-    });
+    try {
+      // Store in database
+      const { error } = await supabase
+        .from('lead_submissions')
+        .insert({
+          source: 'telecallers',
+          name: name.trim(),
+          mobile: mobile.trim(),
+        });
 
-    // Close modal and trigger voice chat
-    onOpenChange(false);
-    setName("");
-    setMobile("");
-    setIsSubmitting(false);
-    
-    // Small delay to allow modal to close
-    setTimeout(() => {
-      openVoiceChat();
-    }, 300);
+      if (error) throw error;
+
+      toast({
+        title: "Thank you!",
+        description: "Redirecting you to Telecallers.ai...",
+      });
+
+      // Close modal and reset
+      onOpenChange(false);
+      setName("");
+      setMobile("");
+      
+      // Redirect to telecallers.ai
+      setTimeout(() => {
+        window.open("https://telecallers.ai", "_blank", "noopener,noreferrer");
+      }, 300);
+    } catch (error) {
+      console.error("Error saving lead:", error);
+      toast({
+        title: "Error",
+        description: "Something went wrong. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -57,7 +75,7 @@ const TelecallersModal = ({ open, onOpenChange }: TelecallersModalProps) => {
         <DialogHeader>
           <DialogTitle className="text-primary">Request Voice Pilot</DialogTitle>
           <DialogDescription>
-            Enter your details to start a voice demo with our AI assistant.
+            Enter your details to explore Telecallers.ai voice solutions.
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -83,7 +101,7 @@ const TelecallersModal = ({ open, onOpenChange }: TelecallersModalProps) => {
             />
           </div>
           <Button type="submit" className="w-full" disabled={isSubmitting}>
-            {isSubmitting ? "Connecting..." : "Start Voice Demo"}
+            {isSubmitting ? "Submitting..." : "Continue to Telecallers.ai"}
           </Button>
         </form>
       </DialogContent>

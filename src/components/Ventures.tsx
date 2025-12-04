@@ -66,7 +66,7 @@ const ventureCategories: VentureCategory[] = [
         name: "MarketResearchLabs",
         description: "Automated outbound surveys, campaign calls, segmentation and analytics — instant market research results at scale.",
         icon: Clipboard,
-        cta: { type: 'feature-link', label: "Try Research Demo" },
+        cta: { type: 'link', label: "Try Research Demo →", href: "https://marketresearchlabs.ai" },
       },
     ]
   },
