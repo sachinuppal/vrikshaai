@@ -257,6 +257,54 @@ export type Database = {
         }
         Relationships: []
       }
+      investor_leads: {
+        Row: {
+          best_time_to_contact: string | null
+          comments: string | null
+          company_name: string | null
+          consent: boolean
+          created_at: string
+          email: string
+          estimated_budget: string | null
+          id: string
+          interest_types: string[]
+          name: string
+          phone: string | null
+          preferred_followup: string | null
+          role: string | null
+        }
+        Insert: {
+          best_time_to_contact?: string | null
+          comments?: string | null
+          company_name?: string | null
+          consent?: boolean
+          created_at?: string
+          email: string
+          estimated_budget?: string | null
+          id?: string
+          interest_types: string[]
+          name: string
+          phone?: string | null
+          preferred_followup?: string | null
+          role?: string | null
+        }
+        Update: {
+          best_time_to_contact?: string | null
+          comments?: string | null
+          company_name?: string | null
+          consent?: boolean
+          created_at?: string
+          email?: string
+          estimated_budget?: string | null
+          id?: string
+          interest_types?: string[]
+          name?: string
+          phone?: string | null
+          preferred_followup?: string | null
+          role?: string | null
+        }
+        Relationships: []
+      }
       lead_submissions: {
         Row: {
           ai_calling_consent: boolean
