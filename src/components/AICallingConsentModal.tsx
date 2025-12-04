@@ -51,15 +51,24 @@ const AICallingConsentModal = () => {
             <DialogTitle className="text-xl">AI Calling Consent</DialogTitle>
           </div>
           <DialogDescription className="text-left space-y-3 pt-2">
-            <p>
-              Vriksha AI uses advanced voice technology to provide personalized 
-              communication services. By accepting, you consent to:
+            <p className="text-base font-medium text-foreground/90">
+              At Vriksha AI, we believe technology should feel human. Our Voice AI 
+              is designed to connect with you personally — understanding your needs, 
+              answering your questions, and being there when you need us most.
+            </p>
+            <p className="text-sm">
+              This consent allows us to reach out to you through our AI-powered voice 
+              technology. By accepting, you consent to:
             </p>
             <ul className="list-disc list-inside space-y-1 text-sm">
               <li>Receiving AI-powered voice calls from Vriksha AI</li>
               <li>Processing of your contact information for voice communications</li>
               <li>Call recording for quality and training purposes</li>
             </ul>
+            <p className="text-sm italic text-muted-foreground">
+              We ask for this consent because trust is the foundation of everything we build. 
+              Your permission empowers us to serve you better while respecting your privacy.
+            </p>
           </DialogDescription>
         </DialogHeader>
         
