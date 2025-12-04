@@ -282,28 +282,28 @@ const ComplianceModal = ({ open, onOpenChange, initialMode = "pilot" }: Complian
             <div className="grid gap-4 py-4">
               <Button
                 variant="outline"
-                className="h-auto p-6 flex flex-col items-start gap-2 hover:border-primary/50"
+                className="group h-auto p-6 flex flex-col items-start gap-2 hover:border-primary hover:bg-primary/10"
                 onClick={() => setMode("pilot")}
               >
                 <div className="flex items-center gap-2 text-primary font-semibold">
                   <Shield className="w-5 h-5" />
                   Request Governance Pilot / Compliance Audit
                 </div>
-                <p className="text-sm text-muted-foreground text-left">
+                <p className="text-sm text-muted-foreground text-left group-hover:text-foreground">
                   Start a pilot program to test our governance stack with your infrastructure. Includes audit-log generation, regulatory tracking, and explainability dashboards.
                 </p>
               </Button>
 
               <Button
                 variant="outline"
-                className="h-auto p-6 flex flex-col items-start gap-2 hover:border-primary/50"
+                className="group h-auto p-6 flex flex-col items-start gap-2 hover:border-primary hover:bg-primary/10"
                 onClick={() => setMode("checklist")}
               >
                 <div className="flex items-center gap-2 text-primary font-semibold">
                   <FileText className="w-5 h-5" />
                   Download Compliance Readiness Checklist
                 </div>
-                <p className="text-sm text-muted-foreground text-left">
+                <p className="text-sm text-muted-foreground text-left group-hover:text-foreground">
                   Get our free enterprise AI compliance checklist covering data privacy, audit readiness, model documentation, access control, and regulatory alignment.
                 </p>
               </Button>

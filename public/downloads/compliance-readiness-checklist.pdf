@@ -1,0 +1,165 @@
+%PDF-1.4
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+
+2 0 obj
+<< /Type /Pages /Kids [3 0 R] /Count 1 >>
+endobj
+
+3 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Contents 4 0 R /Resources << /Font << /F1 5 0 R /F2 6 0 R >> >> >>
+endobj
+
+4 0 obj
+<< /Length 4500 >>
+stream
+BT
+/F2 28 Tf
+72 720 Td
+(VRIKSHA AI) Tj
+0 -20 Td
+/F1 12 Tf
+(Enterprise AI Governance Stack) Tj
+0 -50 Td
+/F2 22 Tf
+(Compliance Readiness Checklist) Tj
+0 -30 Td
+/F1 11 Tf
+(A comprehensive guide for regulated industries) Tj
+
+0 -50 Td
+/F2 14 Tf
+(1. DATA PRIVACY & PROTECTION) Tj
+0 -25 Td
+/F1 10 Tf
+([  ] Data inventory documented - catalog all AI training and inference data) Tj
+0 -15 Td
+([  ] Consent management in place - track user permissions for data usage) Tj
+0 -15 Td
+([  ] Data anonymization protocols - PII masking and de-identification) Tj
+0 -15 Td
+([  ] Right-to-erasure procedures - GDPR/CCPA deletion workflows) Tj
+0 -15 Td
+([  ] Cross-border transfer compliance - data sovereignty requirements met) Tj
+
+0 -30 Td
+/F2 14 Tf
+(2. AUDIT TRAIL & LOGGING) Tj
+0 -25 Td
+/F1 10 Tf
+([  ] Immutable audit logs enabled - tamper-proof decision records) Tj
+0 -15 Td
+([  ] Decision logging configured - capture all AI model outputs) Tj
+0 -15 Td
+([  ] Data access logs tracked - who accessed what and when) Tj
+0 -15 Td
+([  ] Log retention policy defined - compliance with industry requirements) Tj
+0 -15 Td
+([  ] Tamper-proof storage implemented - blockchain or WORM storage) Tj
+
+0 -30 Td
+/F2 14 Tf
+(3. MODEL DOCUMENTATION) Tj
+0 -25 Td
+/F1 10 Tf
+([  ] Model cards maintained - purpose, limitations, intended use) Tj
+0 -15 Td
+([  ] Training data documented - sources, preprocessing, biases) Tj
+0 -15 Td
+([  ] Version history tracked - all model iterations recorded) Tj
+0 -15 Td
+([  ] Performance metrics recorded - accuracy, fairness, drift) Tj
+0 -15 Td
+([  ] Bias testing documented - demographic parity, equal opportunity) Tj
+
+0 -30 Td
+/F2 14 Tf
+(4. EXPLAINABILITY & TRANSPARENCY) Tj
+0 -25 Td
+/F1 10 Tf
+([  ] Decision explanations available - SHAP, LIME, attention maps) Tj
+0 -15 Td
+([  ] Feature importance documented - key decision factors) Tj
+0 -15 Td
+([  ] User-facing explanations designed - plain language summaries) Tj
+0 -15 Td
+([  ] Audit-ready reports generated - regulator-friendly documentation) Tj
+
+0 -30 Td
+/F2 14 Tf
+(5. ACCESS CONTROL & SECURITY) Tj
+0 -25 Td
+/F1 10 Tf
+([  ] Role-based access configured - principle of least privilege) Tj
+0 -15 Td
+([  ] Multi-factor authentication enabled - secure user verification) Tj
+0 -15 Td
+([  ] API key management - rotation, scoping, monitoring) Tj
+0 -15 Td
+([  ] Session management - timeout, single sign-on) Tj
+0 -15 Td
+([  ] Privileged access monitoring - admin action logging) Tj
+
+0 -30 Td
+/F2 14 Tf
+(6. REGULATORY ALIGNMENT) Tj
+0 -25 Td
+/F1 10 Tf
+([  ] Industry regulations identified - RBI, SEBI, HIPAA, GDPR, etc.) Tj
+0 -15 Td
+([  ] Compliance mapping complete - requirements to controls) Tj
+0 -15 Td
+([  ] Regular audits scheduled - internal and external reviews) Tj
+0 -15 Td
+([  ] Incident response plan - breach notification procedures) Tj
+0 -15 Td
+([  ] Regulatory change monitoring - alerts for new requirements) Tj
+
+0 -30 Td
+/F2 14 Tf
+(7. DEPLOYMENT & INFRASTRUCTURE) Tj
+0 -25 Td
+/F1 10 Tf
+([  ] On-prem/hybrid options evaluated - data residency needs) Tj
+0 -15 Td
+([  ] Data residency requirements met - geographic compliance) Tj
+0 -15 Td
+([  ] Backup and recovery tested - disaster recovery procedures) Tj
+0 -15 Td
+([  ] Scalability assessed - growth capacity planning) Tj
+0 -15 Td
+([  ] Vendor lock-in risks analyzed - portability evaluation) Tj
+
+0 -50 Td
+/F1 9 Tf
+(Contact: enterprise@vriksha.ai | Website: vriksha.ai) Tj
+0 -15 Td
+(Copyright 2024 Vriksha AI - Governance Stack for Regulated Industries) Tj
+ET
+endstream
+endobj
+
+5 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
+endobj
+
+6 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold >>
+endobj
+
+xref
+0 7
+0000000000 65535 f 
+0000000009 00000 n 
+0000000058 00000 n 
+0000000115 00000 n 
+0000000266 00000 n 
+0000004820 00000 n 
+0000004897 00000 n 
+
+trailer
+<< /Size 7 /Root 1 0 R >>
+startxref
+4980
+%%EOF
