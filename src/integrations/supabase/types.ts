@@ -16,27 +16,36 @@ export type Database = {
     Tables: {
       lead_submissions: {
         Row: {
+          country_code: string | null
           created_at: string | null
           email: string | null
+          first_name: string | null
           id: string
+          last_name: string | null
           mobile: string | null
           name: string | null
           source: string
           use_case: string | null
         }
         Insert: {
+          country_code?: string | null
           created_at?: string | null
           email?: string | null
+          first_name?: string | null
           id?: string
+          last_name?: string | null
           mobile?: string | null
           name?: string | null
           source: string
           use_case?: string | null
         }
         Update: {
+          country_code?: string | null
           created_at?: string | null
           email?: string | null
+          first_name?: string | null
           id?: string
+          last_name?: string | null
           mobile?: string | null
           name?: string | null
           source?: string

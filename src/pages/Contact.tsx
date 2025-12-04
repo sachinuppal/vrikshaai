@@ -1,22 +1,8 @@
-import { useEffect } from "react";
 import { Link } from "react-router-dom";
 import { ArrowLeft, Mail, MapPin, Phone } from "lucide-react";
+import ContactForm from "@/components/ContactForm";
 
 const Contact = () => {
-  useEffect(() => {
-    const script = document.createElement('script');
-    script.src = 'https://js-na2.hsforms.net/forms/embed/244503106.js';
-    script.async = true;
-    script.defer = true;
-    document.body.appendChild(script);
-
-    return () => {
-      if (document.body.contains(script)) {
-        document.body.removeChild(script);
-      }
-    };
-  }, []);
-
   return (
     <div className="min-h-screen bg-background">
       <div className="container mx-auto px-6 py-12 max-w-4xl">
@@ -79,19 +65,12 @@ const Contact = () => {
           </div>
         </div>
 
-        {/* HubSpot Form */}
+        {/* Contact Form */}
         <div className="bg-card border border-border rounded-xl p-8">
           <h2 className="text-2xl font-bold text-foreground mb-6 text-center">
             Send Us a Message
           </h2>
-          <div className="bg-muted/30 rounded-xl p-6">
-            <div 
-              className="hs-form-frame" 
-              data-region="na2" 
-              data-form-id="4f92692d-3c24-4df3-a960-42ccc2a29498" 
-              data-portal-id="244503106"
-            />
-          </div>
+          <ContactForm source="contact_page" />
         </div>
       </div>
     </div>
