@@ -62,10 +62,9 @@ export const ArchitectureFlow = () => {
       
       {/* Animated Pulse on Line */}
       <motion.div
-        className="absolute top-1/2 h-2 w-2 rounded-full bg-primary shadow-lg shadow-primary/50 -translate-y-1/2 hidden lg:block"
-        animate={{ x: ["0%", "100%"] }}
-        transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
-        style={{ left: "5%" }}
+        className="absolute top-1/2 h-3 w-3 rounded-full bg-primary shadow-lg shadow-primary/50 -translate-y-1/2 hidden lg:block"
+        animate={{ left: ["7%", "93%"] }}
+        transition={{ duration: 6, repeat: Infinity, ease: "linear", repeatType: "reverse" }}
       />
 
       {/* Architecture Nodes */}
