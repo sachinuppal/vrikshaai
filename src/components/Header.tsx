@@ -1,6 +1,23 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Menu, LogOut, FileText, User } from "lucide-react";
+import { 
+  Menu, 
+  LogOut, 
+  FileText, 
+  User, 
+  ChevronDown,
+  Phone,
+  Brain,
+  Eye,
+  Satellite,
+  Bot,
+  Database,
+  Building2,
+  Banknote,
+  Heart,
+  Zap,
+  TreeDeciduous
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
@@ -16,14 +33,103 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  NavigationMenu,
+  NavigationMenuContent,
+  NavigationMenuItem,
+  NavigationMenuLink,
+  NavigationMenuList,
+  NavigationMenuTrigger,
+} from "@/components/ui/navigation-menu";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 import { useAuth } from "@/contexts/AuthContext";
+import { cn } from "@/lib/utils";
+
+const products = [
+  {
+    title: "AI CRM",
+    description: "World's first AI Relationship Engine",
+    href: "/crm",
+    icon: TreeDeciduous,
+  },
+  {
+    title: "Vriksha Voice",
+    description: "AI-powered calling platform",
+    href: "/#voice",
+    icon: Phone,
+  },
+];
+
+const aiInfrastructure = [
+  {
+    title: "Voice AI & Conversational Engines",
+    description: "Natural language interactions",
+    href: "/#ai-infrastructure",
+    icon: Brain,
+  },
+  {
+    title: "Image & Video AI",
+    description: "Visual intelligence solutions",
+    href: "/#ai-infrastructure",
+    icon: Eye,
+  },
+  {
+    title: "Geo-Satellite AI",
+    description: "Location & satellite insights",
+    href: "/#ai-infrastructure",
+    icon: Satellite,
+  },
+  {
+    title: "AI Robotics",
+    description: "Autonomous systems & automation",
+    href: "/#ai-infrastructure",
+    icon: Bot,
+  },
+  {
+    title: "Data & Analytics",
+    description: "Enterprise data intelligence",
+    href: "/#ai-infrastructure",
+    icon: Database,
+  },
+];
+
+const industries = [
+  {
+    title: "Real Estate",
+    description: "Property & construction AI",
+    href: "/crm#industries",
+    icon: Building2,
+  },
+  {
+    title: "Finance",
+    description: "Banking & lending solutions",
+    href: "/crm#industries",
+    icon: Banknote,
+  },
+  {
+    title: "Healthcare",
+    description: "Patient care automation",
+    href: "/crm#industries",
+    icon: Heart,
+  },
+  {
+    title: "Energy & Solar",
+    description: "Sustainable energy AI",
+    href: "/crm#industries",
+    icon: Zap,
+  },
+];
 
 const Header = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const [solutionsOpen, setSolutionsOpen] = useState(false);
   const { user, signOut } = useAuth();
 
   const navLinks = [
-    { name: "AI CRM", path: "/crm" },
     { name: "For Investors", path: "/investors" },
     { name: "For Enterprises", path: "/enterprises" },
     { name: "Contact Us", path: "/contact" },
@@ -41,6 +147,97 @@ const Header = () => {
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center gap-6">
+            {/* Solutions Mega Menu */}
+            <NavigationMenu>
+              <NavigationMenuList>
+                <NavigationMenuItem>
+                  <NavigationMenuTrigger className="bg-transparent text-sm font-medium text-muted-foreground hover:text-primary data-[state=open]:text-primary">
+                    Solutions
+                  </NavigationMenuTrigger>
+                  <NavigationMenuContent>
+                    <div className="w-[750px] p-6 bg-card border border-border rounded-lg shadow-xl">
+                      <div className="grid grid-cols-3 gap-6">
+                        {/* Products Column */}
+                        <div>
+                          <h4 className="text-sm font-semibold text-primary mb-4 uppercase tracking-wider">Products</h4>
+                          <div className="space-y-3">
+                            {products.map((item) => (
+                              <NavigationMenuLink key={item.title} asChild>
+                                <Link
+                                  to={item.href}
+                                  className="flex items-start gap-3 p-3 rounded-lg hover:bg-primary/10 transition-colors group"
+                                >
+                                  <item.icon className="w-5 h-5 text-primary mt-0.5" />
+                                  <div>
+                                    <div className="text-sm font-medium text-foreground group-hover:text-primary transition-colors">
+                                      {item.title}
+                                    </div>
+                                    <div className="text-xs text-muted-foreground">
+                                      {item.description}
+                                    </div>
+                                  </div>
+                                </Link>
+                              </NavigationMenuLink>
+                            ))}
+                          </div>
+                        </div>
+
+                        {/* AI Infrastructure Column */}
+                        <div>
+                          <h4 className="text-sm font-semibold text-primary mb-4 uppercase tracking-wider">AI Infrastructure</h4>
+                          <div className="space-y-2">
+                            {aiInfrastructure.map((item) => (
+                              <NavigationMenuLink key={item.title} asChild>
+                                <Link
+                                  to={item.href}
+                                  className="flex items-start gap-3 p-2 rounded-lg hover:bg-primary/10 transition-colors group"
+                                >
+                                  <item.icon className="w-4 h-4 text-muted-foreground group-hover:text-primary mt-0.5" />
+                                  <div>
+                                    <div className="text-sm font-medium text-foreground group-hover:text-primary transition-colors">
+                                      {item.title}
+                                    </div>
+                                    <div className="text-xs text-muted-foreground">
+                                      {item.description}
+                                    </div>
+                                  </div>
+                                </Link>
+                              </NavigationMenuLink>
+                            ))}
+                          </div>
+                        </div>
+
+                        {/* Industries Column */}
+                        <div>
+                          <h4 className="text-sm font-semibold text-primary mb-4 uppercase tracking-wider">Industries</h4>
+                          <div className="space-y-2">
+                            {industries.map((item) => (
+                              <NavigationMenuLink key={item.title} asChild>
+                                <Link
+                                  to={item.href}
+                                  className="flex items-start gap-3 p-2 rounded-lg hover:bg-primary/10 transition-colors group"
+                                >
+                                  <item.icon className="w-4 h-4 text-muted-foreground group-hover:text-primary mt-0.5" />
+                                  <div>
+                                    <div className="text-sm font-medium text-foreground group-hover:text-primary transition-colors">
+                                      {item.title}
+                                    </div>
+                                    <div className="text-xs text-muted-foreground">
+                                      {item.description}
+                                    </div>
+                                  </div>
+                                </Link>
+                              </NavigationMenuLink>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </NavigationMenuContent>
+                </NavigationMenuItem>
+              </NavigationMenuList>
+            </NavigationMenu>
+
             {navLinks.map((link) => (
               <Link
                 key={link.path}
@@ -86,7 +283,7 @@ const Header = () => {
                   <span className="sr-only">Open menu</span>
                 </Button>
               </SheetTrigger>
-              <SheetContent side="right" className="w-[280px] bg-background">
+              <SheetContent side="right" className="w-[300px] bg-background overflow-y-auto">
                 <SheetHeader className="text-left">
                   <SheetTitle className="flex items-center gap-2">
                     <img src="/images/vriksha-logo.png" alt="Vriksha.ai Logo" className="w-10 h-10 rounded-lg" />
@@ -94,7 +291,7 @@ const Header = () => {
                   </SheetTitle>
                 </SheetHeader>
                 
-                <nav className="flex flex-col gap-4 mt-8">
+                <nav className="flex flex-col gap-2 mt-8">
                   {user && (
                     <>
                       <Link
@@ -108,6 +305,58 @@ const Header = () => {
                       <div className="border-t border-border my-2" />
                     </>
                   )}
+                  
+                  {/* Solutions Collapsible */}
+                  <Collapsible open={solutionsOpen} onOpenChange={setSolutionsOpen}>
+                    <CollapsibleTrigger className="flex items-center justify-between w-full px-4 py-3 rounded-lg text-foreground hover:bg-primary/10 hover:text-primary transition-colors">
+                      <span className="font-medium">Solutions</span>
+                      <ChevronDown className={cn("w-4 h-4 transition-transform", solutionsOpen && "rotate-180")} />
+                    </CollapsibleTrigger>
+                    <CollapsibleContent className="pl-4 space-y-1 mt-2">
+                      {/* Products */}
+                      <div className="px-4 py-2 text-xs font-semibold text-primary uppercase tracking-wider">Products</div>
+                      {products.map((item) => (
+                        <Link
+                          key={item.title}
+                          to={item.href}
+                          onClick={() => setIsOpen(false)}
+                          className="flex items-center gap-3 px-4 py-2 rounded-lg text-foreground hover:bg-primary/10 hover:text-primary transition-colors"
+                        >
+                          <item.icon className="w-4 h-4 text-primary" />
+                          <span className="text-sm">{item.title}</span>
+                        </Link>
+                      ))}
+                      
+                      {/* AI Infrastructure */}
+                      <div className="px-4 py-2 text-xs font-semibold text-primary uppercase tracking-wider mt-2">AI Infrastructure</div>
+                      {aiInfrastructure.map((item) => (
+                        <Link
+                          key={item.title}
+                          to={item.href}
+                          onClick={() => setIsOpen(false)}
+                          className="flex items-center gap-3 px-4 py-2 rounded-lg text-foreground hover:bg-primary/10 hover:text-primary transition-colors"
+                        >
+                          <item.icon className="w-4 h-4 text-muted-foreground" />
+                          <span className="text-sm">{item.title}</span>
+                        </Link>
+                      ))}
+                      
+                      {/* Industries */}
+                      <div className="px-4 py-2 text-xs font-semibold text-primary uppercase tracking-wider mt-2">Industries</div>
+                      {industries.map((item) => (
+                        <Link
+                          key={item.title}
+                          to={item.href}
+                          onClick={() => setIsOpen(false)}
+                          className="flex items-center gap-3 px-4 py-2 rounded-lg text-foreground hover:bg-primary/10 hover:text-primary transition-colors"
+                        >
+                          <item.icon className="w-4 h-4 text-muted-foreground" />
+                          <span className="text-sm">{item.title}</span>
+                        </Link>
+                      ))}
+                    </CollapsibleContent>
+                  </Collapsible>
+                  
                   {navLinks.map((link) => (
                     <Link
                       key={link.path}
