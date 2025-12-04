@@ -12,11 +12,11 @@ import { Link } from "react-router-dom";
 
 const CONSENT_KEY = "vriksha_ai_calling_consent";
 
-export const getAICallingConsent = (): "accepted" | "declined" | null => {
-  return localStorage.getItem(CONSENT_KEY) as "accepted" | "declined" | null;
+export const getAICallingConsent = (): "accepted" | null => {
+  return localStorage.getItem(CONSENT_KEY) as "accepted" | null;
 };
 
-export const setAICallingConsent = (value: "accepted" | "declined") => {
+export const setAICallingConsent = (value: "accepted") => {
   localStorage.setItem(CONSENT_KEY, value);
 };
 
@@ -26,7 +26,6 @@ const AICallingConsentModal = () => {
   useEffect(() => {
     const consent = getAICallingConsent();
     if (!consent) {
-      // Show modal after a short delay for better UX
       const timer = setTimeout(() => setOpen(true), 1500);
       return () => clearTimeout(timer);
     }
@@ -37,14 +36,13 @@ const AICallingConsentModal = () => {
     setOpen(false);
   };
 
-  const handleDecline = () => {
-    setAICallingConsent("declined");
-    setOpen(false);
-  };
-
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogContent className="sm:max-w-md">
+    <Dialog open={open} onOpenChange={() => {}}>
+      <DialogContent 
+        className="sm:max-w-md [&>button]:hidden" 
+        onPointerDownOutside={(e) => e.preventDefault()} 
+        onEscapeKeyDown={(e) => e.preventDefault()}
+      >
         <DialogHeader>
           <div className="flex items-center gap-3 mb-2">
             <div className="p-2 rounded-full bg-primary/10">
@@ -69,24 +67,17 @@ const AICallingConsentModal = () => {
           <Shield className="w-4 h-4 text-primary mt-0.5 shrink-0" />
           <p className="text-xs text-muted-foreground">
             Your data is protected under our{" "}
-            <Link to="/privacy" className="text-primary hover:underline" onClick={() => setOpen(false)}>
+            <Link to="/privacy" className="text-primary hover:underline" onClick={handleAccept}>
               Privacy Policy
             </Link>
-            . You can withdraw consent at any time.
+            .
           </p>
         </div>
 
-        <div className="flex flex-col sm:flex-row gap-3 mt-4">
-          <Button
-            variant="outline"
-            onClick={handleDecline}
-            className="flex-1"
-          >
-            Decline
-          </Button>
+        <div className="mt-4">
           <Button
             onClick={handleAccept}
-            className="flex-1"
+            className="w-full"
           >
             Accept
           </Button>
