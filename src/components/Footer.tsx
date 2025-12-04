@@ -8,7 +8,7 @@ const Footer = () => {
         className="absolute inset-0 flex items-center justify-center pointer-events-none select-none z-0"
         aria-hidden="true"
       >
-        <span className="text-[8rem] sm:text-[12rem] md:text-[16rem] lg:text-[20rem] font-bold text-primary/[0.06] whitespace-nowrap tracking-tight">
+        <span className="text-[5rem] sm:text-[8rem] md:text-[12rem] lg:text-[16rem] xl:text-[20rem] font-bold text-primary/[0.06] whitespace-nowrap tracking-tight">
           Vriksha.AI
         </span>
       </div>

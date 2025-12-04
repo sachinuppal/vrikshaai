@@ -132,12 +132,11 @@ const JoinEcosystem = () => {
                   <motion.button
                     key={audience.id}
                     onClick={() => setSelectedAudience(isSelected ? null : audience.id)}
-                    className={`p-4 rounded-xl border-2 transition-all duration-300 cursor-pointer ${
+                    className={`p-4 rounded-xl border-2 transition-all duration-300 cursor-pointer hover:-translate-y-1 ${
                       isSelected 
                         ? 'bg-primary/10 border-primary text-primary shadow-lg' 
                         : 'bg-card border-border text-foreground hover:border-primary/50 hover:shadow-hover'
                     }`}
-                    whileHover={{ y: -4 }}
                     whileTap={{ scale: 0.98 }}
                   >
                     <Icon className={`w-5 h-5 mx-auto mb-2 ${isSelected ? 'text-primary' : 'text-muted-foreground'}`} />
