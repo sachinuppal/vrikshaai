@@ -257,6 +257,57 @@ export type Database = {
         }
         Relationships: []
       }
+      enterprise_leads: {
+        Row: {
+          additional_notes: string | null
+          best_time_for_demo: string | null
+          company_name: string
+          contact_name: string
+          created_at: string
+          deployment_mode: string | null
+          email: string
+          estimated_scale: string | null
+          id: string
+          industry: string
+          nda_accepted: boolean
+          phone: string | null
+          role: string | null
+          use_cases: string[]
+        }
+        Insert: {
+          additional_notes?: string | null
+          best_time_for_demo?: string | null
+          company_name: string
+          contact_name: string
+          created_at?: string
+          deployment_mode?: string | null
+          email: string
+          estimated_scale?: string | null
+          id?: string
+          industry: string
+          nda_accepted?: boolean
+          phone?: string | null
+          role?: string | null
+          use_cases: string[]
+        }
+        Update: {
+          additional_notes?: string | null
+          best_time_for_demo?: string | null
+          company_name?: string
+          contact_name?: string
+          created_at?: string
+          deployment_mode?: string | null
+          email?: string
+          estimated_scale?: string | null
+          id?: string
+          industry?: string
+          nda_accepted?: boolean
+          phone?: string | null
+          role?: string | null
+          use_cases?: string[]
+        }
+        Relationships: []
+      }
       investor_leads: {
         Row: {
           best_time_to_contact: string | null
