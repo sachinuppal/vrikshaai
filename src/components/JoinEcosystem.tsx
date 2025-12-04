@@ -1,6 +1,7 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Code2, Rocket, Building2, TrendingUp, Check } from "lucide-react";
+import { Code2, Rocket, Building2, TrendingUp, Check, ArrowRight } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { FadeInView } from "@/components/animations";
 import { openVoiceChat } from "@/lib/voiceChat";
@@ -19,7 +20,9 @@ const audiences = [
       "Mentorship from people who have scaled real businesses",
       "A community that cares about learning, experimenting, and creating"
     ],
-    closing: "If you want to build the future — not just maintain the present — you'll feel at home here."
+    closing: "If you want to build the future — not just maintain the present — you'll feel at home here.",
+    ctaText: "Join Our Team",
+    ctaLink: "/contact"
   },
   {
     id: 'founders',
@@ -35,7 +38,9 @@ const audiences = [
       "Guidance on fundraising, storytelling, and scaling",
       "A partner who co-owns the outcome, not just the equity"
     ],
-    closing: "If you want a co-founder-style relationship with real skin in the game, you'll find it here."
+    closing: "If you want a co-founder-style relationship with real skin in the game, you'll find it here.",
+    ctaText: "Apply to Accelerator",
+    ctaLink: "/auth"
   },
   {
     id: 'enterprises',
@@ -51,7 +56,9 @@ const audiences = [
       "Long-term partnership instead of one-time implementation",
       "A team that speaks both business and technology fluently"
     ],
-    closing: "If you're serious about building the next version of your enterprise, we're the right partner."
+    closing: "If you're serious about building the next version of your enterprise, we're the right partner.",
+    ctaText: "Start a Pilot",
+    ctaLink: "/enterprises"
   },
   {
     id: 'investors',
@@ -67,7 +74,9 @@ const audiences = [
       "Shared infrastructure that accelerates multiple ventures",
       "Long-term alignment focused on outcomes, not optics"
     ],
-    closing: "If you're betting on India becoming an AI powerhouse, Vriksha.ai is the platform that turns that belief into returns."
+    closing: "If you're betting on India becoming an AI powerhouse, Vriksha.ai is the platform that turns that belief into returns.",
+    ctaText: "Explore Partnership",
+    ctaLink: "/investors"
   }
 ];
 
@@ -178,9 +187,16 @@ const JoinEcosystem = () => {
                     ))}
                   </ul>
                   
-                  <p className="text-foreground font-medium italic border-l-4 border-primary pl-4">
+                  <p className="text-foreground font-medium italic border-l-4 border-primary pl-4 mb-6">
                     {selectedData.closing}
                   </p>
+                  
+                  <Button asChild className="w-full sm:w-auto">
+                    <Link to={selectedData.ctaLink}>
+                      {selectedData.ctaText}
+                      <ArrowRight className="w-4 h-4 ml-2" />
+                    </Link>
+                  </Button>
                 </motion.div>
               ) : (
                 <motion.p
