@@ -14,3 +14,6 @@ verify_jwt = false
 
 [functions.send-crm-notification]
 verify_jwt = false
+
+[functions.send-voice-notification]
+verify_jwt = false
