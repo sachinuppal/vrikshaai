@@ -16,12 +16,12 @@ const Index = () => {
       <Header />
       <Hero />
       <Philosophy />
+      <WhyIndia />
       <AIInfrastructure />
-      <Accelerator />
       <Ventures />
       <Gamification />
-      <WhyIndia />
       <JoinEcosystem />
+      <Accelerator />
       <FAQ />
       <Footer />
     </div>
