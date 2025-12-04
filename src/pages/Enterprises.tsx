@@ -368,6 +368,27 @@ const Enterprises = () => {
 
       if (error) throw error;
 
+      // Send email notification
+      try {
+        await supabase.functions.invoke("send-enterprise-notification", {
+          body: {
+            companyName: data.company_name,
+            industry: industryName,
+            useCases: useCaseNames,
+            contactName: data.contact_name,
+            role: data.role,
+            email: data.email,
+            phone: data.phone,
+            deploymentMode: data.deployment_mode,
+            estimatedScale: data.estimated_scale,
+            additionalNotes: data.additional_notes,
+            bestTimeForDemo: data.best_time_for_demo,
+          },
+        });
+      } catch (emailError) {
+        console.error("Failed to send notification email:", emailError);
+      }
+
       toast({
         title: "Request Submitted!",
         description: "Our enterprise team will contact you within 24-48 hours.",
