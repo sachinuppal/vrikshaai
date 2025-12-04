@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Select,
   SelectContent,
@@ -17,6 +18,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Loader2 } from "lucide-react";
+import { Link } from "react-router-dom";
 
 const contactSchema = z.object({
   firstName: z.string().trim().min(1, "First name is required").max(100),
@@ -25,6 +27,9 @@ const contactSchema = z.object({
   countryCode: z.string().min(1, "Please select a country"),
   phone: z.string().trim().min(5, "Phone number is required").max(20),
   message: z.string().trim().max(1000).optional(),
+  aiCallingConsent: z.boolean().refine((val) => val === true, {
+    message: "You must consent to AI calling to submit this form",
+  }),
 });
 
 type ContactFormData = z.infer<typeof contactSchema>;
@@ -42,14 +47,18 @@ const ContactForm = ({ source = "contact_form", onSuccess }: ContactFormProps) =
     register,
     handleSubmit,
     setValue,
+    watch,
     reset,
     formState: { errors },
   } = useForm<ContactFormData>({
     resolver: zodResolver(contactSchema),
     defaultValues: {
       countryCode: "IN",
+      aiCallingConsent: false,
     },
   });
+
+  const aiCallingConsent = watch("aiCallingConsent");
 
   const handleCountryChange = (code: string) => {
     setSelectedCountry(code);
@@ -71,6 +80,7 @@ const ContactForm = ({ source = "contact_form", onSuccess }: ContactFormProps) =
         mobile: fullPhone,
         use_case: data.message || null,
         source: source,
+        ai_calling_consent: data.aiCallingConsent,
       });
 
       if (error) throw error;
@@ -233,6 +243,38 @@ const ContactForm = ({ source = "contact_form", onSuccess }: ContactFormProps) =
         />
         {errors.message && (
           <p className="text-sm text-destructive">{errors.message.message}</p>
+        )}
+      </div>
+
+      {/* AI Calling Consent */}
+      <div className="space-y-2">
+        <div className="flex items-start space-x-3 p-4 bg-muted/50 rounded-lg border border-border">
+          <Checkbox
+            id="aiCallingConsent"
+            checked={aiCallingConsent}
+            onCheckedChange={(checked) => setValue("aiCallingConsent", checked === true)}
+            className="mt-0.5"
+          />
+          <div className="space-y-1">
+            <Label
+              htmlFor="aiCallingConsent"
+              className="text-sm font-medium leading-none cursor-pointer"
+            >
+              AI Calling Consent <span className="text-destructive">*</span>
+            </Label>
+            <p className="text-xs text-muted-foreground leading-relaxed">
+              I consent to Vriksha AI using my personal data for AI-powered voice 
+              communications, including automated calls for follow-ups, demos, and 
+              service updates. I understand my data will be processed as per the{" "}
+              <Link to="/privacy" className="text-primary hover:underline">
+                Privacy Policy
+              </Link>
+              .
+            </p>
+          </div>
+        </div>
+        {errors.aiCallingConsent && (
+          <p className="text-sm text-destructive">{errors.aiCallingConsent.message}</p>
         )}
       </div>
 

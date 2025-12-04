@@ -16,6 +16,7 @@ export type Database = {
     Tables: {
       lead_submissions: {
         Row: {
+          ai_calling_consent: boolean
           country_code: string | null
           created_at: string | null
           email: string | null
@@ -28,6 +29,7 @@ export type Database = {
           use_case: string | null
         }
         Insert: {
+          ai_calling_consent?: boolean
           country_code?: string | null
           created_at?: string | null
           email?: string | null
@@ -40,6 +42,7 @@ export type Database = {
           use_case?: string | null
         }
         Update: {
+          ai_calling_consent?: boolean
           country_code?: string | null
           created_at?: string | null
           email?: string | null

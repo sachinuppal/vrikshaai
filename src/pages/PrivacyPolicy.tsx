@@ -36,6 +36,7 @@ const PrivacyPolicy = () => {
               "Your Rights & Choices",
               "Cross-Border Data Transfers",
               "Children & Minors",
+              "AI Calling & Automated Communications",
               "Grievances & Contact",
               "Changes to This Privacy Policy",
               "Governing Law & Dispute Resolution",
@@ -237,10 +238,55 @@ const PrivacyPolicy = () => {
             </div>
           </section>
 
-          {/* Section 12 */}
+          {/* Section 12 - AI Calling */}
           <section id="privacy-section-12" className="scroll-mt-8">
             <h2 className="text-2xl font-bold text-foreground mb-4">
-              <span className="text-primary">12.</span> Grievances & Contact
+              <span className="text-primary">12.</span> AI Calling & Automated Communications
+            </h2>
+            <div className="bg-card rounded-xl border border-border p-6 shadow-sm space-y-6">
+              <div>
+                <h3 className="text-lg font-semibold text-foreground mb-2">12.1 What is AI Calling?</h3>
+                <p className="text-foreground leading-relaxed">
+                  Vriksha AI utilizes advanced artificial intelligence technology to conduct automated voice calls. These AI-powered calls may be used for follow-ups, product demonstrations, service updates, appointment reminders, and other business communications.
+                </p>
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold text-foreground mb-2">12.2 Data Used for AI Calling</h3>
+                <ul className="list-disc list-inside space-y-2 text-foreground">
+                  <li>Name and contact details (phone number, email)</li>
+                  <li>Communication preferences and history</li>
+                  <li>Service/product interest areas</li>
+                  <li>Call recordings and transcripts for quality assurance</li>
+                </ul>
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold text-foreground mb-2">12.3 Consent Requirements</h3>
+                <p className="text-foreground leading-relaxed">
+                  We obtain explicit consent before initiating any AI-powered voice communications. Consent is collected through our forms with a mandatory checkbox. You have the right to withdraw consent at any time by contacting us at support@vriksha.ai.
+                </p>
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold text-foreground mb-2">12.4 Third-Party AI Services</h3>
+                <p className="text-foreground leading-relaxed">
+                  Our AI calling infrastructure may utilize third-party AI and telephony service providers. These providers are bound by data processing agreements and are required to maintain appropriate security measures consistent with this Privacy Policy.
+                </p>
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold text-foreground mb-2">12.5 Your Rights Regarding AI Calls</h3>
+                <ul className="list-disc list-inside space-y-2 text-foreground">
+                  <li>Right to opt-out of AI calls at any time</li>
+                  <li>Right to request human callback instead of AI</li>
+                  <li>Right to access call recordings upon request</li>
+                  <li>Right to request deletion of call data</li>
+                </ul>
+              </div>
+            </div>
+          </section>
+
+          {/* Section 13 */}
+          <section id="privacy-section-13" className="scroll-mt-8">
+            <h2 className="text-2xl font-bold text-foreground mb-4">
+              <span className="text-primary">13.</span> Grievances & Contact
             </h2>
             <div className="bg-card rounded-xl border border-border p-6 shadow-sm">
               <p className="text-foreground leading-relaxed mb-4">
@@ -256,10 +302,10 @@ const PrivacyPolicy = () => {
             </div>
           </section>
 
-          {/* Section 13 */}
-          <section id="privacy-section-13" className="scroll-mt-8">
+          {/* Section 14 */}
+          <section id="privacy-section-14" className="scroll-mt-8">
             <h2 className="text-2xl font-bold text-foreground mb-4">
-              <span className="text-primary">13.</span> Changes to This Privacy Policy
+              <span className="text-primary">14.</span> Changes to This Privacy Policy
             </h2>
             <div className="bg-card rounded-xl border border-border p-6 shadow-sm">
               <p className="text-foreground leading-relaxed">
@@ -268,10 +314,10 @@ const PrivacyPolicy = () => {
             </div>
           </section>
 
-          {/* Section 14 */}
-          <section id="privacy-section-14" className="scroll-mt-8">
+          {/* Section 15 */}
+          <section id="privacy-section-15" className="scroll-mt-8">
             <h2 className="text-2xl font-bold text-foreground mb-4">
-              <span className="text-primary">14.</span> Governing Law & Dispute Resolution
+              <span className="text-primary">15.</span> Governing Law & Dispute Resolution
             </h2>
             <div className="bg-card rounded-xl border border-border p-6 shadow-sm">
               <p className="text-foreground leading-relaxed">
@@ -280,10 +326,10 @@ const PrivacyPolicy = () => {
             </div>
           </section>
 
-          {/* Section 15 */}
-          <section id="privacy-section-15" className="scroll-mt-8">
+          {/* Section 16 */}
+          <section id="privacy-section-16" className="scroll-mt-8">
             <h2 className="text-2xl font-bold text-foreground mb-4">
-              <span className="text-primary">15.</span> Additional Provisions for Indian Legal Context
+              <span className="text-primary">16.</span> Additional Provisions for Indian Legal Context
             </h2>
             <div className="bg-card rounded-xl border border-border p-6 shadow-sm space-y-3">
               <p className="text-foreground leading-relaxed">
