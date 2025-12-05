@@ -155,7 +155,7 @@ const Header = () => {
                     Solutions
                   </NavigationMenuTrigger>
                   <NavigationMenuContent>
-                    <div className="w-[750px] p-6 bg-card border border-border rounded-lg shadow-xl">
+                    <div className="w-[600px] lg:w-[700px] p-4 lg:p-6 bg-card border border-border rounded-lg shadow-xl">
                       <div className="grid grid-cols-3 gap-6">
                         {/* Products Column */}
                         <div>
