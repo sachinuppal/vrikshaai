@@ -58,7 +58,7 @@ const sendEmail = async (to: string[], subject: string, html: string) => {
       Authorization: `Bearer ${RESEND_API_KEY}`,
     },
     body: JSON.stringify({
-      from: "Vriksha AI CRM <onboarding@resend.dev>",
+      from: "Vriksha AI CRM <hello@emails.vriksha.ai>",
       to,
       subject,
       html,
