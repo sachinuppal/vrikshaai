@@ -92,7 +92,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     // Send internal notification
     const internalEmail = await resend.emails.send({
-      from: "Vriksha.ai <notifications@vriksha.ai>",
+      from: "Vriksha.ai <hello@emails.vriksha.ai>",
       to: ["founders@vriksha.ai"],
       subject: internalSubject,
       html: internalHtml,
@@ -158,7 +158,7 @@ const handler = async (req: Request): Promise<Response> => {
       `;
 
     const userEmail = await resend.emails.send({
-      from: "Vriksha.ai <hello@vriksha.ai>",
+      from: "Vriksha.ai <hello@emails.vriksha.ai>",
       to: [data.email],
       subject: userSubject,
       html: userHtml,

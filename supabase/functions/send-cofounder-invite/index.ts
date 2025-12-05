@@ -64,7 +64,7 @@ const handler = async (req: Request): Promise<Response> => {
         Authorization: `Bearer ${RESEND_API_KEY}`,
       },
       body: JSON.stringify({
-        from: "Vriksha.ai <onboarding@resend.dev>",
+        from: "Vriksha.ai <noreply@emails.vriksha.ai>",
         to: [email],
         subject: "You've been invited to join an application on Vriksha.ai",
         html: `

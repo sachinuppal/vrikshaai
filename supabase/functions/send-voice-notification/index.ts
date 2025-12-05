@@ -62,7 +62,7 @@ const handler = async (req: Request): Promise<Response> => {
         Authorization: `Bearer ${RESEND_API_KEY}`,
       },
       body: JSON.stringify({
-        from: "Vriksha Voice <notifications@vriksha.ai>",
+        from: "Vriksha Voice <hello@emails.vriksha.ai>",
         to: ["harshavardhan@vriksha.ai"],
         subject: `🎙️ New Voice AI Demo Request from ${data.company_name}`,
         html: `
@@ -155,7 +155,7 @@ const handler = async (req: Request): Promise<Response> => {
         Authorization: `Bearer ${RESEND_API_KEY}`,
       },
       body: JSON.stringify({
-        from: "Vriksha AI <hello@vriksha.ai>",
+        from: "Vriksha Voice <hello@emails.vriksha.ai>",
         to: [data.email],
         subject: "Thank you for your interest in Vriksha Voice AI!",
         html: `
