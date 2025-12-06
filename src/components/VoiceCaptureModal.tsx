@@ -12,7 +12,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { countries } from "@/data/countries";
-import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { initializeRinggWidget, triggerRinggWidget } from "@/lib/ringgWidget";
 
@@ -48,18 +47,26 @@ export const VoiceCaptureModal = ({ isOpen, onClose, onCallStart }: VoiceCapture
     try {
       const fullPhone = `${selectedCountry?.dialCode}${phone}`;
       
-      // Save to database and get the record ID
-      const { data, error } = await supabase.from("voice_widget_calls").insert({
-        name: name.trim(),
-        phone: phone.trim(),
-        country_code: countryCode,
-        full_phone: fullPhone,
-        source: "voice_widget",
-        page_url: window.location.href,
-      }).select("id").single();
+      // Save to database via edge function (bypasses RLS securely)
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/save-voice-widget-call`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            name: name.trim(),
+            phone: phone.trim(),
+            countryCode,
+            fullPhone,
+            pageUrl: window.location.href,
+          }),
+        }
+      );
 
-      if (error) {
-        console.error("Error saving voice call data:", error);
+      const data = await response.json();
+      
+      if (!response.ok) {
+        console.error("Error saving voice call data:", data.error);
         toast.error("Something went wrong. Please try again.");
         setIsSubmitting(false);
         return;
