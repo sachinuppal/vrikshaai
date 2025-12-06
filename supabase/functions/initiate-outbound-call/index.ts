@@ -29,9 +29,9 @@ Deno.serve(async (req) => {
 
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    const { name, phone, countryCode } = await req.json();
+    const { name, phone, countryCode, fromNumber } = await req.json();
 
-    console.log("Initiating outbound call:", { name, phone, countryCode });
+    console.log("Initiating outbound call:", { name, phone, countryCode, fromNumber });
 
     // Validate input
     if (!name || !phone || !countryCode) {
@@ -42,6 +42,7 @@ Deno.serve(async (req) => {
     }
 
     const fullPhone = `${countryCode}${phone}`;
+    const DEFAULT_FROM_NUMBER = "+912269976405";
 
     // Create a record in voice_widget_calls
     const { data: callRecord, error: insertError } = await supabase
@@ -68,11 +69,12 @@ Deno.serve(async (req) => {
 
     console.log("Created call record:", callRecord.id);
 
-    // Call Ringg API
+    // Call Ringg API with required from_number field
     const ringgPayload = {
       name,
       mobile_number: fullPhone,
       agent_id: AGENT_ID,
+      from_number: fromNumber || DEFAULT_FROM_NUMBER,
       call_config: {
         idle_timeout_warning: 5,
         idle_timeout_end: 10,
@@ -85,6 +87,7 @@ Deno.serve(async (req) => {
       },
       custom_args_values: {
         caller_name: name,
+        mobile_number: fullPhone,
         source: "vriksha_outbound",
       },
     };
