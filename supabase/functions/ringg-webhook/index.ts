@@ -159,14 +159,20 @@ serve(async (req) => {
       ringg_call_id: payload.call_id,
     };
 
+    // Extract common fields that might be in any event
+    const commonDuration = rawPayload.call_duration;
+    const commonTranscript = rawPayload.transcript;
+    const commonStatus = rawPayload.status;
+    const commonRecordingUrl = rawPayload.recording_url;
+
     switch (payload.event_type) {
       case "call_completed": {
-        const callData = payload as CallCompletedPayload;
         updateData = {
           ...updateData,
-          call_status: callData.status,
-          call_duration: callData.call_duration,
-          transcript: callData.transcript,
+          call_status: commonStatus || "completed",
+          ...(commonDuration && { call_duration: commonDuration }),
+          ...(commonTranscript && { transcript: commonTranscript }),
+          ...(commonRecordingUrl && { recording_url: commonRecordingUrl }),
         };
         console.log("Updating call_completed data");
         break;
@@ -177,8 +183,9 @@ serve(async (req) => {
         updateData = {
           ...updateData,
           platform_analysis: analysisData.analysis_data,
-          // Also update transcript if provided
-          ...(analysisData.transcript && { transcript: analysisData.transcript }),
+          ...(commonTranscript && { transcript: commonTranscript }),
+          ...(commonDuration && { call_duration: commonDuration }),
+          ...(commonStatus && { call_status: commonStatus }),
         };
         console.log("Updating platform_analysis data");
         break;
@@ -189,16 +196,17 @@ serve(async (req) => {
         updateData = {
           ...updateData,
           client_analysis: clientData.analysis_data,
+          ...(commonDuration && { call_duration: commonDuration }),
+          ...(commonStatus && { call_status: commonStatus }),
         };
         console.log("Updating client_analysis data");
         break;
       }
 
       case "recording_completed": {
-        const recordingData = payload as RecordingCompletedPayload;
         updateData = {
           ...updateData,
-          recording_url: recordingData.recording_url,
+          recording_url: commonRecordingUrl,
         };
         console.log("Updating recording_url");
         break;
