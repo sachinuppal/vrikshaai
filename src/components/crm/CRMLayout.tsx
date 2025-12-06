@@ -4,12 +4,13 @@ import {
   LayoutDashboard,
   Users,
   CheckSquare,
-  Settings,
   ArrowLeft,
   Zap,
-  Database,
   RefreshCw,
   Workflow,
+  Phone,
+  FileText,
+  ChevronDown,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -24,15 +25,21 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
+import { cn } from "@/lib/utils";
 
 interface CRMLayoutProps {
   children: ReactNode;
 }
 
-const navItems = [
+const crmNavItems = [
   { title: "Dashboard", url: "/crm/dashboard", icon: LayoutDashboard },
   { title: "Contacts", url: "/crm/contacts", icon: Users },
   { title: "Tasks", url: "/crm/tasks", icon: CheckSquare },
@@ -40,11 +47,22 @@ const navItems = [
   { title: "Flow Builder", url: "/crm/flow-builder", icon: Workflow },
 ];
 
+const voiceNavItems = [
+  { title: "All Calls", url: "/crm/calls", icon: Phone },
+];
+
+const acceleratorNavItems = [
+  { title: "Applications", url: "/crm/applications", icon: FileText },
+];
+
 export function CRMLayout({ children }: CRMLayoutProps) {
   const navigate = useNavigate();
   const location = useLocation();
   const { toast } = useToast();
   const [syncing, setSyncing] = useState(false);
+  const [crmOpen, setCrmOpen] = useState(true);
+  const [voiceOpen, setVoiceOpen] = useState(location.pathname.includes('/crm/calls'));
+  const [acceleratorOpen, setAcceleratorOpen] = useState(location.pathname.includes('/crm/applications'));
 
   const handleSync = async () => {
     setSyncing(true);
@@ -71,6 +89,9 @@ export function CRMLayout({ children }: CRMLayoutProps) {
     }
   };
 
+  const isActive = (url: string) => location.pathname === url;
+  const isSectionActive = (items: typeof crmNavItems) => items.some(item => location.pathname.startsWith(item.url.split('/').slice(0, 3).join('/')));
+
   return (
     <SidebarProvider>
       <div className="min-h-screen flex w-full bg-background">
@@ -83,36 +104,118 @@ export function CRMLayout({ children }: CRMLayoutProps) {
                   <Zap className="h-5 w-5 text-primary-foreground" />
                 </div>
                 <div>
-                  <h2 className="font-bold text-foreground">Vriksha CRM</h2>
-                  <p className="text-xs text-muted-foreground">Agentic AI</p>
+                  <h2 className="font-bold text-foreground">Admin Console</h2>
+                  <p className="text-xs text-muted-foreground">Vriksha.ai</p>
                 </div>
               </div>
             </div>
 
-            <SidebarGroup>
-              <SidebarGroupLabel>Navigation</SidebarGroupLabel>
-              <SidebarGroupContent>
-                <SidebarMenu>
-                  {navItems.map((item) => (
-                    <SidebarMenuItem key={item.title}>
-                      <SidebarMenuButton
-                        asChild
-                        isActive={location.pathname === item.url}
-                      >
-                        <button
-                          onClick={() => navigate(item.url)}
-                          className="w-full flex items-center gap-2"
-                        >
-                          <item.icon className="h-4 w-4" />
-                          <span>{item.title}</span>
-                        </button>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                  ))}
-                </SidebarMenu>
-              </SidebarGroupContent>
-            </SidebarGroup>
+            {/* CRM Section */}
+            <Collapsible open={crmOpen} onOpenChange={setCrmOpen}>
+              <SidebarGroup>
+                <CollapsibleTrigger className="flex items-center justify-between w-full px-3 py-2 text-sm font-semibold text-muted-foreground hover:text-foreground">
+                  <span className="flex items-center gap-2">
+                    <LayoutDashboard className="h-4 w-4" />
+                    CRM
+                  </span>
+                  <ChevronDown className={cn("h-4 w-4 transition-transform", crmOpen && "rotate-180")} />
+                </CollapsibleTrigger>
+                <CollapsibleContent>
+                  <SidebarGroupContent>
+                    <SidebarMenu>
+                      {crmNavItems.map((item) => (
+                        <SidebarMenuItem key={item.title}>
+                          <SidebarMenuButton
+                            asChild
+                            isActive={isActive(item.url)}
+                          >
+                            <button
+                              onClick={() => navigate(item.url)}
+                              className="w-full flex items-center gap-2"
+                            >
+                              <item.icon className="h-4 w-4" />
+                              <span>{item.title}</span>
+                            </button>
+                          </SidebarMenuButton>
+                        </SidebarMenuItem>
+                      ))}
+                    </SidebarMenu>
+                  </SidebarGroupContent>
+                </CollapsibleContent>
+              </SidebarGroup>
+            </Collapsible>
 
+            {/* Voice Calls Section */}
+            <Collapsible open={voiceOpen} onOpenChange={setVoiceOpen}>
+              <SidebarGroup>
+                <CollapsibleTrigger className="flex items-center justify-between w-full px-3 py-2 text-sm font-semibold text-muted-foreground hover:text-foreground">
+                  <span className="flex items-center gap-2">
+                    <Phone className="h-4 w-4" />
+                    Voice Calls
+                  </span>
+                  <ChevronDown className={cn("h-4 w-4 transition-transform", voiceOpen && "rotate-180")} />
+                </CollapsibleTrigger>
+                <CollapsibleContent>
+                  <SidebarGroupContent>
+                    <SidebarMenu>
+                      {voiceNavItems.map((item) => (
+                        <SidebarMenuItem key={item.title}>
+                          <SidebarMenuButton
+                            asChild
+                            isActive={isActive(item.url)}
+                          >
+                            <button
+                              onClick={() => navigate(item.url)}
+                              className="w-full flex items-center gap-2"
+                            >
+                              <item.icon className="h-4 w-4" />
+                              <span>{item.title}</span>
+                            </button>
+                          </SidebarMenuButton>
+                        </SidebarMenuItem>
+                      ))}
+                    </SidebarMenu>
+                  </SidebarGroupContent>
+                </CollapsibleContent>
+              </SidebarGroup>
+            </Collapsible>
+
+            {/* Accelerator Section */}
+            <Collapsible open={acceleratorOpen} onOpenChange={setAcceleratorOpen}>
+              <SidebarGroup>
+                <CollapsibleTrigger className="flex items-center justify-between w-full px-3 py-2 text-sm font-semibold text-muted-foreground hover:text-foreground">
+                  <span className="flex items-center gap-2">
+                    <FileText className="h-4 w-4" />
+                    Accelerator
+                  </span>
+                  <ChevronDown className={cn("h-4 w-4 transition-transform", acceleratorOpen && "rotate-180")} />
+                </CollapsibleTrigger>
+                <CollapsibleContent>
+                  <SidebarGroupContent>
+                    <SidebarMenu>
+                      {acceleratorNavItems.map((item) => (
+                        <SidebarMenuItem key={item.title}>
+                          <SidebarMenuButton
+                            asChild
+                            isActive={isActive(item.url)}
+                          >
+                            <button
+                              onClick={() => navigate(item.url)}
+                              className="w-full flex items-center gap-2"
+                            >
+                              <item.icon className="h-4 w-4" />
+                              <span>{item.title}</span>
+                            </button>
+                          </SidebarMenuButton>
+                        </SidebarMenuItem>
+                      ))}
+                    </SidebarMenu>
+                  </SidebarGroupContent>
+                </CollapsibleContent>
+              </SidebarGroup>
+            </Collapsible>
+
+            {/* Actions */}
             <SidebarGroup>
               <SidebarGroupLabel>Actions</SidebarGroupLabel>
               <SidebarGroupContent>
