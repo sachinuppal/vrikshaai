@@ -17,3 +17,6 @@ verify_jwt = false
 
 [functions.send-voice-notification]
 verify_jwt = false
+
+[functions.ringg-webhook]
+verify_jwt = false
