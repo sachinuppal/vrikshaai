@@ -235,6 +235,28 @@ serve(async (req) => {
 
     await supabase.from("crm_contacts").update(contactUpdate).eq("id", contactId);
 
+    // Compute scores for this contact
+    let scoresComputed = false;
+    try {
+      const scoreResponse = await fetch(`${supabaseUrl}/functions/v1/crm-compute-scores`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${supabaseServiceKey}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ contact_id: contactId }),
+      });
+      
+      if (scoreResponse.ok) {
+        scoresComputed = true;
+        console.log("Computed scores for contact:", contactId);
+      } else {
+        console.error("Score computation failed:", await scoreResponse.text());
+      }
+    } catch (scoreError) {
+      console.error("Score computation error:", scoreError);
+    }
+
     // Evaluate triggers for this new interaction
     let triggersExecuted = 0;
     try {
@@ -296,6 +318,7 @@ serve(async (req) => {
         variables_extracted: variablesToStore.length,
         ai_analysis_performed: !!aiAnalysis,
         triggers_executed: triggersExecuted,
+        scores_computed: scoresComputed,
       }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
