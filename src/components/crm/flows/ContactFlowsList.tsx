@@ -1,10 +1,11 @@
 import { motion } from 'framer-motion';
-import { Workflow, MoreVertical, Clock, Zap, Trash2, Edit, ExternalLink } from 'lucide-react';
+import { Workflow, MoreVertical, Clock, Zap, Trash2, Edit, ExternalLink, Check } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
+import { Checkbox } from '@/components/ui/checkbox';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -45,9 +46,36 @@ interface ContactFlowsListProps {
   onToggle: (contactFlowId: string, isEnabled: boolean) => void;
   onRemove: (contactFlowId: string) => void;
   onEdit: (flowId: string) => void;
+  selectedIds?: string[];
+  onSelectionChange?: (ids: string[]) => void;
+  selectable?: boolean;
 }
 
-export function ContactFlowsList({ contactFlows, onToggle, onRemove, onEdit }: ContactFlowsListProps) {
+export function ContactFlowsList({ 
+  contactFlows, 
+  onToggle, 
+  onRemove, 
+  onEdit,
+  selectedIds = [],
+  onSelectionChange,
+  selectable = false
+}: ContactFlowsListProps) {
+  const handleSelectAll = () => {
+    if (selectedIds.length === contactFlows.length) {
+      onSelectionChange?.([]);
+    } else {
+      onSelectionChange?.(contactFlows.map(cf => cf.id));
+    }
+  };
+
+  const handleSelectOne = (id: string) => {
+    if (selectedIds.includes(id)) {
+      onSelectionChange?.(selectedIds.filter(i => i !== id));
+    } else {
+      onSelectionChange?.([...selectedIds, id]);
+    }
+  };
+
   if (contactFlows.length === 0) {
     return (
       <Card className="border-none shadow-card">
@@ -62,10 +90,27 @@ export function ContactFlowsList({ contactFlows, onToggle, onRemove, onEdit }: C
     );
   }
 
+  const allSelected = selectedIds.length === contactFlows.length;
+  const someSelected = selectedIds.length > 0 && selectedIds.length < contactFlows.length;
+
   return (
     <Card className="border-none shadow-card">
-      <CardHeader>
+      <CardHeader className="flex flex-row items-center justify-between">
         <CardTitle className="text-lg">Assigned Flows</CardTitle>
+        {selectable && contactFlows.length > 0 && (
+          <div className="flex items-center gap-2">
+            <Checkbox 
+              checked={allSelected}
+              ref={(el) => {
+                if (el) (el as any).indeterminate = someSelected;
+              }}
+              onCheckedChange={handleSelectAll}
+            />
+            <span className="text-sm text-muted-foreground">
+              {allSelected ? 'Deselect all' : 'Select all'}
+            </span>
+          </div>
+        )}
       </CardHeader>
       <CardContent className="space-y-3">
         {contactFlows.map((cf, index) => (
@@ -74,9 +119,19 @@ export function ContactFlowsList({ contactFlows, onToggle, onRemove, onEdit }: C
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: index * 0.05 }}
-            className="flex items-center justify-between p-4 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors"
+            className={`flex items-center justify-between p-4 rounded-lg transition-colors ${
+              selectedIds.includes(cf.id) 
+                ? 'bg-primary/10 ring-1 ring-primary/20' 
+                : 'bg-muted/30 hover:bg-muted/50'
+            }`}
           >
             <div className="flex items-center gap-4 flex-1">
+              {selectable && (
+                <Checkbox 
+                  checked={selectedIds.includes(cf.id)}
+                  onCheckedChange={() => handleSelectOne(cf.id)}
+                />
+              )}
               <div className="p-2 rounded-lg bg-primary/10">
                 <Workflow className="h-5 w-5 text-primary" />
               </div>

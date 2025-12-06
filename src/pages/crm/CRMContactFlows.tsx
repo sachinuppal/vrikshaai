@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Plus, Workflow, Activity, Clock, Settings2 } from 'lucide-react';
+import { ArrowLeft, Plus, Workflow, Activity, Clock, RefreshCw, Power, PowerOff, Trash2, Loader2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { CRMLayout } from '@/components/crm/CRMLayout';
 import { Button } from '@/components/ui/button';
@@ -10,6 +10,17 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { ContactFlowsList } from '@/components/crm/flows/ContactFlowsList';
 import { AssignFlowModal } from '@/components/crm/flows/AssignFlowModal';
 import { toast } from 'sonner';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 
 interface ContactFlow {
   id: string;
@@ -42,6 +53,9 @@ export default function CRMContactFlows() {
   const [contactFlows, setContactFlows] = useState<ContactFlow[]>([]);
   const [loading, setLoading] = useState(true);
   const [isAssignModalOpen, setIsAssignModalOpen] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [syncing, setSyncing] = useState(false);
+  const [bulkActionLoading, setBulkActionLoading] = useState(false);
 
   useEffect(() => {
     if (contactId) {
@@ -72,12 +86,12 @@ export default function CRMContactFlows() {
       if (contactRes.error) throw contactRes.error;
       setContact(contactRes.data);
       
-      // Transform the data to handle the joined flow
       const flows = (flowsRes.data || []).map((cf: any) => ({
         ...cf,
         flow: cf.flow || { id: cf.flow_id, name: 'Unknown Flow', description: null, status: 'draft' }
       }));
       setContactFlows(flows);
+      setSelectedIds([]);
     } catch (error) {
       console.error('Error fetching contact flows:', error);
       toast.error('Failed to load contact flows');
@@ -115,6 +129,7 @@ export default function CRMContactFlows() {
       if (error) throw error;
 
       setContactFlows(prev => prev.filter(cf => cf.id !== contactFlowId));
+      setSelectedIds(prev => prev.filter(id => id !== contactFlowId));
       toast.success('Flow removed from contact');
     } catch (error) {
       console.error('Error removing flow:', error);
@@ -125,6 +140,120 @@ export default function CRMContactFlows() {
   const handleFlowAssigned = () => {
     fetchData();
     setIsAssignModalOpen(false);
+  };
+
+  const handleSyncDefaultFlows = async () => {
+    setSyncing(true);
+    try {
+      // Fetch all published flows
+      const { data: allFlows, error: flowsError } = await supabase
+        .from('crm_agentic_flows')
+        .select('id')
+        .eq('status', 'published');
+
+      if (flowsError) throw flowsError;
+
+      // Filter to flows not already assigned
+      const existingFlowIds = contactFlows.map(cf => cf.flow_id);
+      const newFlows = (allFlows || []).filter(f => !existingFlowIds.includes(f.id));
+
+      if (newFlows.length === 0) {
+        toast.info('All published flows are already assigned');
+        return;
+      }
+
+      // Insert new flow assignments
+      const { error: insertError } = await supabase
+        .from('crm_contact_flows')
+        .insert(
+          newFlows.map((f, idx) => ({
+            contact_id: contactId,
+            flow_id: f.id,
+            is_enabled: true,
+            priority: existingFlowIds.length + idx
+          }))
+        );
+
+      if (insertError) throw insertError;
+
+      toast.success(`Assigned ${newFlows.length} new flow(s)`);
+      fetchData();
+    } catch (error) {
+      console.error('Error syncing default flows:', error);
+      toast.error('Failed to sync flows');
+    } finally {
+      setSyncing(false);
+    }
+  };
+
+  const handleBulkEnable = async () => {
+    if (selectedIds.length === 0) return;
+    setBulkActionLoading(true);
+    try {
+      const { error } = await supabase
+        .from('crm_contact_flows')
+        .update({ is_enabled: true })
+        .in('id', selectedIds);
+
+      if (error) throw error;
+
+      setContactFlows(prev => prev.map(cf => 
+        selectedIds.includes(cf.id) ? { ...cf, is_enabled: true } : cf
+      ));
+      toast.success(`Enabled ${selectedIds.length} flow(s)`);
+      setSelectedIds([]);
+    } catch (error) {
+      console.error('Error bulk enabling:', error);
+      toast.error('Failed to enable flows');
+    } finally {
+      setBulkActionLoading(false);
+    }
+  };
+
+  const handleBulkDisable = async () => {
+    if (selectedIds.length === 0) return;
+    setBulkActionLoading(true);
+    try {
+      const { error } = await supabase
+        .from('crm_contact_flows')
+        .update({ is_enabled: false })
+        .in('id', selectedIds);
+
+      if (error) throw error;
+
+      setContactFlows(prev => prev.map(cf => 
+        selectedIds.includes(cf.id) ? { ...cf, is_enabled: false } : cf
+      ));
+      toast.success(`Disabled ${selectedIds.length} flow(s)`);
+      setSelectedIds([]);
+    } catch (error) {
+      console.error('Error bulk disabling:', error);
+      toast.error('Failed to disable flows');
+    } finally {
+      setBulkActionLoading(false);
+    }
+  };
+
+  const handleBulkRemove = async () => {
+    if (selectedIds.length === 0) return;
+    setBulkActionLoading(true);
+    try {
+      const { error } = await supabase
+        .from('crm_contact_flows')
+        .delete()
+        .in('id', selectedIds);
+
+      if (error) throw error;
+
+      setContactFlows(prev => prev.filter(cf => !selectedIds.includes(cf.id)));
+      toast.success(`Removed ${selectedIds.length} flow(s)`);
+      setSelectedIds([]);
+    } catch (error) {
+      console.error('Error bulk removing:', error);
+      toast.error('Failed to remove flows');
+    } finally {
+      setBulkActionLoading(false);
+    }
   };
 
   const activeFlows = contactFlows.filter(cf => cf.is_enabled);
@@ -164,7 +293,7 @@ export default function CRMContactFlows() {
     <CRMLayout>
       <div className="space-y-6">
         {/* Header */}
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between flex-wrap gap-4">
           <div className="flex items-center gap-4">
             <Button variant="ghost" onClick={() => navigate(`/crm/contacts/${contactId}`)}>
               <ArrowLeft className="mr-2 h-4 w-4" />
@@ -175,10 +304,20 @@ export default function CRMContactFlows() {
               <p className="text-muted-foreground">Manage automation flows</p>
             </div>
           </div>
-          <Button onClick={() => setIsAssignModalOpen(true)}>
-            <Plus className="mr-2 h-4 w-4" />
-            Add Flow
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button variant="outline" onClick={handleSyncDefaultFlows} disabled={syncing}>
+              {syncing ? (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              ) : (
+                <RefreshCw className="mr-2 h-4 w-4" />
+              )}
+              Sync Default Flows
+            </Button>
+            <Button onClick={() => setIsAssignModalOpen(true)}>
+              <Plus className="mr-2 h-4 w-4" />
+              Add Flow
+            </Button>
+          </div>
         </div>
 
         {/* Stats */}
@@ -232,12 +371,71 @@ export default function CRMContactFlows() {
           </motion.div>
         </div>
 
+        {/* Bulk Actions Bar */}
+        {selectedIds.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="flex items-center justify-between p-4 rounded-lg bg-primary/10 border border-primary/20"
+          >
+            <span className="text-sm font-medium">
+              {selectedIds.length} flow(s) selected
+            </span>
+            <div className="flex items-center gap-2">
+              <Button 
+                size="sm" 
+                variant="outline" 
+                onClick={handleBulkEnable}
+                disabled={bulkActionLoading}
+              >
+                <Power className="h-4 w-4 mr-1" />
+                Enable All
+              </Button>
+              <Button 
+                size="sm" 
+                variant="outline" 
+                onClick={handleBulkDisable}
+                disabled={bulkActionLoading}
+              >
+                <PowerOff className="h-4 w-4 mr-1" />
+                Disable All
+              </Button>
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button size="sm" variant="destructive" disabled={bulkActionLoading}>
+                    <Trash2 className="h-4 w-4 mr-1" />
+                    Remove All
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Remove Selected Flows</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      Are you sure you want to remove {selectedIds.length} flow(s) from this contact? 
+                      The flows themselves will not be deleted.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction onClick={handleBulkRemove}>
+                      Remove
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            </div>
+          </motion.div>
+        )}
+
         {/* Flows List */}
         <ContactFlowsList
           contactFlows={contactFlows}
           onToggle={handleToggleFlow}
           onRemove={handleRemoveFlow}
           onEdit={(flowId) => navigate(`/crm/flow-builder/${flowId}?contactId=${contactId}`)}
+          selectable={true}
+          selectedIds={selectedIds}
+          onSelectionChange={setSelectedIds}
         />
 
         {/* Assign Flow Modal */}
