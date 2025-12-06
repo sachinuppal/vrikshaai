@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Phone, Loader2, User } from "lucide-react";
+import { Phone, Loader2, User, PhoneOutgoing } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -27,10 +27,23 @@ interface InitiateCallModalProps {
   onSuccess?: () => void;
 }
 
+const OUTBOUND_NUMBERS = [
+  { label: "Default", number: "+912269976405" },
+  { label: "Financematrix", number: "+918035737102" },
+  { label: "Gtinfra", number: "+914045210102" },
+  { label: "Test", number: "+918046801149" },
+  { label: "Idfc", number: "+918045682967" },
+  { label: "Myra - Motorola Nursery Care", number: "+912269539393" },
+  { label: "Monika - Revenueable AI", number: "+918035315396" },
+  { label: "Solarium", number: "+918035317208" },
+  { label: "Solarium 2", number: "+918035317201" },
+];
+
 const InitiateCallModal = ({ open, onOpenChange, onSuccess }: InitiateCallModalProps) => {
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [countryCode, setCountryCode] = useState("+91");
+  const [fromNumber, setFromNumber] = useState("+912269976405");
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
 
@@ -54,6 +67,7 @@ const InitiateCallModal = ({ open, onOpenChange, onSuccess }: InitiateCallModalP
           name: name.trim(),
           phone: phone.trim(),
           countryCode: countryCode,
+          fromNumber: fromNumber,
         },
       });
 
@@ -144,6 +158,28 @@ const InitiateCallModal = ({ open, onOpenChange, onSuccess }: InitiateCallModalP
                 disabled={loading}
               />
             </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="fromNumber" className="flex items-center gap-2">
+              <PhoneOutgoing className="h-4 w-4" />
+              Call From
+            </Label>
+            <Select value={fromNumber} onValueChange={setFromNumber} disabled={loading}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select outbound number" />
+              </SelectTrigger>
+              <SelectContent>
+                {OUTBOUND_NUMBERS.map((item) => (
+                  <SelectItem key={item.number} value={item.number}>
+                    <span className="flex items-center gap-2">
+                      <span className="font-medium">{item.label}</span>
+                      <span className="text-muted-foreground text-xs">{item.number}</span>
+                    </span>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           <div className="bg-muted/50 rounded-lg p-3 text-sm text-muted-foreground">
