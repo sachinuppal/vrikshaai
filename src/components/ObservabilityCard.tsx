@@ -15,10 +15,12 @@ import {
   Building2,
   Code,
   Briefcase,
-  HelpCircle
+  HelpCircle,
+  GitBranch
 } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { ConversationFlowchart } from "./ConversationFlowchart";
 import { cn } from "@/lib/utils";
 
 interface SkippedSection {
@@ -85,6 +87,7 @@ export const ObservabilityCard = ({
 }: ObservabilityCardProps) => {
   const [expandedSections, setExpandedSections] = useState<string[]>([]);
   const [showSkipped, setShowSkipped] = useState(false);
+  const [showFlowchart, setShowFlowchart] = useState(true);
 
   const toggleSection = (section: string) => {
     setExpandedSections(prev => 
@@ -274,6 +277,29 @@ export const ObservabilityCard = ({
       {analysis.summary && (
         <p className="text-muted-foreground">{analysis.summary}</p>
       )}
+
+      {/* Conversation Flowchart */}
+      <div className="space-y-3">
+        <button
+          onClick={() => setShowFlowchart(!showFlowchart)}
+          className="flex items-center gap-2 font-medium hover:text-primary transition-colors"
+        >
+          <GitBranch className="h-4 w-4" />
+          <span>Conversation Path</span>
+          {showFlowchart ? (
+            <ChevronUp className="h-4 w-4" />
+          ) : (
+            <ChevronDown className="h-4 w-4" />
+          )}
+        </button>
+        
+        {showFlowchart && (
+          <ConversationFlowchart 
+            detectedUserType={analysis.detected_user_type}
+            applicableSections={analysis.applicable_sections}
+          />
+        )}
+      </div>
 
       {/* Applicable Sections */}
       {applicableSections.length > 0 && (
