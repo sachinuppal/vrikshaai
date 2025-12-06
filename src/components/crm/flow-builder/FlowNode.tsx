@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { Pencil, GripVertical } from 'lucide-react';
 import { NODE_TYPES } from './nodeTypes';
@@ -35,7 +35,24 @@ export const FlowNode: React.FC<FlowNodeProps> = ({
   onConnectionEnd,
   isConnecting = false
 }) => {
+  const nodeRef = useRef<HTMLDivElement>(null);
   const nodeType = NODE_TYPES[node.node_type];
+  
+  // Set up native drag event listener
+  useEffect(() => {
+    const element = nodeRef.current;
+    if (!element) return;
+    
+    const handleDragStart = (e: DragEvent) => {
+      e.dataTransfer?.setData('nodeId', node.id);
+      if (e.dataTransfer) {
+        e.dataTransfer.effectAllowed = 'move';
+      }
+    };
+    
+    element.addEventListener('dragstart', handleDragStart);
+    return () => element.removeEventListener('dragstart', handleDragStart);
+  }, [node.id]);
   
   if (!nodeType) {
     return null;
@@ -79,16 +96,19 @@ export const FlowNode: React.FC<FlowNodeProps> = ({
 
   return (
     <motion.div
+      ref={nodeRef}
       data-node-id={node.id}
+      draggable
       initial={{ scale: 0.8, opacity: 0 }}
       animate={{ scale: isHighlighted ? 1.02 : 1, opacity: 1 }}
       transition={{ type: 'spring', stiffness: 300, damping: 25 }}
       className={cn(
-        "absolute cursor-pointer select-none group",
+        "absolute cursor-grab select-none group",
         "w-[220px] rounded-xl bg-white shadow-md",
         "transition-all duration-200 border",
+        "active:cursor-grabbing",
         isHighlighted
-          ? "border-primary ring-4 ring-primary/30 shadow-xl scale-102"
+          ? "border-primary ring-4 ring-primary/30 shadow-xl"
           : isSelected 
             ? "border-primary/60 ring-2 ring-primary/20 shadow-lg" 
             : "border-slate-200 hover:border-primary/40 hover:shadow-lg"
@@ -96,11 +116,12 @@ export const FlowNode: React.FC<FlowNodeProps> = ({
       style={{
         left: node.position_x,
         top: node.position_y,
-        transform: 'translate(-50%, -50%)'
+        transform: 'translate(-50%, -50%)',
+        willChange: 'transform'
       }}
       onClick={handleClick}
     >
-      <div className="absolute -left-1 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity cursor-grab">
+      <div className="absolute -left-1 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity">
         <GripVertical className="w-4 h-4 text-muted-foreground" />
       </div>
 
