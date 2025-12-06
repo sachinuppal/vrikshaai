@@ -96,23 +96,86 @@ export const AgenticFlowCanvas: React.FC<AgenticFlowCanvasProps> = ({
   const [showGrid, setShowGrid] = useState(true);
   const [showMinimap, setShowMinimap] = useState(true);
   const [snapToGrid, setSnapToGrid] = useState(true);
+  const [isSnapDisabledTemporarily, setIsSnapDisabledTemporarily] = useState(false);
   const [selectedEdgeId, setSelectedEdgeId] = useState<string | null>(null);
   const [hoveredEdgeId, setHoveredEdgeId] = useState<string | null>(null);
   const [connectionState, setConnectionState] = useState<ConnectionState | null>(null);
   const [selectionState, setSelectionState] = useState<SelectionState | null>(null);
   const [contextPosition, setContextPosition] = useState({ x: 0, y: 0 });
   const [selectedGroupId, setSelectedGroupId] = useState<string | null>(null);
+  const [alignmentGuides, setAlignmentGuides] = useState<{ x: number | null; y: number | null }>({ x: null, y: null });
+  const [draggingNodeId, setDraggingNodeId] = useState<string | null>(null);
   const canvasRef = useRef<HTMLDivElement>(null);
   const lastPanPosition = useRef({ x: 0, y: 0 });
 
   // Grid size for snapping (matches visual grid)
   const GRID_SIZE = 20;
+  const ALIGNMENT_THRESHOLD = 10; // Pixels threshold for alignment detection
+  
+  // Check if snap is effectively enabled (global setting AND not temporarily disabled)
+  const isSnapEnabled = snapToGrid && !isSnapDisabledTemporarily;
   
   // Snap coordinates to grid
   const snapToGridCoord = useCallback((value: number): number => {
-    if (!snapToGrid) return value;
+    if (!isSnapEnabled) return value;
     return Math.round(value / GRID_SIZE) * GRID_SIZE;
-  }, [snapToGrid]);
+  }, [isSnapEnabled]);
+  
+  // Find alignment guides with other nodes
+  const findAlignmentGuides = useCallback((nodeId: string, x: number, y: number) => {
+    if (!isSnapEnabled) {
+      setAlignmentGuides({ x: null, y: null });
+      return { x, y };
+    }
+    
+    let alignX: number | null = null;
+    let alignY: number | null = null;
+    let snappedX = x;
+    let snappedY = y;
+    
+    // Check alignment with other nodes
+    nodes.forEach(node => {
+      if (node.id === nodeId) return;
+      
+      // Horizontal alignment (same Y position)
+      if (Math.abs(node.position_y - y) < ALIGNMENT_THRESHOLD) {
+        alignY = node.position_y;
+        snappedY = node.position_y;
+      }
+      
+      // Vertical alignment (same X position)
+      if (Math.abs(node.position_x - x) < ALIGNMENT_THRESHOLD) {
+        alignX = node.position_x;
+        snappedX = node.position_x;
+      }
+    });
+    
+    setAlignmentGuides({ x: alignX, y: alignY });
+    return { x: snappedX, y: snappedY };
+  }, [nodes, isSnapEnabled]);
+
+  // Handle Alt key for temporary snap disable
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Alt') {
+        setIsSnapDisabledTemporarily(true);
+      }
+    };
+    
+    const handleKeyUp = (e: KeyboardEvent) => {
+      if (e.key === 'Alt') {
+        setIsSnapDisabledTemporarily(false);
+      }
+    };
+    
+    window.addEventListener('keydown', handleKeyDown);
+    window.addEventListener('keyup', handleKeyUp);
+    
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('keyup', handleKeyUp);
+    };
+  }, []);
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -323,21 +386,37 @@ export const AgenticFlowCanvas: React.FC<AgenticFlowCanvasProps> = ({
     if (!canvasRef.current) return;
     
     const pos = screenToCanvas(e.clientX, e.clientY);
-    const snappedX = snapToGridCoord(pos.x);
-    const snappedY = snapToGridCoord(pos.y);
-    
+    const nodeId = e.dataTransfer.getData('nodeId');
     const newNodeType = e.dataTransfer.getData('newNodeType');
+    
+    // Find alignment with other nodes first, then snap to grid
+    const aligned = findAlignmentGuides(nodeId || 'new', pos.x, pos.y);
+    const snappedX = snapToGridCoord(aligned.x);
+    const snappedY = snapToGridCoord(aligned.y);
+    
+    // Clear alignment guides after drop
+    setAlignmentGuides({ x: null, y: null });
+    setDraggingNodeId(null);
     
     if (newNodeType && onNodeAdd) {
       onNodeAdd(newNodeType, snappedX, snappedY);
       return;
     }
     
-    const nodeId = e.dataTransfer.getData('nodeId');
     if (nodeId) onNodeMove(nodeId, snappedX, snappedY);
-  }, [screenToCanvas, onNodeMove, onNodeAdd, snapToGridCoord]);
+  }, [screenToCanvas, onNodeMove, onNodeAdd, snapToGridCoord, findAlignmentGuides]);
 
-  const handleDragOver = (e: React.DragEvent) => e.preventDefault();
+  const handleDragOver = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    
+    // Update alignment guides while dragging
+    const nodeId = e.dataTransfer.types.includes('nodeid') ? 'dragging' : null;
+    if (nodeId && canvasRef.current) {
+      const pos = screenToCanvas(e.clientX, e.clientY);
+      findAlignmentGuides('dragging', pos.x, pos.y);
+      setDraggingNodeId('dragging');
+    }
+  }, [screenToCanvas, findAlignmentGuides]);
 
   const handleConnectionStart = useCallback((nodeId: string, point: ConnectionPoint) => {
     const node = nodes.find(n => n.id === nodeId);
@@ -636,7 +715,18 @@ export const AgenticFlowCanvas: React.FC<AgenticFlowCanvasProps> = ({
             <div className="w-px h-6 bg-border mx-1" />
             <Button variant="ghost" size="icon" onClick={handleResetView} className="h-8 w-8" title="Reset view"><Maximize2 className="w-4 h-4" /></Button>
             <Button variant={showGrid ? "secondary" : "ghost"} size="icon" onClick={() => setShowGrid(!showGrid)} className="h-8 w-8" title="Toggle grid"><Grid3X3 className="w-4 h-4" /></Button>
-            <Button variant={snapToGrid ? "secondary" : "ghost"} size="icon" onClick={() => setSnapToGrid(!snapToGrid)} className="h-8 w-8" title="Snap to grid"><Magnet className="w-4 h-4" /></Button>
+            <Button 
+              variant={snapToGrid ? "secondary" : "ghost"} 
+              size="icon" 
+              onClick={() => setSnapToGrid(!snapToGrid)} 
+              className={`h-8 w-8 relative ${isSnapDisabledTemporarily ? 'opacity-50' : ''}`} 
+              title="Snap to grid (hold Alt to temporarily disable)"
+            >
+              <Magnet className="w-4 h-4" />
+              {isSnapDisabledTemporarily && snapToGrid && (
+                <span className="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-orange-500 border border-white" />
+              )}
+            </Button>
             <Button variant={showMinimap ? "secondary" : "ghost"} size="icon" onClick={() => setShowMinimap(!showMinimap)} className="h-8 w-8" title="Toggle minimap"><Map className="w-4 h-4" /></Button>
           </div>
 
@@ -683,6 +773,35 @@ export const AgenticFlowCanvas: React.FC<AgenticFlowCanvasProps> = ({
               ))}
 
               <svg className="absolute inset-0 w-full h-full pointer-events-none" style={{ overflow: 'visible' }}>
+                {/* Alignment guides */}
+                {alignmentGuides.x !== null && (
+                  <motion.line
+                    x1={alignmentGuides.x}
+                    y1={-10000}
+                    x2={alignmentGuides.x}
+                    y2={10000}
+                    stroke="hsl(var(--primary))"
+                    strokeWidth={1}
+                    strokeDasharray="6 4"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 0.7 }}
+                    exit={{ opacity: 0 }}
+                  />
+                )}
+                {alignmentGuides.y !== null && (
+                  <motion.line
+                    x1={-10000}
+                    y1={alignmentGuides.y}
+                    x2={10000}
+                    y2={alignmentGuides.y}
+                    stroke="hsl(var(--primary))"
+                    strokeWidth={1}
+                    strokeDasharray="6 4"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 0.7 }}
+                    exit={{ opacity: 0 }}
+                  />
+                )}
                 <g className="pointer-events-auto">{renderEdges()}</g>
                 {renderConnectionLine()}
               </svg>
