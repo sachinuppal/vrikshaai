@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
@@ -18,6 +18,7 @@ import {
   Star,
   ExternalLink,
   Play,
+  RefreshCw,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -29,6 +30,7 @@ import { Progress } from "@/components/ui/progress";
 import { CRMLayout } from "@/components/crm/CRMLayout";
 import { DynamicIndustryGraph } from "@/components/crm/DynamicIndustryGraph";
 import { PredictiveTimeline } from "@/components/crm/PredictiveTimeline";
+import { toast } from "sonner";
 
 interface Contact360 {
   contact: any;
@@ -47,11 +49,89 @@ export default function CRMContactProfile() {
   const navigate = useNavigate();
   const [data, setData] = useState<Contact360 | null>(null);
   const [loading, setLoading] = useState(true);
+  const [scoresUpdating, setScoresUpdating] = useState(false);
 
+  // Fetch contact data
   useEffect(() => {
     if (id) {
       fetchContact360();
     }
+  }, [id]);
+
+  // Real-time subscription for score and contact updates
+  useEffect(() => {
+    if (!id) return;
+
+    // Subscribe to contact updates (scores are stored on the contact)
+    const contactChannel = supabase
+      .channel(`contact-${id}`)
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'crm_contacts',
+          filter: `id=eq.${id}`,
+        },
+        (payload) => {
+          console.log('Contact updated:', payload);
+          setScoresUpdating(true);
+          
+          // Update scores in state
+          setData((prev) => {
+            if (!prev) return prev;
+            const newContact = payload.new as any;
+            return {
+              ...prev,
+              contact: newContact,
+              scores: {
+                current: {
+                  intent: newContact.intent_score,
+                  urgency: newContact.urgency_score,
+                  engagement: newContact.engagement_score,
+                  ltv_prediction: newContact.ltv_prediction,
+                  churn_risk: newContact.churn_risk,
+                },
+              },
+            };
+          });
+          
+          toast.success("Scores updated in real-time");
+          setTimeout(() => setScoresUpdating(false), 1000);
+        }
+      )
+      .subscribe();
+
+    // Subscribe to new tasks for this contact
+    const tasksChannel = supabase
+      .channel(`tasks-${id}`)
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'crm_tasks',
+          filter: `contact_id=eq.${id}`,
+        },
+        (payload) => {
+          console.log('New task created:', payload);
+          setData((prev) => {
+            if (!prev) return prev;
+            return {
+              ...prev,
+              tasks: [payload.new as any, ...prev.tasks],
+            };
+          });
+          toast.success("New task created by automation");
+        }
+      )
+      .subscribe();
+
+    // Cleanup subscriptions
+    return () => {
+      supabase.removeChannel(contactChannel);
+      supabase.removeChannel(tasksChannel);
+    };
   }, [id]);
 
   const fetchContact360 = async () => {
@@ -274,9 +354,12 @@ export default function CRMContactProfile() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
             >
-              <Card className="border-none shadow-card">
-                <CardHeader>
+            <Card className="border-none shadow-card">
+                <CardHeader className="flex flex-row items-center justify-between">
                   <CardTitle className="text-lg">AI Scores</CardTitle>
+                  {scoresUpdating && (
+                    <RefreshCw className="h-4 w-4 animate-spin text-primary" />
+                  )}
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div>
