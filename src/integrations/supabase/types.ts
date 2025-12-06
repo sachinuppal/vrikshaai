@@ -347,6 +347,60 @@ export type Database = {
           },
         ]
       }
+      crm_contact_flows: {
+        Row: {
+          contact_id: string
+          created_at: string | null
+          custom_config: Json | null
+          execution_count: number | null
+          flow_id: string
+          id: string
+          is_enabled: boolean | null
+          last_executed_at: string | null
+          priority: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          contact_id: string
+          created_at?: string | null
+          custom_config?: Json | null
+          execution_count?: number | null
+          flow_id: string
+          id?: string
+          is_enabled?: boolean | null
+          last_executed_at?: string | null
+          priority?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          contact_id?: string
+          created_at?: string | null
+          custom_config?: Json | null
+          execution_count?: number | null
+          flow_id?: string
+          id?: string
+          is_enabled?: boolean | null
+          last_executed_at?: string | null
+          priority?: number | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_contact_flows_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "crm_contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_contact_flows_flow_id_fkey"
+            columns: ["flow_id"]
+            isOneToOne: false
+            referencedRelation: "crm_agentic_flows"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       crm_contacts: {
         Row: {
           base_profile: Json | null
