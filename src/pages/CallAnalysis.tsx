@@ -22,8 +22,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import { ObservabilityCard } from "@/components/ObservabilityCard";
 
 interface TranscriptEntry {
   role?: string;
@@ -60,6 +62,28 @@ interface ClientAnalysis {
   interest_in_vriksha_model?: string;
 }
 
+interface ObservabilityAnalysis {
+  overall_score: number;
+  status: string;
+  sections_covered: {
+    section: string;
+    covered: boolean;
+    compliance_score: number;
+    questions_asked?: string[];
+    questions_missed?: string[];
+  }[];
+  tone_analysis: {
+    professional: boolean;
+    empathetic: boolean;
+    clear: boolean;
+  };
+  guardrail_violations: string[];
+  language_compliance: boolean;
+  strengths: string[];
+  improvements: string[];
+  summary: string;
+}
+
 interface CallData {
   id: string;
   name: string;
@@ -71,6 +95,8 @@ interface CallData {
   client_analysis: ClientAnalysis | null;
   recording_url: string | null;
   created_at: string;
+  observability_analysis: ObservabilityAnalysis | null;
+  observability_status: string | null;
 }
 
 const CallAnalysis = () => {
@@ -79,6 +105,7 @@ const CallAnalysis = () => {
   const [callData, setCallData] = useState<CallData | null>(null);
   const [loading, setLoading] = useState(true);
   const [analyzing, setAnalyzing] = useState(false);
+  const [runningObservability, setRunningObservability] = useState(false);
 
   useEffect(() => {
     if (!id) {
@@ -144,6 +171,35 @@ const CallAnalysis = () => {
     sessionStorage.removeItem("voice_user_name");
     sessionStorage.removeItem("voice_user_phone");
     navigate("/");
+  };
+
+  const runObservabilityAnalysis = async () => {
+    if (!callData?.transcript || callData.transcript.length === 0) {
+      toast.error("No transcript available to analyze");
+      return;
+    }
+
+    setRunningObservability(true);
+    
+    try {
+      const response = await supabase.functions.invoke("observe-call-script", {
+        body: {
+          call_id: callData.id,
+          transcript: callData.transcript,
+        },
+      });
+
+      if (response.error) {
+        throw new Error(response.error.message);
+      }
+
+      toast.success("Script analysis complete!");
+    } catch (error) {
+      console.error("Observability analysis error:", error);
+      toast.error("Failed to analyze script compliance");
+    } finally {
+      setRunningObservability(false);
+    }
   };
 
   const formatDuration = (seconds: number | null) => {
@@ -443,6 +499,16 @@ const CallAnalysis = () => {
                   </CardContent>
                 </Card>
               </motion.div>
+            )}
+
+            {/* Script Observability */}
+            {callData.transcript && callData.transcript.length > 0 && (
+              <ObservabilityCard
+                analysis={callData.observability_analysis}
+                status={callData.observability_status}
+                onRunAnalysis={runObservabilityAnalysis}
+                isAnalyzing={runningObservability || callData.observability_status === "analyzing"}
+              />
             )}
 
             {/* Transcript */}
