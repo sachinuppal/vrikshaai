@@ -13,6 +13,7 @@ import PrivacyPolicy from "./pages/PrivacyPolicy";
 import Contact from "./pages/Contact";
 import CookieSettings from "./pages/CookieSettings";
 import Auth from "./pages/Auth";
+import DemoLogin from "./pages/DemoLogin";
 import Apply from "./pages/Apply";
 import Applications from "./pages/Applications";
 import Investors from "./pages/Investors";
@@ -21,6 +22,7 @@ import CRM from "./pages/CRM";
 import Voice from "./pages/Voice";
 import CallAnalysis from "./pages/CallAnalysis";
 import CallHistory from "./pages/CallHistory";
+import MyCalls from "./pages/MyCalls";
 import AICallingConsentModal from "./components/AICallingConsentModal";
 import { CookieConsent } from "./components/CookieConsent";
 
@@ -43,7 +45,8 @@ const App = () => (
               <Route path="/contact" element={<Contact />} />
               <Route path="/cookies" element={<CookieSettings />} />
               <Route path="/auth" element={<Auth />} />
-              <Route path="/investors" element={<Investors />} />
+              <Route path="/demo-login" element={<DemoLogin />} />
+              <Route path="/my-calls" element={<MyCalls />} />
               <Route path="/enterprises" element={<Enterprises />} />
               <Route path="/crm" element={<CRM />} />
               <Route path="/voice" element={<Voice />} />
