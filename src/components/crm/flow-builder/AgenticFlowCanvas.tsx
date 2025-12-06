@@ -25,10 +25,12 @@ interface AgenticFlowCanvasProps {
   nodes: FlowNodeData[];
   edges: FlowEdgeData[];
   selectedNodeId: string | null;
+  highlightedNodeId?: string | null;
   onNodeSelect: (nodeId: string | null) => void;
   onNodeMove: (nodeId: string, x: number, y: number) => void;
   onNodeAdd?: (nodeType: string, x: number, y: number) => void;
   onEdgeAdd?: (sourceNodeId: string, targetNodeId: string, sourcePoint: ConnectionPoint) => void;
+  onEdgeDelete?: (edgeId: string) => void;
   onEdgeClick?: (edgeId: string) => void;
 }
 
@@ -36,16 +38,19 @@ export const AgenticFlowCanvas: React.FC<AgenticFlowCanvasProps> = ({
   nodes,
   edges,
   selectedNodeId,
+  highlightedNodeId,
   onNodeSelect,
   onNodeMove,
   onNodeAdd,
   onEdgeAdd,
+  onEdgeDelete,
   onEdgeClick
 }) => {
   const [zoom, setZoom] = useState(1);
   const [pan, setPan] = useState({ x: 0, y: 0 });
   const [isPanning, setIsPanning] = useState(false);
   const [showGrid, setShowGrid] = useState(true);
+  const [selectedEdgeId, setSelectedEdgeId] = useState<string | null>(null);
   const [connectionState, setConnectionState] = useState<ConnectionState | null>(null);
   const canvasRef = useRef<HTMLDivElement>(null);
   const lastPanPosition = useRef({ x: 0, y: 0 });
@@ -167,6 +172,19 @@ export const AgenticFlowCanvas: React.FC<AgenticFlowCanvasProps> = ({
     return { x: 0, y: yOffset };
   };
 
+  // Handle edge click for selection/deletion
+  const handleEdgeClick = (edgeId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (selectedEdgeId === edgeId) {
+      // Double click or same edge - delete it
+      onEdgeDelete?.(edgeId);
+      setSelectedEdgeId(null);
+    } else {
+      setSelectedEdgeId(edgeId);
+      onEdgeClick?.(edgeId);
+    }
+  };
+
   // Calculate edge paths
   const renderEdges = () => {
     return edges.map(edge => {
@@ -177,6 +195,7 @@ export const AgenticFlowCanvas: React.FC<AgenticFlowCanvasProps> = ({
 
       const sourceType = NODE_TYPES[sourceNode.node_type];
       const sourceOffset = getConnectionPointOffset(edge.source_point || 'output', true);
+      const isSelected = selectedEdgeId === edge.id;
       
       const startX = sourceNode.position_x + sourceOffset.x;
       const startY = sourceNode.position_y + sourceOffset.y;
@@ -188,31 +207,61 @@ export const AgenticFlowCanvas: React.FC<AgenticFlowCanvasProps> = ({
       const path = `M ${startX} ${startY} C ${startX} ${midY}, ${endX} ${midY}, ${endX} ${endY}`;
 
       return (
-        <g key={edge.id} onClick={() => onEdgeClick?.(edge.id)} className="cursor-pointer">
+        <g key={edge.id} onClick={(e) => handleEdgeClick(edge.id, e)} className="cursor-pointer group">
+          {/* Invisible wider hit area */}
+          <path
+            d={path}
+            fill="none"
+            stroke="transparent"
+            strokeWidth={20}
+            strokeLinecap="round"
+          />
           {/* Edge shadow */}
           <path
             d={path}
             fill="none"
-            stroke="hsl(var(--muted))"
-            strokeWidth={4}
+            stroke={isSelected ? 'hsl(var(--destructive))' : 'hsl(var(--muted))'}
+            strokeWidth={isSelected ? 6 : 4}
             strokeLinecap="round"
+            className="transition-all"
           />
           {/* Edge line */}
           <path
             d={path}
             fill="none"
-            stroke={sourceType?.color || 'hsl(var(--primary))'}
-            strokeWidth={2}
+            stroke={isSelected ? 'hsl(var(--destructive))' : (sourceType?.color || 'hsl(var(--primary))')}
+            strokeWidth={isSelected ? 3 : 2}
             strokeLinecap="round"
-            className="transition-all hover:stroke-[3px]"
+            className="transition-all group-hover:stroke-[3px]"
           />
           {/* Arrow head */}
           <polygon
             points={`${endX},${endY} ${endX - 6},${endY - 10} ${endX + 6},${endY - 10}`}
-            fill={sourceType?.color || 'hsl(var(--primary))'}
+            fill={isSelected ? 'hsl(var(--destructive))' : (sourceType?.color || 'hsl(var(--primary))')}
+            className="transition-all"
           />
+          {/* Delete indicator when selected */}
+          {isSelected && (
+            <>
+              <circle
+                cx={(startX + endX) / 2}
+                cy={(startY + endY) / 2}
+                r={12}
+                fill="hsl(var(--destructive))"
+                className="animate-pulse"
+              />
+              <text
+                x={(startX + endX) / 2}
+                y={(startY + endY) / 2 + 4}
+                textAnchor="middle"
+                className="text-xs fill-white font-bold pointer-events-none"
+              >
+                ×
+              </text>
+            </>
+          )}
           {/* Edge label */}
-          {edge.label && (
+          {edge.label && !isSelected && (
             <text
               x={(startX + endX) / 2}
               y={(startY + endY) / 2 - 10}
@@ -346,6 +395,7 @@ export const AgenticFlowCanvas: React.FC<AgenticFlowCanvasProps> = ({
               key={node.id}
               node={node}
               isSelected={selectedNodeId === node.id}
+              isHighlighted={highlightedNodeId === node.id}
               onClick={() => onNodeSelect(node.id)}
               onConnectionStart={handleConnectionStart}
               onConnectionEnd={handleConnectionEnd}
