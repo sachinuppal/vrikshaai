@@ -5,7 +5,6 @@ import {
   Phone, 
   Clock, 
   CheckCircle2, 
-  Star, 
   Target, 
   TrendingUp, 
   MessageSquare,
@@ -16,14 +15,15 @@ import {
   User,
   Bot,
   Sparkles,
-  Play,
-  Pause,
-  Volume2
+  Volume2,
+  LayoutDashboard,
+  Shield
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import Header from "@/components/Header";
@@ -47,14 +47,12 @@ interface PlatformAnalysis {
 }
 
 interface ClientAnalysis {
-  // Original expected fields (keep for compatibility)
   lead_quality?: string;
   intent_score?: number;
   next_action?: string;
   purchase_probability?: number;
   customer_segment?: string;
   satisfaction_score?: number;
-  // Actual Ringg fields
   priority_score?: string;
   next_steps?: string;
   user_type?: string;
@@ -119,10 +117,8 @@ const CallAnalysis = () => {
       return;
     }
 
-    // Initial fetch
     fetchCallData();
 
-    // Set up real-time subscription
     const channel = supabase
       .channel(`call-${id}`)
       .on(
@@ -164,14 +160,12 @@ const CallAnalysis = () => {
     setCallData(data as unknown as CallData);
     setLoading(false);
 
-    // Check if still waiting for analysis
     if (data.call_status && !data.platform_analysis) {
       setAnalyzing(true);
     }
   };
 
   const handleTryAgain = () => {
-    // Clear session data
     sessionStorage.removeItem("voice_call_record_id");
     sessionStorage.removeItem("voice_captured");
     sessionStorage.removeItem("voice_user_name");
@@ -252,7 +246,7 @@ const CallAnalysis = () => {
         <Button
           variant="ghost"
           onClick={() => navigate("/call-history")}
-          className="mb-6"
+          className="mb-4"
         >
           <ArrowLeft className="mr-2 h-4 w-4" />
           Back to Call History
@@ -262,9 +256,9 @@ const CallAnalysis = () => {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="mb-8"
+          className="mb-6"
         >
-          <div className="flex items-center gap-3 mb-2">
+          <div className="flex items-center gap-3">
             <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
               <Phone className="h-6 w-6 text-primary" />
             </div>
@@ -282,7 +276,7 @@ const CallAnalysis = () => {
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="mb-8 p-6 rounded-xl border border-primary/20 bg-primary/5"
+            className="mb-6 p-4 rounded-xl border border-primary/20 bg-primary/5"
           >
             <div className="flex items-center gap-4">
               <div className="h-10 w-10 rounded-full bg-primary/20 flex items-center justify-center">
@@ -298,204 +292,207 @@ const CallAnalysis = () => {
           </motion.div>
         )}
 
-        <div className="grid gap-6 lg:grid-cols-3">
-          {/* Left column - Summary & Metrics */}
-          <div className="lg:col-span-1 space-y-6">
-            {/* Call Summary Card */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1 }}
-            >
-              <Card className="border-border/50">
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-lg flex items-center gap-2">
-                    <Clock className="h-5 w-5 text-primary" />
-                    Call Summary
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-muted-foreground">Duration</span>
-                    <span className="font-medium">{formatDuration(callData.call_duration)}</span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-muted-foreground">Status</span>
-                    <Badge variant={callData.call_status === "completed" ? "default" : "secondary"}>
-                      {callData.call_status || "In Progress"}
-                    </Badge>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-muted-foreground">Date</span>
-                    <span className="text-sm">
-                      {new Date(callData.created_at).toLocaleDateString()}
-                    </span>
-                  </div>
-                </CardContent>
-              </Card>
-            </motion.div>
+        {/* Tabs Interface */}
+        <Tabs defaultValue="overview" className="w-full">
+          <TabsList className="w-full justify-start mb-6 h-auto p-1 bg-muted/50 overflow-x-auto flex-nowrap">
+            <TabsTrigger value="overview" className="flex items-center gap-2 data-[state=active]:bg-background whitespace-nowrap">
+              <LayoutDashboard className="h-4 w-4" />
+              <span className="hidden sm:inline">Overview</span>
+              <span className="sm:hidden">Overview</span>
+            </TabsTrigger>
+            <TabsTrigger value="analysis" className="flex items-center gap-2 data-[state=active]:bg-background whitespace-nowrap">
+              <Target className="h-4 w-4" />
+              <span className="hidden sm:inline">Analysis</span>
+              <span className="sm:hidden">Analysis</span>
+            </TabsTrigger>
+            <TabsTrigger value="transcript" className="flex items-center gap-2 data-[state=active]:bg-background whitespace-nowrap">
+              <MessageSquare className="h-4 w-4" />
+              <span className="hidden sm:inline">Transcript</span>
+              <span className="sm:hidden">Chat</span>
+            </TabsTrigger>
+            <TabsTrigger value="observability" className="flex items-center gap-2 data-[state=active]:bg-background whitespace-nowrap">
+              <Shield className="h-4 w-4" />
+              <span className="hidden sm:inline">Observability</span>
+              <span className="sm:hidden">QA</span>
+            </TabsTrigger>
+          </TabsList>
 
-            {/* Client Analysis Metrics */}
-            {callData.client_analysis && (
+          {/* Overview Tab */}
+          <TabsContent value="overview" className="mt-0">
+            <div className="grid gap-6 md:grid-cols-2">
+              {/* Call Summary Card */}
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.2 }}
+                transition={{ delay: 0.1 }}
               >
-                <Card className="border-border/50">
+                <Card className="border-border/50 h-full">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-lg flex items-center gap-2">
+                      <Clock className="h-5 w-5 text-primary" />
+                      Call Summary
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-muted-foreground">Duration</span>
+                      <span className="font-medium">{formatDuration(callData.call_duration)}</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-muted-foreground">Status</span>
+                      <Badge variant={callData.call_status === "completed" ? "default" : "secondary"}>
+                        {callData.call_status || "In Progress"}
+                      </Badge>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-muted-foreground">Date</span>
+                      <span className="text-sm">
+                        {new Date(callData.created_at).toLocaleDateString()}
+                      </span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-muted-foreground">Time</span>
+                      <span className="text-sm">
+                        {new Date(callData.created_at).toLocaleTimeString()}
+                      </span>
+                    </div>
+                  </CardContent>
+                </Card>
+              </motion.div>
+
+              {/* Insights Card */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.15 }}
+              >
+                <Card className="border-border/50 h-full">
                   <CardHeader className="pb-3">
                     <CardTitle className="text-lg flex items-center gap-2">
                       <TrendingUp className="h-5 w-5 text-primary" />
                       Insights
                     </CardTitle>
                   </CardHeader>
-                <CardContent className="space-y-4">
-                    {/* Lead Quality - use priority_score as fallback */}
-                    {(callData.client_analysis.priority_score || callData.client_analysis.lead_quality) && (
-                      <div className="flex justify-between items-center">
-                        <span className="text-sm text-muted-foreground">Lead Quality</span>
-                        <Badge className={getQualityColor(callData.client_analysis.priority_score || callData.client_analysis.lead_quality)}>
-                          {callData.client_analysis.priority_score || callData.client_analysis.lead_quality}
-                        </Badge>
-                      </div>
-                    )}
-                    
-                    {/* User Type */}
-                    {(callData.client_analysis.user_type || callData.client_analysis.investor_type) && (
-                      <div className="flex justify-between items-center">
-                        <span className="text-sm text-muted-foreground">User Type</span>
-                        <Badge variant="secondary">
-                          {callData.client_analysis.investor_type || callData.client_analysis.user_type}
-                        </Badge>
-                      </div>
-                    )}
-                    
-                    {/* Interest Area */}
-                    {callData.client_analysis.interest_area && (
-                      <div className="flex justify-between items-center">
-                        <span className="text-sm text-muted-foreground">Interest Area</span>
-                        <span className="text-sm font-medium">{callData.client_analysis.interest_area}</span>
-                      </div>
-                    )}
-                    
-                    {/* Sector Preference */}
-                    {callData.client_analysis.sector_preference && (
-                      <div className="flex justify-between items-center">
-                        <span className="text-sm text-muted-foreground">Sector Preference</span>
-                        <span className="text-sm font-medium">{callData.client_analysis.sector_preference}</span>
-                      </div>
-                    )}
-                    
-                    {/* Geography Preference */}
-                    {callData.client_analysis.geography_preference && (
-                      <div className="flex justify-between items-center">
-                        <span className="text-sm text-muted-foreground">Geography</span>
-                        <span className="text-sm font-medium">{callData.client_analysis.geography_preference}</span>
-                      </div>
-                    )}
-                    
-                    {/* Business Stage */}
-                    {callData.client_analysis.business_stage && (
-                      <div className="flex justify-between items-center">
-                        <span className="text-sm text-muted-foreground">Business Stage</span>
-                        <Badge variant="outline">{callData.client_analysis.business_stage}</Badge>
-                      </div>
-                    )}
-                    
-                    {/* Interest in Vriksha Model */}
-                    {callData.client_analysis.interest_in_vriksha_model && (
-                      <div className="flex justify-between items-center">
-                        <span className="text-sm text-muted-foreground">Interest Level</span>
-                        <Badge className={getQualityColor(callData.client_analysis.interest_in_vriksha_model)}>
-                          {callData.client_analysis.interest_in_vriksha_model}
-                        </Badge>
-                      </div>
-                    )}
-                    
-                    {/* Next Action - use next_steps as fallback */}
-                    {(callData.client_analysis.next_steps || callData.client_analysis.next_action) && (
-                      <div className="flex justify-between items-center">
-                        <span className="text-sm text-muted-foreground">Next Action</span>
-                        <Badge variant="outline" className="max-w-[180px] truncate">
-                          {callData.client_analysis.next_steps || callData.client_analysis.next_action}
-                        </Badge>
+                  <CardContent className="space-y-4">
+                    {callData.client_analysis ? (
+                      <>
+                        {(callData.client_analysis.priority_score || callData.client_analysis.lead_quality) && (
+                          <div className="flex justify-between items-center">
+                            <span className="text-sm text-muted-foreground">Lead Quality</span>
+                            <Badge className={getQualityColor(callData.client_analysis.priority_score || callData.client_analysis.lead_quality || "")}>
+                              {callData.client_analysis.priority_score || callData.client_analysis.lead_quality}
+                            </Badge>
+                          </div>
+                        )}
+                        {(callData.client_analysis.user_type || callData.client_analysis.investor_type) && (
+                          <div className="flex justify-between items-center">
+                            <span className="text-sm text-muted-foreground">User Type</span>
+                            <Badge variant="secondary">
+                              {callData.client_analysis.investor_type || callData.client_analysis.user_type}
+                            </Badge>
+                          </div>
+                        )}
+                        {callData.client_analysis.interest_area && (
+                          <div className="flex justify-between items-center">
+                            <span className="text-sm text-muted-foreground">Interest Area</span>
+                            <span className="text-sm font-medium">{callData.client_analysis.interest_area}</span>
+                          </div>
+                        )}
+                        {callData.client_analysis.business_stage && (
+                          <div className="flex justify-between items-center">
+                            <span className="text-sm text-muted-foreground">Business Stage</span>
+                            <Badge variant="outline">{callData.client_analysis.business_stage}</Badge>
+                          </div>
+                        )}
+                        {(callData.client_analysis.next_steps || callData.client_analysis.next_action) && (
+                          <div className="flex justify-between items-center">
+                            <span className="text-sm text-muted-foreground">Next Action</span>
+                            <Badge variant="outline" className="max-w-[180px] truncate">
+                              {callData.client_analysis.next_steps || callData.client_analysis.next_action}
+                            </Badge>
+                          </div>
+                        )}
+                      </>
+                    ) : (
+                      <div className="flex items-center justify-center py-6 text-muted-foreground">
+                        <p className="text-sm">Insights will appear after analysis</p>
                       </div>
                     )}
                   </CardContent>
                 </Card>
               </motion.div>
-            )}
 
-            {/* Audio Player */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.25 }}
-            >
-              <Card className="border-border/50">
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-lg flex items-center gap-2">
-                    <Volume2 className="h-5 w-5 text-primary" />
-                    Call Recording
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  {callData.recording_url ? (
-                    <audio
-                      ref={(el) => setAudioRef(el)}
-                      src={callData.recording_url}
-                      onPlay={() => setIsPlaying(true)}
-                      onPause={() => setIsPlaying(false)}
-                      onEnded={() => setIsPlaying(false)}
-                      className="w-full"
-                      controls
-                    />
-                  ) : (
-                    <div className="flex items-center justify-center py-6 text-muted-foreground bg-muted/30 rounded-lg border border-dashed border-border">
-                      <div className="text-center">
-                        <Volume2 className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                        <p className="text-sm">Recording not available yet</p>
-                        <p className="text-xs mt-1 opacity-70">The recording will appear here once processed</p>
-                      </div>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            </motion.div>
-
-            {/* Actions */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3 }}
-              className="space-y-3"
-            >
-              <Button onClick={handleTryAgain} className="w-full" size="lg">
-                <RefreshCw className="mr-2 h-4 w-4" />
-                Try Another Call
-              </Button>
-              {callData.recording_url && (
-                <Button
-                  variant="outline"
-                  className="w-full"
-                  onClick={() => window.open(callData.recording_url!, "_blank")}
-                >
-                  <Download className="mr-2 h-4 w-4" />
-                  Download Recording
-                </Button>
-              )}
-            </motion.div>
-          </div>
-
-          {/* Right column - Analysis & Transcript */}
-          <div className="lg:col-span-2 space-y-6">
-            {/* Platform Analysis */}
-            {callData.platform_analysis && (
+              {/* Audio Player - Full Width */}
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2 }}
+                className="md:col-span-2"
               >
+                <Card className="border-border/50">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-lg flex items-center gap-2">
+                      <Volume2 className="h-5 w-5 text-primary" />
+                      Call Recording
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    {callData.recording_url ? (
+                      <audio
+                        ref={(el) => setAudioRef(el)}
+                        src={callData.recording_url}
+                        onPlay={() => setIsPlaying(true)}
+                        onPause={() => setIsPlaying(false)}
+                        onEnded={() => setIsPlaying(false)}
+                        className="w-full"
+                        controls
+                      />
+                    ) : (
+                      <div className="flex items-center justify-center py-6 text-muted-foreground bg-muted/30 rounded-lg border border-dashed border-border">
+                        <div className="text-center">
+                          <Volume2 className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                          <p className="text-sm">Recording not available yet</p>
+                          <p className="text-xs mt-1 opacity-70">The recording will appear here once processed</p>
+                        </div>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              </motion.div>
+
+              {/* Action Buttons - Full Width */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.25 }}
+                className="md:col-span-2 flex flex-col sm:flex-row gap-3"
+              >
+                <Button onClick={handleTryAgain} className="flex-1" size="lg">
+                  <RefreshCw className="mr-2 h-4 w-4" />
+                  Try Another Call
+                </Button>
+                {callData.recording_url && (
+                  <Button
+                    variant="outline"
+                    className="flex-1"
+                    size="lg"
+                    onClick={() => window.open(callData.recording_url!, "_blank")}
+                  >
+                    <Download className="mr-2 h-4 w-4" />
+                    Download Recording
+                  </Button>
+                )}
+              </motion.div>
+            </div>
+          </TabsContent>
+
+          {/* Analysis Tab */}
+          <TabsContent value="analysis" className="mt-0">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+            >
+              {callData.platform_analysis ? (
                 <Card className="border-border/50">
                   <CardHeader className="pb-3">
                     <CardTitle className="text-lg flex items-center gap-2">
@@ -503,17 +500,19 @@ const CallAnalysis = () => {
                       AI Analysis
                     </CardTitle>
                   </CardHeader>
-                  <CardContent className="space-y-4">
+                  <CardContent className="space-y-6">
                     {/* Summary */}
-                    <div>
-                      <h4 className="text-sm font-medium text-muted-foreground mb-2">Summary</h4>
-                      <p className="text-foreground">{callData.platform_analysis.summary}</p>
-                    </div>
+                    {callData.platform_analysis.summary && (
+                      <div>
+                        <h4 className="text-sm font-medium text-muted-foreground mb-2">Summary</h4>
+                        <p className="text-foreground">{callData.platform_analysis.summary}</p>
+                      </div>
+                    )}
 
                     {/* Key Points */}
-                    {callData.platform_analysis.key_points?.length > 0 && (
+                    {callData.platform_analysis.key_points && callData.platform_analysis.key_points.length > 0 && (
                       <div>
-                        <h4 className="text-sm font-medium text-muted-foreground mb-2">Key Points</h4>
+                        <h4 className="text-sm font-medium text-muted-foreground mb-3">Key Points</h4>
                         <ul className="space-y-2">
                           {callData.platform_analysis.key_points.map((point, idx) => (
                             <li key={idx} className="flex items-start gap-2">
@@ -526,9 +525,9 @@ const CallAnalysis = () => {
                     )}
 
                     {/* Action Items */}
-                    {callData.platform_analysis.action_items?.length > 0 && (
+                    {callData.platform_analysis.action_items && callData.platform_analysis.action_items.length > 0 && (
                       <div>
-                        <h4 className="text-sm font-medium text-muted-foreground mb-2">Action Items</h4>
+                        <h4 className="text-sm font-medium text-muted-foreground mb-3">Action Items</h4>
                         <ul className="space-y-2">
                           {callData.platform_analysis.action_items.map((item, idx) => (
                             <li key={idx} className="flex items-start gap-2">
@@ -539,40 +538,69 @@ const CallAnalysis = () => {
                         </ul>
                       </div>
                     )}
+
+                    {/* Additional Client Insights */}
+                    {callData.client_analysis && (
+                      <div className="pt-4 border-t border-border">
+                        <h4 className="text-sm font-medium text-muted-foreground mb-3">Additional Insights</h4>
+                        <div className="grid gap-3 sm:grid-cols-2">
+                          {callData.client_analysis.sector_preference && (
+                            <div className="flex justify-between items-center p-3 bg-muted/30 rounded-lg">
+                              <span className="text-sm text-muted-foreground">Sector Preference</span>
+                              <span className="text-sm font-medium">{callData.client_analysis.sector_preference}</span>
+                            </div>
+                          )}
+                          {callData.client_analysis.geography_preference && (
+                            <div className="flex justify-between items-center p-3 bg-muted/30 rounded-lg">
+                              <span className="text-sm text-muted-foreground">Geography</span>
+                              <span className="text-sm font-medium">{callData.client_analysis.geography_preference}</span>
+                            </div>
+                          )}
+                          {callData.client_analysis.interest_in_vriksha_model && (
+                            <div className="flex justify-between items-center p-3 bg-muted/30 rounded-lg">
+                              <span className="text-sm text-muted-foreground">Interest Level</span>
+                              <Badge className={getQualityColor(callData.client_analysis.interest_in_vriksha_model)}>
+                                {callData.client_analysis.interest_in_vriksha_model}
+                              </Badge>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
-              </motion.div>
-            )}
+              ) : (
+                <Card className="border-border/50">
+                  <CardContent className="py-12 text-center">
+                    <Target className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                    <h3 className="font-medium text-foreground mb-1">Analysis not available yet</h3>
+                    <p className="text-sm text-muted-foreground">
+                      AI analysis will appear here once the call is processed.
+                    </p>
+                  </CardContent>
+                </Card>
+              )}
+            </motion.div>
+          </TabsContent>
 
-            {/* Script Observability */}
-            {callData.transcript && callData.transcript.length > 0 && (
-              <ObservabilityCard
-                analysis={callData.observability_analysis}
-                status={callData.observability_status}
-                onRunAnalysis={runObservabilityAnalysis}
-                isAnalyzing={runningObservability || callData.observability_status === "analyzing"}
-              />
-            )}
-
-            {/* Transcript */}
-            {callData.transcript && callData.transcript.length > 0 && (
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.3 }}
-              >
+          {/* Transcript Tab */}
+          <TabsContent value="transcript" className="mt-0">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+            >
+              {callData.transcript && callData.transcript.length > 0 ? (
                 <Card className="border-border/50">
                   <CardHeader className="pb-3">
                     <CardTitle className="text-lg flex items-center gap-2">
                       <MessageSquare className="h-5 w-5 text-primary" />
-                      Transcript
+                      Conversation Transcript
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <ScrollArea className="h-[400px] pr-4">
+                    <ScrollArea className="h-[500px] pr-4">
                       <div className="space-y-4">
                         {callData.transcript.map((entry, idx) => {
-                          // Handle both formats: {role, content} and {bot, user}
                           const isBot = entry.role === "assistant" || entry.bot;
                           const message = entry.content || entry.bot || entry.user;
                           
@@ -610,23 +638,47 @@ const CallAnalysis = () => {
                     </ScrollArea>
                   </CardContent>
                 </Card>
-              </motion.div>
-            )}
+              ) : (
+                <Card className="border-border/50">
+                  <CardContent className="py-12 text-center">
+                    <MessageSquare className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                    <h3 className="font-medium text-foreground mb-1">No transcript available yet</h3>
+                    <p className="text-sm text-muted-foreground">
+                      The transcript will appear here once the call is completed.
+                    </p>
+                  </CardContent>
+                </Card>
+              )}
+            </motion.div>
+          </TabsContent>
 
-            {/* No transcript yet */}
-            {(!callData.transcript || callData.transcript.length === 0) && !analyzing && (
-              <Card className="border-border/50">
-                <CardContent className="py-12 text-center">
-                  <MessageSquare className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                  <h3 className="font-medium text-foreground mb-1">No transcript available yet</h3>
-                  <p className="text-sm text-muted-foreground">
-                    The transcript will appear here once the call is completed.
-                  </p>
-                </CardContent>
-              </Card>
-            )}
-          </div>
-        </div>
+          {/* Observability Tab */}
+          <TabsContent value="observability" className="mt-0">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+            >
+              {callData.transcript && callData.transcript.length > 0 ? (
+                <ObservabilityCard
+                  analysis={callData.observability_analysis}
+                  status={callData.observability_status}
+                  onRunAnalysis={runObservabilityAnalysis}
+                  isAnalyzing={runningObservability || callData.observability_status === "analyzing"}
+                />
+              ) : (
+                <Card className="border-border/50">
+                  <CardContent className="py-12 text-center">
+                    <Shield className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                    <h3 className="font-medium text-foreground mb-1">Script analysis requires a transcript</h3>
+                    <p className="text-sm text-muted-foreground">
+                      The observability analysis will be available once the call transcript is ready.
+                    </p>
+                  </CardContent>
+                </Card>
+              )}
+            </motion.div>
+          </TabsContent>
+        </Tabs>
       </main>
 
       <Footer />
