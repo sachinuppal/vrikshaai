@@ -67,8 +67,8 @@ const CRMCalls = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [syncingCallId, setSyncingCallId] = useState<string | null>(null);
   const [syncingAll, setSyncingAll] = useState(false);
+  const [creatingContactFromCall, setCreatingContactFromCall] = useState<string | null>(null);
   const { toast } = useToast();
-  const navigate = useNavigate();
 
   const fetchCalls = async (showRefresh = false) => {
     if (showRefresh) setRefreshing(true);
@@ -257,6 +257,52 @@ const CRMCalls = () => {
 
   const getLinkedContact = (call: CallRecord) => {
     return contacts.get(call.full_phone);
+  };
+
+  const createContactFromCall = async (call: CallRecord) => {
+    setCreatingContactFromCall(call.id);
+    try {
+      // Extract any additional info from client_analysis if available
+      const clientAnalysis = call.client_analysis as Record<string, unknown> | null;
+      
+      const { data, error } = await supabase
+        .from("crm_contacts")
+        .insert({
+          full_name: call.name,
+          phone: call.full_phone,
+          country_code: call.country_code,
+          source: "voice_call",
+          source_id: call.id,
+          lifecycle_stage: "lead",
+          last_channel: "voice_ai",
+          last_interaction_at: call.created_at,
+          total_interactions: 1,
+          user_type: clientAnalysis?.user_type as string || null,
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      toast({
+        title: "Contact Created",
+        description: `${call.name} has been added to CRM contacts`,
+      });
+
+      // Refresh contacts to update the linked status
+      fetchCalls(true);
+      
+      return data;
+    } catch (error) {
+      console.error("Error creating contact:", error);
+      toast({
+        title: "Error",
+        description: "Failed to create contact from call",
+        variant: "destructive",
+      });
+    } finally {
+      setCreatingContactFromCall(null);
+    }
   };
 
   const stats = {
@@ -497,7 +543,20 @@ const CRMCalls = () => {
                                 {linkedContact.full_name}
                               </Link>
                             ) : (
-                              <span className="text-muted-foreground text-sm">Not linked</span>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="text-muted-foreground hover:text-primary"
+                                onClick={() => createContactFromCall(call)}
+                                disabled={creatingContactFromCall === call.id}
+                              >
+                                {creatingContactFromCall === call.id ? (
+                                  <Loader2 className="w-3 h-3 mr-1 animate-spin" />
+                                ) : (
+                                  <UserPlus className="w-3 h-3 mr-1" />
+                                )}
+                                Create Contact
+                              </Button>
                             )}
                           </TableCell>
                           <TableCell>{getStatusBadge(call.call_status)}</TableCell>
