@@ -15,7 +15,10 @@ import {
   Loader2,
   User,
   Bot,
-  Sparkles
+  Sparkles,
+  Play,
+  Pause,
+  Volume2
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -106,6 +109,8 @@ const CallAnalysis = () => {
   const [loading, setLoading] = useState(true);
   const [analyzing, setAnalyzing] = useState(false);
   const [runningObservability, setRunningObservability] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [audioRef, setAudioRef] = useState<HTMLAudioElement | null>(null);
 
   useEffect(() => {
     if (!id) {
@@ -415,6 +420,35 @@ const CallAnalysis = () => {
                         </Badge>
                       </div>
                     )}
+                  </CardContent>
+                </Card>
+              </motion.div>
+            )}
+
+            {/* Audio Player */}
+            {callData.recording_url && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.25 }}
+              >
+                <Card className="border-border/50">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-lg flex items-center gap-2">
+                      <Volume2 className="h-5 w-5 text-primary" />
+                      Call Recording
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <audio
+                      ref={(el) => setAudioRef(el)}
+                      src={callData.recording_url}
+                      onPlay={() => setIsPlaying(true)}
+                      onPause={() => setIsPlaying(false)}
+                      onEnded={() => setIsPlaying(false)}
+                      className="w-full"
+                      controls
+                    />
                   </CardContent>
                 </Card>
               </motion.div>
