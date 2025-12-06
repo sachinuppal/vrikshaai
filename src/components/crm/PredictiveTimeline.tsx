@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Clock,
@@ -15,6 +16,7 @@ import {
   Sparkles,
   TrendingUp,
   Target,
+  ExternalLink,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -199,6 +201,14 @@ export function PredictiveTimeline({
                   <p className="text-xs text-muted-foreground mt-1">
                     Duration: {Math.floor(interaction.duration_seconds / 60)}m {interaction.duration_seconds % 60}s
                   </p>
+                )}
+                {interaction.source_id && ['voice_ai', 'voice', 'call', 'voice_human'].includes(interaction.channel) && (
+                  <Link 
+                    to={`/call-analysis/${interaction.source_id}`}
+                    className="text-xs text-primary hover:underline flex items-center gap-1 mt-2"
+                  >
+                    View Call Analysis <ExternalLink className="h-3 w-3" />
+                  </Link>
                 )}
               </div>
             </motion.div>
