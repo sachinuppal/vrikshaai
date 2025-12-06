@@ -11,7 +11,8 @@ import {
   Target,
   Clock,
   AlertTriangle,
-  Radio
+  Radio,
+  RefreshCw
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -20,6 +21,7 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { CRMLayout } from "@/components/crm/CRMLayout";
 import { useCRMRealtime } from "@/hooks/useCRMRealtime";
+import { toast } from "sonner";
 
 interface DashboardStats {
   totalContacts: number;
@@ -35,6 +37,26 @@ export default function CRMDashboard() {
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [isLive, setIsLive] = useState(true);
+  const [recomputingScores, setRecomputingScores] = useState(false);
+
+  const recomputeAllScores = async () => {
+    setRecomputingScores(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("crm-compute-scores", {
+        body: { compute_all: true },
+      });
+      
+      if (error) throw error;
+      
+      toast.success(`Recomputed scores for ${data?.processed || 0} contacts`);
+      await fetchDashboardStats();
+    } catch (error) {
+      console.error("Error recomputing scores:", error);
+      toast.error("Failed to recompute scores");
+    } finally {
+      setRecomputingScores(false);
+    }
+  };
 
   // Real-time updates
   useCRMRealtime({
@@ -133,10 +155,24 @@ export default function CRMDashboard() {
               Agentic CRM with AI-powered insights
             </p>
           </div>
-          <Button onClick={() => navigate("/crm/contacts")}>
-            View All Contacts
-            <ArrowUpRight className="ml-2 h-4 w-4" />
-          </Button>
+          <div className="flex gap-2">
+            <Button 
+              variant="outline" 
+              onClick={recomputeAllScores}
+              disabled={recomputingScores}
+            >
+              {recomputingScores ? (
+                <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
+              ) : (
+                <RefreshCw className="mr-2 h-4 w-4" />
+              )}
+              Recompute Scores
+            </Button>
+            <Button onClick={() => navigate("/crm/contacts")}>
+              View All Contacts
+              <ArrowUpRight className="ml-2 h-4 w-4" />
+            </Button>
+          </div>
         </div>
 
         {/* Stats Cards */}
