@@ -17,6 +17,7 @@ export type ConnectionPoint = 'input' | 'output' | 'output-left' | 'output-right
 interface FlowNodeProps {
   node: FlowNodeData;
   isSelected: boolean;
+  isHighlighted?: boolean;
   onClick: () => void;
   onConnectionStart?: (nodeId: string, point: ConnectionPoint) => void;
   onConnectionEnd?: (nodeId: string, point: ConnectionPoint) => void;
@@ -26,6 +27,7 @@ interface FlowNodeProps {
 export const FlowNode: React.FC<FlowNodeProps> = ({
   node,
   isSelected,
+  isHighlighted = false,
   onClick,
   onConnectionStart,
   onConnectionEnd,
@@ -58,14 +60,20 @@ export const FlowNode: React.FC<FlowNodeProps> = ({
   return (
     <motion.div
       initial={{ scale: 0, opacity: 0 }}
-      animate={{ scale: 1, opacity: 1 }}
+      animate={{ 
+        scale: isHighlighted ? 1.05 : 1, 
+        opacity: 1,
+        boxShadow: isHighlighted ? '0 0 30px hsl(var(--primary) / 0.5)' : undefined
+      }}
       className={cn(
         "absolute cursor-pointer select-none",
         "min-w-[160px] rounded-xl border-2 bg-card shadow-lg",
         "transition-all duration-200",
-        isSelected 
-          ? "border-primary ring-2 ring-primary/30 shadow-xl" 
-          : "border-border hover:border-primary/50 hover:shadow-xl"
+        isHighlighted
+          ? "border-primary ring-4 ring-primary/40 shadow-2xl z-10"
+          : isSelected 
+            ? "border-primary ring-2 ring-primary/30 shadow-xl" 
+            : "border-border hover:border-primary/50 hover:shadow-xl"
       )}
       style={{
         left: node.position_x,

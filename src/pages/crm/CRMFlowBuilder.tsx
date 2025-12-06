@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Save, Play, MoreVertical, ChevronLeft, FileText } from 'lucide-react';
+import { Save, Play, MoreVertical, ChevronLeft, FileText, TestTube2, LayoutTemplate } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -8,7 +8,8 @@ import {
   DropdownMenu, 
   DropdownMenuContent, 
   DropdownMenuItem, 
-  DropdownMenuTrigger 
+  DropdownMenuTrigger,
+  DropdownMenuSeparator
 } from '@/components/ui/dropdown-menu';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
@@ -17,6 +18,8 @@ import { AgentChatPanel, ChatMessage } from '@/components/crm/flow-builder/Agent
 import { AgenticFlowCanvas, FlowEdgeData } from '@/components/crm/flow-builder/AgenticFlowCanvas';
 import { NodeConfigPanel } from '@/components/crm/flow-builder/NodeConfigPanel';
 import { NodePalette } from '@/components/crm/flow-builder/NodePalette';
+import { FlowTestingPanel } from '@/components/crm/flow-builder/FlowTestingPanel';
+import { FlowTemplatesModal } from '@/components/crm/flow-builder/FlowTemplatesModal';
 import { FlowNodeData, ConnectionPoint } from '@/components/crm/flow-builder/FlowNode';
 import { NODE_TYPES } from '@/components/crm/flow-builder/nodeTypes';
 
@@ -30,11 +33,16 @@ const CRMFlowBuilder: React.FC = () => {
   const [nodes, setNodes] = useState<FlowNodeData[]>([]);
   const [edges, setEdges] = useState<FlowEdgeData[]>([]);
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
+  const [highlightedNodeId, setHighlightedNodeId] = useState<string | null>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [thinkingSteps, setThinkingSteps] = useState<string[]>([]);
   const [sessionId] = useState(() => crypto.randomUUID());
   const [isSaving, setIsSaving] = useState(false);
+  
+  // Panel states
+  const [isTestingOpen, setIsTestingOpen] = useState(false);
+  const [isTemplatesOpen, setIsTemplatesOpen] = useState(false);
 
   // Load existing flow if editing
   useEffect(() => {
@@ -235,6 +243,18 @@ const CRMFlowBuilder: React.FC = () => {
     toast.success('Connection created');
   }, [edges]);
 
+  const handleEdgeDelete = useCallback((edgeId: string) => {
+    setEdges(prev => prev.filter(e => e.id !== edgeId));
+    toast.success('Connection deleted');
+  }, []);
+
+  const handleTemplateSelect = useCallback((templateNodes: FlowNodeData[], templateEdges: FlowEdgeData[], name: string) => {
+    setNodes(templateNodes);
+    setEdges(templateEdges);
+    setFlowName(name);
+    toast.success(`Loaded "${name}" template`);
+  }, []);
+
   const handleSaveFlow = async () => {
     setIsSaving(true);
     try {
@@ -321,9 +341,25 @@ const CRMFlowBuilder: React.FC = () => {
           </div>
 
           <div className="flex items-center gap-2">
+            <Button 
+              variant="outline" 
+              onClick={() => setIsTemplatesOpen(true)}
+              className="hidden sm:flex"
+            >
+              <LayoutTemplate className="w-4 h-4 mr-2" />
+              Templates
+            </Button>
+            <Button 
+              variant="outline" 
+              onClick={() => setIsTestingOpen(true)}
+              disabled={nodes.length === 0}
+            >
+              <TestTube2 className="w-4 h-4 mr-2" />
+              Test
+            </Button>
             <Button variant="outline" onClick={handleSaveFlow} disabled={isSaving}>
               <Save className="w-4 h-4 mr-2" />
-              {isSaving ? 'Saving...' : 'Save Draft'}
+              {isSaving ? 'Saving...' : 'Save'}
             </Button>
             <Button onClick={handlePublish} disabled={nodes.length === 0}>
               <Play className="w-4 h-4 mr-2" />
@@ -336,7 +372,12 @@ const CRMFlowBuilder: React.FC = () => {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={() => setNodes([])}>
+                <DropdownMenuItem onClick={() => setIsTemplatesOpen(true)}>
+                  <LayoutTemplate className="w-4 h-4 mr-2" />
+                  Browse Templates
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => { setNodes([]); setEdges([]); }}>
                   Clear Canvas
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => setMessages([])}>
@@ -369,14 +410,16 @@ const CRMFlowBuilder: React.FC = () => {
               nodes={nodes}
               edges={edges}
               selectedNodeId={selectedNodeId}
+              highlightedNodeId={highlightedNodeId}
               onNodeSelect={setSelectedNodeId}
               onNodeMove={handleNodeMove}
               onNodeAdd={handleNodeAdd}
               onEdgeAdd={handleEdgeAdd}
+              onEdgeDelete={handleEdgeDelete}
             />
 
             {/* Node Config Panel */}
-            {selectedNode && (
+            {selectedNode && !isTestingOpen && (
               <NodeConfigPanel
                 node={selectedNode}
                 onClose={() => setSelectedNodeId(null)}
@@ -384,9 +427,28 @@ const CRMFlowBuilder: React.FC = () => {
                 onDelete={handleNodeDelete}
               />
             )}
+
+            {/* Flow Testing Panel */}
+            <FlowTestingPanel
+              nodes={nodes}
+              edges={edges}
+              isOpen={isTestingOpen}
+              onClose={() => {
+                setIsTestingOpen(false);
+                setHighlightedNodeId(null);
+              }}
+              onHighlightNode={setHighlightedNodeId}
+            />
           </div>
         </div>
       </div>
+
+      {/* Flow Templates Modal */}
+      <FlowTemplatesModal
+        isOpen={isTemplatesOpen}
+        onClose={() => setIsTemplatesOpen(false)}
+        onSelectTemplate={handleTemplateSelect}
+      />
     </CRMLayout>
   );
 };
