@@ -1,5 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { useState, useEffect, useCallback, useRef } from "react";
 
 export type CallStatus = 
   | "idle"
@@ -14,7 +13,7 @@ interface CallData {
   call_status: string | null;
   platform_analysis: unknown;
   client_analysis: unknown;
-  transcript: unknown;
+  has_transcript: boolean;
   call_duration: number | null;
 }
 
@@ -27,10 +26,13 @@ interface UseCallStatusReturn {
   startCall: (recordId: string) => void;
 }
 
+const POLL_INTERVAL = 5000; // 5 seconds
+
 export const useCallStatus = (): UseCallStatusReturn => {
   const [status, setStatus] = useState<CallStatus>("idle");
   const [callId, setCallId] = useState<string | null>(null);
   const [callData, setCallData] = useState<CallData | null>(null);
+  const pollIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   // Derive status from call data
   const deriveStatus = useCallback((data: CallData): CallStatus => {
@@ -46,6 +48,32 @@ export const useCallStatus = (): UseCallStatusReturn => {
     return "initiated";
   }, []);
 
+  // Fetch call status via edge function
+  const fetchCallStatus = useCallback(async (id: string) => {
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/get-call-status`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ callId: id }),
+        }
+      );
+
+      if (!response.ok) {
+        const error = await response.json();
+        console.error("[CallStatus] Error fetching status:", error);
+        return null;
+      }
+
+      const data = await response.json();
+      return data as CallData;
+    } catch (error) {
+      console.error("[CallStatus] Network error:", error);
+      return null;
+    }
+  }, []);
+
   // Start tracking a call
   const startCall = useCallback((recordId: string) => {
     sessionStorage.setItem("voice_call_active", "true");
@@ -57,9 +85,16 @@ export const useCallStatus = (): UseCallStatusReturn => {
   // Clear call state
   const clearCall = useCallback(() => {
     sessionStorage.removeItem("voice_call_active");
+    sessionStorage.removeItem("voice_call_record_id");
     setStatus("idle");
     setCallId(null);
     setCallData(null);
+    
+    // Clear polling interval
+    if (pollIntervalRef.current) {
+      clearInterval(pollIntervalRef.current);
+      pollIntervalRef.current = null;
+    }
   }, []);
 
   // Check for active call on mount
@@ -70,52 +105,57 @@ export const useCallStatus = (): UseCallStatusReturn => {
     if (isActive && recordId) {
       setCallId(recordId);
       // Fetch initial status
-      supabase
-        .from("voice_widget_calls")
-        .select("id, call_status, platform_analysis, client_analysis, transcript, call_duration")
-        .eq("id", recordId)
-        .single()
-        .then(({ data, error }) => {
-          if (!error && data) {
-            setCallData(data as CallData);
-            setStatus(deriveStatus(data as CallData));
-          } else {
-            setStatus("initiated");
-          }
-        });
+      fetchCallStatus(recordId).then((data) => {
+        if (data) {
+          setCallData(data);
+          setStatus(deriveStatus(data));
+        } else {
+          setStatus("initiated");
+        }
+      });
     }
-  }, [deriveStatus]);
+  }, [deriveStatus, fetchCallStatus]);
 
-  // Set up realtime subscription
+  // Set up polling instead of realtime subscription
   useEffect(() => {
     if (!callId) return;
 
-    const channel = supabase
-      .channel(`call-status-${callId}`)
-      .on(
-        "postgres_changes",
-        {
-          event: "UPDATE",
-          schema: "public",
-          table: "voice_widget_calls",
-          filter: `id=eq.${callId}`,
-        },
-        (payload) => {
-          const newData = payload.new as CallData;
-          setCallData(newData);
-          const newStatus = deriveStatus(newData);
-          setStatus(newStatus);
-          
-          // Auto-clear after viewing if needed
-          console.log("[CallStatus] Update received:", newStatus, newData);
+    // Clear any existing interval
+    if (pollIntervalRef.current) {
+      clearInterval(pollIntervalRef.current);
+    }
+
+    // Poll for updates
+    const poll = async () => {
+      const data = await fetchCallStatus(callId);
+      if (data) {
+        setCallData(data);
+        const newStatus = deriveStatus(data);
+        setStatus(newStatus);
+        console.log("[CallStatus] Poll update:", newStatus, data);
+        
+        // Stop polling once analysis is ready
+        if (newStatus === "analysis_ready" && pollIntervalRef.current) {
+          console.log("[CallStatus] Analysis ready, stopping polling");
+          clearInterval(pollIntervalRef.current);
+          pollIntervalRef.current = null;
         }
-      )
-      .subscribe();
+      }
+    };
+
+    // Start polling
+    pollIntervalRef.current = setInterval(poll, POLL_INTERVAL);
+    
+    // Also poll immediately
+    poll();
 
     return () => {
-      supabase.removeChannel(channel);
+      if (pollIntervalRef.current) {
+        clearInterval(pollIntervalRef.current);
+        pollIntervalRef.current = null;
+      }
     };
-  }, [callId, deriveStatus]);
+  }, [callId, deriveStatus, fetchCallStatus]);
 
   return {
     status,
