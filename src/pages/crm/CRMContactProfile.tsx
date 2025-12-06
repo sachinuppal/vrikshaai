@@ -23,6 +23,7 @@ import {
   CheckCircle,
   XCircle,
   Loader2,
+  Workflow,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -410,6 +411,18 @@ export default function CRMContactProfile() {
                         {contact.phone}
                       </span>
                     )}
+                  </div>
+                  
+                  {/* Quick Actions */}
+                  <div className="mt-3 flex gap-2">
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => navigate(`/crm/contacts/${id}/flows`)}
+                    >
+                      <Workflow className="h-4 w-4 mr-2" />
+                      Manage Flows
+                    </Button>
                   </div>
                 </div>
 
