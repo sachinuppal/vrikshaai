@@ -62,6 +62,12 @@ const products = [
     href: "/voice",
     icon: Phone,
   },
+  {
+    title: "Call History",
+    description: "View and manage AI calls",
+    href: "/call-history",
+    icon: Phone,
+  },
 ];
 
 const aiInfrastructure = [
