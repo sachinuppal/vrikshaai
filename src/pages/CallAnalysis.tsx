@@ -147,32 +147,45 @@ const CallAnalysis = () => {
   const fetchCallData = async () => {
     if (!id) return;
     
-    const { data, error } = await supabase
-      .from("voice_widget_calls")
-      .select("*")
-      .eq("id", id)
-      .single();
+    try {
+      // Use edge function to fetch call data (bypasses RLS for anonymous access)
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/get-call-analysis`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ callId: id }),
+        }
+      );
 
-    if (error || !data) {
+      const data = await response.json();
+
+      if (!response.ok || data.error) {
+        console.error("Error fetching call:", data.error);
+        toast.error("Call not found");
+        navigate("/");
+        return;
+      }
+
+      setCallData(data as CallData);
+      setLoading(false);
+
+      if (data.call_status && !data.platform_analysis) {
+        setAnalyzing(true);
+      }
+    } catch (error) {
       console.error("Error fetching call:", error);
+      toast.error("Failed to load call data");
       navigate("/");
-      return;
-    }
-
-    setCallData(data as unknown as CallData);
-    setLoading(false);
-
-    if (data.call_status && !data.platform_analysis) {
-      setAnalyzing(true);
     }
   };
 
   const handleTryAgain = () => {
+    // Keep user info for pre-fill but clear call-specific data
     sessionStorage.removeItem("voice_call_record_id");
     sessionStorage.removeItem("voice_captured");
-    sessionStorage.removeItem("voice_user_name");
-    sessionStorage.removeItem("voice_user_phone");
-    navigate("/call-history");
+    // Redirect to home page where they can start a new call
+    navigate("/");
   };
 
   const runObservabilityAnalysis = async () => {

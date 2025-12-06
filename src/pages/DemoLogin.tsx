@@ -19,8 +19,6 @@ import { supabase } from '@/integrations/supabase/client';
 
 export default function DemoLogin() {
   const [step, setStep] = useState<'phone' | 'otp'>('phone');
-  const [phone, setPhone] = useState('');
-  const [countryCode, setCountryCode] = useState('IN');
   const [otp, setOtp] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [fullPhone, setFullPhone] = useState('');
@@ -30,6 +28,30 @@ export default function DemoLogin() {
 
   const from = (location.state as { from?: string })?.from || '/call-history';
   const callId = (location.state as { callId?: string })?.callId;
+
+  // Pre-fill from sessionStorage (captured during first call)
+  const storedName = sessionStorage.getItem('voice_user_name') || '';
+  const storedPhone = sessionStorage.getItem('voice_user_phone') || '';
+  
+  // Parse stored phone to extract country code and number
+  const parseStoredPhone = () => {
+    if (!storedPhone) return { code: 'IN', number: '' };
+    // Find matching country by dial code
+    for (const country of countries) {
+      if (storedPhone.startsWith(country.dialCode)) {
+        return {
+          code: country.code,
+          number: storedPhone.replace(country.dialCode, '')
+        };
+      }
+    }
+    return { code: 'IN', number: storedPhone };
+  };
+
+  const parsedPhone = parseStoredPhone();
+  const [name, setName] = useState(storedName);
+  const [phone, setPhone] = useState(parsedPhone.number);
+  const [countryCode, setCountryCode] = useState(parsedPhone.code);
 
   const selectedCountry = countries.find(c => c.code === countryCode);
 
@@ -160,11 +182,16 @@ export default function DemoLogin() {
             </div>
             <div>
               <CardTitle className="text-xl">
-                {step === 'phone' ? 'Verify Your Phone' : 'Enter OTP'}
+                {step === 'phone' 
+                  ? (storedName ? `Welcome back, ${storedName}` : 'Verify Your Phone')
+                  : 'Enter OTP'
+                }
               </CardTitle>
               <CardDescription>
                 {step === 'phone' 
-                  ? 'Enter your phone number to access your call analysis'
+                  ? (storedName 
+                      ? 'Verify your phone to create an account and access all your calls'
+                      : 'Enter your phone number to create an account')
                   : `We sent a code to ${fullPhone}`
                 }
               </CardDescription>
