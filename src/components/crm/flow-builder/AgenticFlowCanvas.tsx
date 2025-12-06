@@ -19,6 +19,7 @@ interface AgenticFlowCanvasProps {
   selectedNodeId: string | null;
   onNodeSelect: (nodeId: string | null) => void;
   onNodeMove: (nodeId: string, x: number, y: number) => void;
+  onNodeAdd?: (nodeType: string, x: number, y: number) => void;
   onEdgeClick?: (edgeId: string) => void;
 }
 
@@ -28,6 +29,7 @@ export const AgenticFlowCanvas: React.FC<AgenticFlowCanvasProps> = ({
   selectedNodeId,
   onNodeSelect,
   onNodeMove,
+  onNodeAdd,
   onEdgeClick
 }) => {
   const [zoom, setZoom] = useState(1);
@@ -71,14 +73,26 @@ export const AgenticFlowCanvas: React.FC<AgenticFlowCanvasProps> = ({
 
   const handleDrop = useCallback((e: React.DragEvent) => {
     e.preventDefault();
+    
+    if (!canvasRef.current) return;
+    
+    const rect = canvasRef.current.getBoundingClientRect();
+    const x = (e.clientX - rect.left - pan.x) / zoom;
+    const y = (e.clientY - rect.top - pan.y) / zoom;
+    
+    // Check if dropping a new node from palette
+    const newNodeType = e.dataTransfer.getData('newNodeType');
+    if (newNodeType && onNodeAdd) {
+      onNodeAdd(newNodeType, x, y);
+      return;
+    }
+    
+    // Otherwise, moving an existing node
     const nodeId = e.dataTransfer.getData('nodeId');
-    if (nodeId && canvasRef.current) {
-      const rect = canvasRef.current.getBoundingClientRect();
-      const x = (e.clientX - rect.left - pan.x) / zoom;
-      const y = (e.clientY - rect.top - pan.y) / zoom;
+    if (nodeId) {
       onNodeMove(nodeId, x, y);
     }
-  }, [pan, zoom, onNodeMove]);
+  }, [pan, zoom, onNodeMove, onNodeAdd]);
 
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();

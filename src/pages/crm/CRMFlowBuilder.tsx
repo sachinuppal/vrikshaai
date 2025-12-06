@@ -16,7 +16,9 @@ import { CRMLayout } from '@/components/crm/CRMLayout';
 import { AgentChatPanel, ChatMessage } from '@/components/crm/flow-builder/AgentChatPanel';
 import { AgenticFlowCanvas, FlowEdgeData } from '@/components/crm/flow-builder/AgenticFlowCanvas';
 import { NodeConfigPanel } from '@/components/crm/flow-builder/NodeConfigPanel';
+import { NodePalette } from '@/components/crm/flow-builder/NodePalette';
 import { FlowNodeData } from '@/components/crm/flow-builder/FlowNode';
+import { NODE_TYPES } from '@/components/crm/flow-builder/nodeTypes';
 
 const CRMFlowBuilder: React.FC = () => {
   const navigate = useNavigate();
@@ -192,6 +194,24 @@ const CRMFlowBuilder: React.FC = () => {
     toast.success('Node deleted');
   }, []);
 
+  const handleNodeAdd = useCallback((nodeType: string, x: number, y: number) => {
+    const nodeConfig = NODE_TYPES[nodeType];
+    if (!nodeConfig) return;
+
+    const newNode: FlowNodeData = {
+      id: crypto.randomUUID(),
+      node_type: nodeType,
+      label: nodeConfig.label,
+      config: {},
+      position_x: x,
+      position_y: y
+    };
+
+    setNodes(prev => [...prev, newNode]);
+    setSelectedNodeId(newNode.id);
+    toast.success(`Added ${nodeConfig.label} node`);
+  }, []);
+
   const handleSaveFlow = async () => {
     setIsSaving(true);
     try {
@@ -317,6 +337,9 @@ const CRMFlowBuilder: React.FC = () => {
             />
           </div>
 
+          {/* Node Palette */}
+          <NodePalette />
+
           {/* Canvas */}
           <div className="flex-1 relative">
             <AgenticFlowCanvas
@@ -325,6 +348,7 @@ const CRMFlowBuilder: React.FC = () => {
               selectedNodeId={selectedNodeId}
               onNodeSelect={setSelectedNodeId}
               onNodeMove={handleNodeMove}
+              onNodeAdd={handleNodeAdd}
             />
 
             {/* Node Config Panel */}
