@@ -12,16 +12,24 @@ export interface FlowNodeData {
   position_y: number;
 }
 
+export type ConnectionPoint = 'input' | 'output' | 'output-left' | 'output-right';
+
 interface FlowNodeProps {
   node: FlowNodeData;
   isSelected: boolean;
   onClick: () => void;
+  onConnectionStart?: (nodeId: string, point: ConnectionPoint) => void;
+  onConnectionEnd?: (nodeId: string, point: ConnectionPoint) => void;
+  isConnecting?: boolean;
 }
 
 export const FlowNode: React.FC<FlowNodeProps> = ({
   node,
   isSelected,
-  onClick
+  onClick,
+  onConnectionStart,
+  onConnectionEnd,
+  isConnecting = false
 }) => {
   const nodeType = NODE_TYPES[node.node_type];
   
@@ -30,6 +38,22 @@ export const FlowNode: React.FC<FlowNodeProps> = ({
   }
 
   const Icon = nodeType.icon;
+
+  const handleConnectionMouseDown = (point: ConnectionPoint, e: React.MouseEvent) => {
+    e.stopPropagation();
+    onConnectionStart?.(node.id, point);
+  };
+
+  const handleConnectionMouseUp = (point: ConnectionPoint, e: React.MouseEvent) => {
+    e.stopPropagation();
+    onConnectionEnd?.(node.id, point);
+  };
+
+  const connectionPointClasses = cn(
+    "absolute transform -translate-x-1/2 rounded-full border-2 bg-background transition-all duration-200",
+    "hover:scale-125 hover:shadow-md cursor-crosshair",
+    isConnecting && "animate-pulse"
+  );
 
   return (
     <motion.div
@@ -78,30 +102,54 @@ export const FlowNode: React.FC<FlowNodeProps> = ({
         )}
       </div>
 
-      {/* Connection Points */}
+      {/* Input Connection Point (top) */}
       {nodeType.category !== 'trigger' && (
         <div 
-          className="absolute -top-2 left-1/2 transform -translate-x-1/2 w-4 h-4 rounded-full border-2 border-border bg-background"
+          className={cn(connectionPointClasses, "-top-2 left-1/2 w-4 h-4")}
           style={{ borderColor: nodeType.color }}
+          onMouseDown={(e) => handleConnectionMouseDown('input', e)}
+          onMouseUp={(e) => handleConnectionMouseUp('input', e)}
+          title="Drop connection here"
         />
       )}
-      {nodeType.category !== 'end' && (
+
+      {/* Output Connection Point (bottom - single) */}
+      {nodeType.category !== 'end' && nodeType.category !== 'router' && (
         <div 
-          className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 w-4 h-4 rounded-full border-2 border-border bg-background"
+          className={cn(connectionPointClasses, "-bottom-2 left-1/2 w-4 h-4")}
           style={{ borderColor: nodeType.color }}
+          onMouseDown={(e) => handleConnectionMouseDown('output', e)}
+          onMouseUp={(e) => handleConnectionMouseUp('output', e)}
+          title="Drag to connect"
         />
       )}
 
       {/* Multiple outputs for routers */}
       {nodeType.category === 'router' && (
         <>
+          {/* Center output */}
           <div 
-            className="absolute -bottom-2 left-1/4 transform -translate-x-1/2 w-3 h-3 rounded-full border-2 bg-background"
+            className={cn(connectionPointClasses, "-bottom-2 left-1/2 w-4 h-4")}
             style={{ borderColor: nodeType.color }}
+            onMouseDown={(e) => handleConnectionMouseDown('output', e)}
+            onMouseUp={(e) => handleConnectionMouseUp('output', e)}
+            title="Default output"
           />
+          {/* Left output */}
           <div 
-            className="absolute -bottom-2 left-3/4 transform -translate-x-1/2 w-3 h-3 rounded-full border-2 bg-background"
+            className={cn(connectionPointClasses, "-bottom-2 left-1/4 w-3 h-3")}
             style={{ borderColor: nodeType.color }}
+            onMouseDown={(e) => handleConnectionMouseDown('output-left', e)}
+            onMouseUp={(e) => handleConnectionMouseUp('output-left', e)}
+            title="Condition A"
+          />
+          {/* Right output */}
+          <div 
+            className={cn(connectionPointClasses, "-bottom-2 left-3/4 w-3 h-3")}
+            style={{ borderColor: nodeType.color }}
+            onMouseDown={(e) => handleConnectionMouseDown('output-right', e)}
+            onMouseUp={(e) => handleConnectionMouseUp('output-right', e)}
+            title="Condition B"
           />
         </>
       )}

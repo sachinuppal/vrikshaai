@@ -17,7 +17,7 @@ import { AgentChatPanel, ChatMessage } from '@/components/crm/flow-builder/Agent
 import { AgenticFlowCanvas, FlowEdgeData } from '@/components/crm/flow-builder/AgenticFlowCanvas';
 import { NodeConfigPanel } from '@/components/crm/flow-builder/NodeConfigPanel';
 import { NodePalette } from '@/components/crm/flow-builder/NodePalette';
-import { FlowNodeData } from '@/components/crm/flow-builder/FlowNode';
+import { FlowNodeData, ConnectionPoint } from '@/components/crm/flow-builder/FlowNode';
 import { NODE_TYPES } from '@/components/crm/flow-builder/nodeTypes';
 
 const CRMFlowBuilder: React.FC = () => {
@@ -212,6 +212,29 @@ const CRMFlowBuilder: React.FC = () => {
     toast.success(`Added ${nodeConfig.label} node`);
   }, []);
 
+  const handleEdgeAdd = useCallback((sourceNodeId: string, targetNodeId: string, sourcePoint: ConnectionPoint) => {
+    // Check if edge already exists
+    const edgeExists = edges.some(
+      e => e.source_node_id === sourceNodeId && e.target_node_id === targetNodeId
+    );
+    
+    if (edgeExists) {
+      toast.error('Connection already exists');
+      return;
+    }
+
+    const newEdge: FlowEdgeData = {
+      id: crypto.randomUUID(),
+      source_node_id: sourceNodeId,
+      target_node_id: targetNodeId,
+      source_point: sourcePoint,
+      label: sourcePoint === 'output-left' ? 'Condition A' : sourcePoint === 'output-right' ? 'Condition B' : undefined
+    };
+
+    setEdges(prev => [...prev, newEdge]);
+    toast.success('Connection created');
+  }, [edges]);
+
   const handleSaveFlow = async () => {
     setIsSaving(true);
     try {
@@ -349,6 +372,7 @@ const CRMFlowBuilder: React.FC = () => {
               onNodeSelect={setSelectedNodeId}
               onNodeMove={handleNodeMove}
               onNodeAdd={handleNodeAdd}
+              onEdgeAdd={handleEdgeAdd}
             />
 
             {/* Node Config Panel */}
