@@ -27,6 +27,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
 import { CRMLayout } from "@/components/crm/CRMLayout";
+import { DynamicIndustryGraph } from "@/components/crm/DynamicIndustryGraph";
 
 interface Contact360 {
   contact: any;
@@ -432,6 +433,20 @@ export default function CRMContactProfile() {
                 </CardContent>
               </Card>
             </motion.div>
+
+            {/* Industry Graph */}
+            {contact.primary_industry && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.4 }}
+              >
+                <DynamicIndustryGraph
+                  primaryIndustry={contact.primary_industry}
+                  contactId={contact.id}
+                />
+              </motion.div>
+            )}
           </div>
 
           {/* Right Column - Timeline */}
