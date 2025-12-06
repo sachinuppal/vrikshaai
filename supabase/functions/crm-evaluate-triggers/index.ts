@@ -8,7 +8,7 @@ const corsHeaders = {
 
 interface EvaluateRequest {
   contact_id: string;
-  trigger_event: string; // new_interaction, score_change, lifecycle_change, manual
+  trigger_event: string;
   event_data?: any;
 }
 
@@ -37,9 +37,8 @@ serve(async (req) => {
     const body: EvaluateRequest = await req.json();
     const { contact_id, trigger_event, event_data } = body;
 
-    console.log("Evaluating triggers for:", { contact_id, trigger_event });
+    console.log("Evaluating triggers for:", { contact_id, trigger_event, event_data });
 
-    // Validate required fields
     if (!contact_id || !trigger_event) {
       return new Response(
         JSON.stringify({ error: "contact_id and trigger_event are required" }),
@@ -96,6 +95,8 @@ serve(async (req) => {
 
     // Evaluate each trigger
     for (const trigger of triggers || []) {
+      console.log(`Evaluating trigger: ${trigger.name}`, { conditions: trigger.conditions });
+
       // Check cooldown
       const cooldownOk = await checkCooldown(supabase, contact_id, trigger.id, trigger.cooldown_minutes);
       if (!cooldownOk) {
@@ -124,9 +125,11 @@ serve(async (req) => {
         event_data,
       });
 
+      console.log(`Trigger ${trigger.name} evaluation:`, conditionsResult);
+
       if (conditionsResult.matched) {
-        console.log(`Trigger ${trigger.name} matched with conditions:`, conditionsResult.matchedConditions);
-        
+        console.log(`Trigger ${trigger.name} MATCHED with conditions:`, conditionsResult.matchedConditions);
+
         // Add all actions from this trigger
         const actions = Array.isArray(trigger.actions) ? trigger.actions : [trigger.actions];
         for (const action of actions) {
@@ -191,10 +194,42 @@ function evaluateConditions(
   }
 
   const matchedConditions: any = {};
-  let allMatched = true;
 
-  // Handle "all" conditions (AND logic)
+  // Handle NEW format: { conditions: [...], operator: "and"|"or" }
+  if (conditions.conditions && Array.isArray(conditions.conditions)) {
+    const operator = conditions.operator || "and";
+    console.log(`Evaluating ${conditions.conditions.length} conditions with operator: ${operator}`);
+
+    if (operator === "or" || operator === "any") {
+      // OR logic - any one condition matching is enough
+      for (const condition of conditions.conditions) {
+        const result = evaluateSingleCondition(condition, context);
+        console.log(`Condition ${condition.field} ${condition.operator} ${condition.value}: ${result}`);
+        if (result) {
+          matchedConditions[condition.field] = condition;
+          return { matched: true, matchedConditions };
+        }
+      }
+      return { matched: false, matchedConditions: {} };
+    } else {
+      // AND logic - all conditions must match
+      let allMatched = true;
+      for (const condition of conditions.conditions) {
+        const result = evaluateSingleCondition(condition, context);
+        console.log(`Condition ${condition.field} ${condition.operator} ${condition.value}: ${result}`);
+        if (!result) {
+          allMatched = false;
+          break;
+        }
+        matchedConditions[condition.field] = condition;
+      }
+      return { matched: allMatched, matchedConditions };
+    }
+  }
+
+  // Handle OLD format: { all: [...] } (AND logic)
   if (conditions.all && Array.isArray(conditions.all)) {
+    let allMatched = true;
     for (const condition of conditions.all) {
       const result = evaluateSingleCondition(condition, context);
       if (!result) {
@@ -206,7 +241,7 @@ function evaluateConditions(
     return { matched: allMatched, matchedConditions };
   }
 
-  // Handle "any" conditions (OR logic)
+  // Handle OLD format: { any: [...] } (OR logic)
   if (conditions.any && Array.isArray(conditions.any)) {
     for (const condition of conditions.any) {
       const result = evaluateSingleCondition(condition, context);
@@ -245,42 +280,64 @@ function evaluateSingleCondition(
   } else if (field.startsWith("event.")) {
     actualValue = context.event_data?.[field.replace("event.", "")];
   } else {
-    // Try contact first, then variables
-    actualValue = context.contact[field] ?? context.variables[field];
+    // Try contact first, then variables, then event_data
+    actualValue = context.contact[field] ?? context.variables[field] ?? context.event_data?.[field];
   }
 
-  // Evaluate based on operator
+  console.log(`Evaluating: ${field} (value: ${actualValue}) ${operator} ${value}`);
+
+  // Evaluate based on operator - support multiple aliases
   switch (operator) {
     case "equals":
     case "eq":
+    case "==":
+    case "=":
       return actualValue == value;
+
     case "not_equals":
     case "neq":
+    case "!=":
+    case "<>":
       return actualValue != value;
+
     case "greater_than":
     case "gt":
+    case ">":
       return Number(actualValue) > Number(value);
+
     case "less_than":
     case "lt":
+    case "<":
       return Number(actualValue) < Number(value);
+
     case "greater_than_or_equal":
     case "gte":
+    case ">=":
       return Number(actualValue) >= Number(value);
+
     case "less_than_or_equal":
     case "lte":
+    case "<=":
       return Number(actualValue) <= Number(value);
+
     case "contains":
-      return String(actualValue).toLowerCase().includes(String(value).toLowerCase());
+      return String(actualValue || "").toLowerCase().includes(String(value).toLowerCase());
+
     case "not_contains":
-      return !String(actualValue).toLowerCase().includes(String(value).toLowerCase());
+      return !String(actualValue || "").toLowerCase().includes(String(value).toLowerCase());
+
     case "in":
       return Array.isArray(value) ? value.includes(actualValue) : false;
+
     case "not_in":
       return Array.isArray(value) ? !value.includes(actualValue) : true;
+
     case "exists":
       return actualValue !== null && actualValue !== undefined;
+
     case "not_exists":
       return actualValue === null || actualValue === undefined;
+
     default:
       console.warn(`Unknown operator: ${operator}`);
       return false;
