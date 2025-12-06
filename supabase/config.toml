@@ -50,3 +50,18 @@ verify_jwt = true
 
 [functions.update-application-status]
 verify_jwt = true
+
+[functions.crm-sync-existing-data]
+verify_jwt = true
+
+[functions.crm-get-contacts]
+verify_jwt = true
+
+[functions.crm-get-contact-360]
+verify_jwt = true
+
+[functions.crm-ingest-interaction]
+verify_jwt = true
+
+[functions.crm-compute-scores]
+verify_jwt = true
