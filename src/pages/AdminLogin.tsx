@@ -20,7 +20,7 @@ const AdminLogin = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const from = (location.state as { from?: { pathname: string } })?.from?.pathname || '/admin';
+  const from = (location.state as { from?: { pathname: string } })?.from?.pathname || '/crm/dashboard';
 
   // Redirect if already logged in as admin
   useEffect(() => {
