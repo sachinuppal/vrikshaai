@@ -13,6 +13,7 @@ import {
   ChevronDown,
   LogOut,
   Plug,
+  BarChart3,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -49,6 +50,7 @@ const crmNavItems = [
   { title: "Triggers", url: "/crm/triggers", icon: Zap },
   { title: "Flow Builder", url: "/crm/flow-builder", icon: Workflow },
   { title: "Integrations", url: "/crm/integrations", icon: Plug },
+  { title: "ROI Dashboard", url: "/crm/roi", icon: BarChart3 },
 ];
 
 const voiceNavItems = [
