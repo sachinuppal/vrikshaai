@@ -524,6 +524,39 @@ export type Database = {
         }
         Relationships: []
       }
+      voice_widget_calls: {
+        Row: {
+          country_code: string
+          created_at: string | null
+          full_phone: string
+          id: string
+          name: string
+          page_url: string | null
+          phone: string
+          source: string | null
+        }
+        Insert: {
+          country_code: string
+          created_at?: string | null
+          full_phone: string
+          id?: string
+          name: string
+          page_url?: string | null
+          phone: string
+          source?: string | null
+        }
+        Update: {
+          country_code?: string
+          created_at?: string | null
+          full_phone?: string
+          id?: string
+          name?: string
+          page_url?: string | null
+          phone?: string
+          source?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
