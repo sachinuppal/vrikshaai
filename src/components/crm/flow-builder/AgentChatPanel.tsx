@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Send, Bot, User, Loader2, Sparkles, CheckCircle2, AlertCircle } from 'lucide-react';
+import { Send, Bot, User, Loader2, Sparkles, CheckCircle2, AlertCircle, Minimize2, Maximize2, MessageSquare, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -24,6 +24,8 @@ interface AgentChatPanelProps {
   thinkingSteps: string[];
   onSendMessage: (message: string) => void;
   onOptionSelect?: (option: string) => void;
+  isMinimized?: boolean;
+  onToggleMinimize?: () => void;
 }
 
 export const AgentChatPanel: React.FC<AgentChatPanelProps> = ({
@@ -31,7 +33,9 @@ export const AgentChatPanel: React.FC<AgentChatPanelProps> = ({
   isLoading,
   thinkingSteps,
   onSendMessage,
-  onOptionSelect
+  onOptionSelect,
+  isMinimized = false,
+  onToggleMinimize
 }) => {
   const [input, setInput] = useState('');
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -58,17 +62,53 @@ export const AgentChatPanel: React.FC<AgentChatPanelProps> = ({
     }
   };
 
+  // Minimized floating bubble
+  if (isMinimized) {
+    return (
+      <motion.button
+        initial={{ scale: 0, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        exit={{ scale: 0, opacity: 0 }}
+        onClick={onToggleMinimize}
+        className="fixed bottom-6 left-6 z-50 w-14 h-14 rounded-full bg-gradient-to-br from-primary to-primary/80 shadow-lg flex items-center justify-center hover:scale-105 transition-transform group"
+      >
+        <Bot className="w-6 h-6 text-primary-foreground" />
+        {messages.length > 0 && (
+          <span className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-destructive text-destructive-foreground text-xs flex items-center justify-center font-medium">
+            {messages.filter(m => m.role === 'assistant').length}
+          </span>
+        )}
+        <span className="absolute left-full ml-3 px-2 py-1 rounded bg-popover text-popover-foreground text-xs whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity shadow-md">
+          Open AI Chat (⌘J)
+        </span>
+      </motion.button>
+    );
+  }
+
   return (
-    <div className="flex flex-col h-full bg-card border-r">
+    <motion.div 
+      initial={{ x: -350, opacity: 0 }}
+      animate={{ x: 0, opacity: 1 }}
+      exit={{ x: -350, opacity: 0 }}
+      transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+      className="flex flex-col h-full bg-card border-r w-[350px]"
+    >
       {/* Header */}
-      <div className="flex items-center gap-3 p-4 border-b">
-        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center">
-          <Bot className="w-5 h-5 text-primary-foreground" />
+      <div className="flex items-center justify-between p-4 border-b">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center">
+            <Bot className="w-5 h-5 text-primary-foreground" />
+          </div>
+          <div>
+            <h3 className="font-semibold text-foreground">Flow Builder Agent</h3>
+            <p className="text-xs text-muted-foreground">Powered by Gemini AI</p>
+          </div>
         </div>
-        <div>
-          <h3 className="font-semibold text-foreground">Flow Builder Agent</h3>
-          <p className="text-xs text-muted-foreground">Powered by Gemini AI</p>
-        </div>
+        {onToggleMinimize && (
+          <Button variant="ghost" size="icon" onClick={onToggleMinimize} className="h-8 w-8">
+            <Minimize2 className="w-4 h-4" />
+          </Button>
+        )}
       </div>
 
       {/* Messages */}
@@ -263,6 +303,6 @@ export const AgentChatPanel: React.FC<AgentChatPanelProps> = ({
           </Button>
         </div>
       </form>
-    </div>
+    </motion.div>
   );
 };

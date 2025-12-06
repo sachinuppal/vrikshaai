@@ -1,14 +1,22 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronDown, ChevronRight, GripVertical } from 'lucide-react';
+import { ChevronDown, ChevronRight, ChevronLeft, GripVertical, PanelLeftClose, PanelLeft } from 'lucide-react';
 import { NODE_TYPES, NODE_CATEGORIES } from './nodeTypes';
 import { cn } from '@/lib/utils';
+import { Button } from '@/components/ui/button';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 interface NodePaletteProps {
   className?: string;
+  isCollapsed?: boolean;
+  onToggleCollapse?: () => void;
 }
 
-export const NodePalette: React.FC<NodePaletteProps> = ({ className }) => {
+export const NodePalette: React.FC<NodePaletteProps> = ({ 
+  className,
+  isCollapsed = false,
+  onToggleCollapse
+}) => {
   const [expandedCategories, setExpandedCategories] = useState<Record<string, boolean>>({
     trigger: true,
     router: true,
@@ -39,14 +47,88 @@ export const NodePalette: React.FC<NodePaletteProps> = ({ className }) => {
     return acc;
   }, {} as Record<string, Array<{ type: string; label: string; icon: React.ComponentType<any>; color: string; bgColor: string; category: string }>>);
 
+  // Collapsed state - show only category icons
+  if (isCollapsed) {
+    return (
+      <TooltipProvider delayDuration={0}>
+        <motion.div 
+          initial={{ width: 240 }}
+          animate={{ width: 48 }}
+          transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+          className={cn("bg-card border-r flex flex-col items-center py-3", className)}
+        >
+          {/* Expand button */}
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                onClick={onToggleCollapse}
+                className="h-8 w-8 mb-3"
+              >
+                <PanelLeft className="w-4 h-4" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent side="right">
+              <p>Expand palette (⌘B)</p>
+            </TooltipContent>
+          </Tooltip>
+
+          {/* Category icons */}
+          <div className="flex-1 flex flex-col gap-2">
+            {Object.entries(NODE_CATEGORIES).map(([categoryKey, categoryInfo]) => {
+              const nodes = nodesByCategory[categoryKey] || [];
+              if (nodes.length === 0) return null;
+
+              // Get the first node's icon for the category
+              const CategoryIcon = nodes[0].icon;
+
+              return (
+                <Tooltip key={categoryKey}>
+                  <TooltipTrigger asChild>
+                    <button
+                      onClick={() => {
+                        onToggleCollapse?.();
+                        setExpandedCategories(prev => ({ ...prev, [categoryKey]: true }));
+                      }}
+                      className="w-10 h-10 rounded-lg flex items-center justify-center hover:bg-muted/60 transition-colors"
+                      style={{ backgroundColor: `${nodes[0].bgColor}20` }}
+                    >
+                      <CategoryIcon className="w-4 h-4" style={{ color: nodes[0].color }} />
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent side="right">
+                    <p>{categoryInfo.label} ({nodes.length})</p>
+                  </TooltipContent>
+                </Tooltip>
+              );
+            })}
+          </div>
+        </motion.div>
+      </TooltipProvider>
+    );
+  }
+
   return (
-    <div className={cn("w-[240px] bg-card border-r overflow-hidden flex flex-col", className)}>
+    <motion.div 
+      initial={{ width: 48 }}
+      animate={{ width: 240 }}
+      transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+      className={cn("bg-card border-r overflow-hidden flex flex-col", className)}
+    >
       {/* Header */}
-      <div className="p-3 border-b">
-        <h3 className="font-semibold text-sm">Node Palette</h3>
-        <p className="text-xs text-muted-foreground mt-1">
-          Drag nodes to canvas
-        </p>
+      <div className="flex items-center justify-between p-3 border-b">
+        <div>
+          <h3 className="font-semibold text-sm">Node Palette</h3>
+          <p className="text-xs text-muted-foreground mt-0.5">
+            Drag nodes to canvas
+          </p>
+        </div>
+        {onToggleCollapse && (
+          <Button variant="ghost" size="icon" onClick={onToggleCollapse} className="h-8 w-8">
+            <PanelLeftClose className="w-4 h-4" />
+          </Button>
+        )}
       </div>
 
       {/* Categories */}
@@ -123,6 +205,6 @@ export const NodePalette: React.FC<NodePaletteProps> = ({ className }) => {
           💡 Or describe your flow in chat
         </p>
       </div>
-    </div>
+    </motion.div>
   );
 };
