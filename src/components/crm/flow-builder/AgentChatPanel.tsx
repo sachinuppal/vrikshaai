@@ -70,7 +70,7 @@ export const AgentChatPanel: React.FC<AgentChatPanelProps> = ({
         animate={{ scale: 1, opacity: 1 }}
         exit={{ scale: 0, opacity: 0 }}
         onClick={onToggleMinimize}
-        className="fixed bottom-6 left-6 z-50 w-14 h-14 rounded-full bg-gradient-to-br from-primary to-primary/80 shadow-lg flex items-center justify-center hover:scale-105 transition-transform group"
+        className="absolute bottom-4 right-4 z-40 w-14 h-14 rounded-full bg-gradient-to-br from-primary to-primary/80 shadow-lg flex items-center justify-center hover:scale-105 transition-transform group"
       >
         <Bot className="w-6 h-6 text-primary-foreground" />
         {messages.length > 0 && (
