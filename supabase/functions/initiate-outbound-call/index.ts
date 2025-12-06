@@ -124,8 +124,9 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Update call record with ringg_call_id
-    const ringgCallId = ringgData.call_id || ringgData.id;
+    // Update call record with ringg_call_id - handle nested data structure
+    const ringgCallId = ringgData.data?.call_id || ringgData.call_id || ringgData.id;
+    console.log("Extracted ringg_call_id:", ringgCallId);
     if (ringgCallId) {
       const { error: updateError } = await supabase
         .from("voice_widget_calls")
