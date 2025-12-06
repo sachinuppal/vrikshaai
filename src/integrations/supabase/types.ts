@@ -612,6 +612,107 @@ export type Database = {
           },
         ]
       }
+      crm_integration_connections: {
+        Row: {
+          account_id: string | null
+          account_name: string | null
+          connected_at: string | null
+          credentials: Json | null
+          expires_at: string | null
+          id: string
+          integration_id: string | null
+          metadata: Json | null
+          scopes: string[] | null
+          status: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          account_id?: string | null
+          account_name?: string | null
+          connected_at?: string | null
+          credentials?: Json | null
+          expires_at?: string | null
+          id?: string
+          integration_id?: string | null
+          metadata?: Json | null
+          scopes?: string[] | null
+          status?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          account_id?: string | null
+          account_name?: string | null
+          connected_at?: string | null
+          credentials?: Json | null
+          expires_at?: string | null
+          id?: string
+          integration_id?: string | null
+          metadata?: Json | null
+          scopes?: string[] | null
+          status?: string | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_integration_connections_integration_id_fkey"
+            columns: ["integration_id"]
+            isOneToOne: false
+            referencedRelation: "crm_integrations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      crm_integrations: {
+        Row: {
+          api_base_url: string | null
+          auth_type: string
+          category: string
+          created_at: string | null
+          description: string | null
+          features: string[] | null
+          id: string
+          is_active: boolean | null
+          logo_url: string | null
+          name: string
+          node_types: Json | null
+          oauth_config: Json | null
+          slug: string
+        }
+        Insert: {
+          api_base_url?: string | null
+          auth_type?: string
+          category: string
+          created_at?: string | null
+          description?: string | null
+          features?: string[] | null
+          id?: string
+          is_active?: boolean | null
+          logo_url?: string | null
+          name: string
+          node_types?: Json | null
+          oauth_config?: Json | null
+          slug: string
+        }
+        Update: {
+          api_base_url?: string | null
+          auth_type?: string
+          category?: string
+          created_at?: string | null
+          description?: string | null
+          features?: string[] | null
+          id?: string
+          is_active?: boolean | null
+          logo_url?: string | null
+          name?: string
+          node_types?: Json | null
+          oauth_config?: Json | null
+          slug?: string
+        }
+        Relationships: []
+      }
       crm_interactions: {
         Row: {
           ai_insights: Json | null

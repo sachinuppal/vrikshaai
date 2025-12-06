@@ -34,6 +34,7 @@ import CRMTriggers from "./pages/crm/CRMTriggers";
 import CRMFlowBuilder from "./pages/crm/CRMFlowBuilder";
 import CRMCalls from "./pages/crm/CRMCalls";
 import CRMApplications from "./pages/crm/CRMApplications";
+import CRMIntegrations from "./pages/crm/CRMIntegrations";
 import AICallingConsentModal from "./components/AICallingConsentModal";
 import { CookieConsent } from "./components/CookieConsent";
 
@@ -78,6 +79,7 @@ const App = () => (
               <Route path="/crm/flow-builder/:flowId" element={<AdminRoute><CRMFlowBuilder /></AdminRoute>} />
               <Route path="/crm/calls" element={<AdminRoute><CRMCalls /></AdminRoute>} />
               <Route path="/crm/applications" element={<AdminRoute><CRMApplications /></AdminRoute>} />
+              <Route path="/crm/integrations" element={<AdminRoute><CRMIntegrations /></AdminRoute>} />
               <Route path="/voice" element={<Voice />} />
               <Route
                 path="/call-history"
