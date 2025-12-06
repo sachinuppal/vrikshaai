@@ -41,12 +41,23 @@ interface PlatformAnalysis {
 }
 
 interface ClientAnalysis {
+  // Original expected fields (keep for compatibility)
   lead_quality?: string;
   intent_score?: number;
   next_action?: string;
   purchase_probability?: number;
   customer_segment?: string;
   satisfaction_score?: number;
+  // Actual Ringg fields
+  priority_score?: string;
+  next_steps?: string;
+  user_type?: string;
+  investor_type?: string;
+  sector_preference?: string;
+  geography_preference?: string;
+  business_stage?: string;
+  interest_area?: string;
+  interest_in_vriksha_model?: string;
 }
 
 interface CallData {
@@ -276,48 +287,78 @@ const CallAnalysis = () => {
                       Insights
                     </CardTitle>
                   </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm text-muted-foreground">Lead Quality</span>
-                      <Badge className={getQualityColor(callData.client_analysis.lead_quality)}>
-                        {callData.client_analysis.lead_quality}
-                      </Badge>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm text-muted-foreground">Intent Score</span>
-                      <div className="flex items-center gap-2">
-                        <div className="w-20 h-2 bg-muted rounded-full overflow-hidden">
-                          <div 
-                            className="h-full bg-primary rounded-full"
-                            style={{ width: `${(callData.client_analysis.intent_score / 10) * 100}%` }}
-                          />
-                        </div>
-                        <span className="text-sm font-medium">
-                          {callData.client_analysis.intent_score}/10
-                        </span>
+                <CardContent className="space-y-4">
+                    {/* Lead Quality - use priority_score as fallback */}
+                    {(callData.client_analysis.priority_score || callData.client_analysis.lead_quality) && (
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm text-muted-foreground">Lead Quality</span>
+                        <Badge className={getQualityColor(callData.client_analysis.priority_score || callData.client_analysis.lead_quality)}>
+                          {callData.client_analysis.priority_score || callData.client_analysis.lead_quality}
+                        </Badge>
                       </div>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm text-muted-foreground">Satisfaction</span>
-                      <div className="flex gap-0.5">
-                        {[1, 2, 3, 4, 5].map((star) => (
-                          <Star
-                            key={star}
-                            className={`h-4 w-4 ${
-                              star <= Math.round(callData.client_analysis!.satisfaction_score / 2)
-                                ? "text-yellow-400 fill-yellow-400"
-                                : "text-muted"
-                            }`}
-                          />
-                        ))}
+                    )}
+                    
+                    {/* User Type */}
+                    {(callData.client_analysis.user_type || callData.client_analysis.investor_type) && (
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm text-muted-foreground">User Type</span>
+                        <Badge variant="secondary">
+                          {callData.client_analysis.investor_type || callData.client_analysis.user_type}
+                        </Badge>
                       </div>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm text-muted-foreground">Next Action</span>
-                      <Badge variant="outline">
-                        {callData.client_analysis.next_action}
-                      </Badge>
-                    </div>
+                    )}
+                    
+                    {/* Interest Area */}
+                    {callData.client_analysis.interest_area && (
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm text-muted-foreground">Interest Area</span>
+                        <span className="text-sm font-medium">{callData.client_analysis.interest_area}</span>
+                      </div>
+                    )}
+                    
+                    {/* Sector Preference */}
+                    {callData.client_analysis.sector_preference && (
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm text-muted-foreground">Sector Preference</span>
+                        <span className="text-sm font-medium">{callData.client_analysis.sector_preference}</span>
+                      </div>
+                    )}
+                    
+                    {/* Geography Preference */}
+                    {callData.client_analysis.geography_preference && (
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm text-muted-foreground">Geography</span>
+                        <span className="text-sm font-medium">{callData.client_analysis.geography_preference}</span>
+                      </div>
+                    )}
+                    
+                    {/* Business Stage */}
+                    {callData.client_analysis.business_stage && (
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm text-muted-foreground">Business Stage</span>
+                        <Badge variant="outline">{callData.client_analysis.business_stage}</Badge>
+                      </div>
+                    )}
+                    
+                    {/* Interest in Vriksha Model */}
+                    {callData.client_analysis.interest_in_vriksha_model && (
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm text-muted-foreground">Interest Level</span>
+                        <Badge className={getQualityColor(callData.client_analysis.interest_in_vriksha_model)}>
+                          {callData.client_analysis.interest_in_vriksha_model}
+                        </Badge>
+                      </div>
+                    )}
+                    
+                    {/* Next Action - use next_steps as fallback */}
+                    {(callData.client_analysis.next_steps || callData.client_analysis.next_action) && (
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm text-muted-foreground">Next Action</span>
+                        <Badge variant="outline" className="max-w-[180px] truncate">
+                          {callData.client_analysis.next_steps || callData.client_analysis.next_action}
+                        </Badge>
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
               </motion.div>
