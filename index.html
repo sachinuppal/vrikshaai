@@ -38,66 +38,6 @@
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
-    <!-- Ringg AI Web Call Assistant -->
-    <script>
-      function loadAgentsCdn(e,t){
-        let n=document.createElement("link");
-        n.rel="stylesheet",n.type="text/css",n.href=`https://cdn.jsdelivr.net/npm/@desivocal/agents-cdn@${e}/dist/style.css`;
-        var a=document.createElement("script");
-        a.type="text/javascript",a.readyState?a.onreadystatechange=function(){
-          "loaded"!==a.readyState&&"complete"!==a.readyState||(a.onreadystatechange=null,t())
-        }:a.onload=function(){t()},
-        a.src=`https://cdn.jsdelivr.net/npm/@desivocal/agents-cdn@${e}/dist/dv-agent.es.js`,
-        document.getElementsByTagName("head")[0].appendChild(n),
-        document.getElementsByTagName("head")[0].appendChild(a)
-      }
-    </script>
-    <script>
-      loadAgentsCdn("latest", function () {
-        loadAgent({
-          agentId: "1b0faabe-2256-47d3-9321-ab113091dc5d",
-          xApiKey: "5c67d04f-3302-4d21-9fcd-8ca6eeb030f5",
-          variables: {},
-          
-          // Custom Branding
-          title: "Talk to Vriksha",
-          description: "Ask me anything about our AI ventures and accelerator",
-          logoUrl: "/images/vriksha-voice-logo.png",
-          logoStyles: {
-            width: "60px",
-            height: "60px",
-            borderRadius: "12px"
-          },
-          
-          // Custom Legal Links
-          legalDisclaimer: {
-            text: "By starting call you agree to our Terms & Privacy Policy",
-            links: {
-              "Terms & Privacy Policy": "/terms"
-            }
-          },
-          
-          // Button Styling (matching site theme - Vibrant Orange)
-          buttons: {
-            modalTrigger: {
-              styles: {
-                backgroundColor: "#FF4D00",
-                color: "#FFFFFF",
-                borderRadius: "50%",
-              }
-            },
-            call: {
-              textBeforeCall: "Start Call",
-              textDuringCall: "End Call",
-              styles: {
-                backgroundColor: "#FF4D00",
-                color: "#FFFFFF",
-                borderRadius: "8px"
-              }
-            }
-          }
-        });
-      });
-    </script>
+    <!-- Ringg AI Web Call Assistant is loaded dynamically via src/lib/ringgWidget.ts -->
   </body>
 </html>

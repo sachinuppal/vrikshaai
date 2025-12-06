@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Phone, User, X, Loader2 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -14,7 +15,7 @@ import {
 import { countries } from "@/data/countries";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { triggerVoiceWidget } from "@/lib/voiceChat";
+import { initializeRinggWidget, triggerRinggWidget } from "@/lib/ringgWidget";
 
 interface VoiceCaptureModalProps {
   isOpen: boolean;
@@ -26,6 +27,7 @@ export const VoiceCaptureModal = ({ isOpen, onClose }: VoiceCaptureModalProps) =
   const [countryCode, setCountryCode] = useState("IN");
   const [phone, setPhone] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const navigate = useNavigate();
 
   const selectedCountry = countries.find((c) => c.code === countryCode);
 
@@ -47,33 +49,56 @@ export const VoiceCaptureModal = ({ isOpen, onClose }: VoiceCaptureModalProps) =
     try {
       const fullPhone = `${selectedCountry?.dialCode}${phone}`;
       
-      // Save to database
-      const { error } = await supabase.from("voice_widget_calls").insert({
+      // Save to database and get the record ID
+      const { data, error } = await supabase.from("voice_widget_calls").insert({
         name: name.trim(),
         phone: phone.trim(),
         country_code: countryCode,
         full_phone: fullPhone,
         source: "voice_widget",
         page_url: window.location.href,
-      });
+      }).select("id").single();
 
       if (error) {
         console.error("Error saving voice call data:", error);
-        // Continue anyway - don't block the call
+        toast.error("Something went wrong. Please try again.");
+        setIsSubmitting(false);
+        return;
       }
 
-      // Store in session for subsequent calls
+      // Store record ID and user info in session
+      sessionStorage.setItem("voice_call_record_id", data.id);
       sessionStorage.setItem("voice_user_name", name.trim());
       sessionStorage.setItem("voice_user_phone", fullPhone);
       sessionStorage.setItem("voice_captured", "true");
+
+      // Initialize widget with personalized variables
+      await initializeRinggWidget(name.trim(), fullPhone);
 
       // Close modal with animation
       onClose();
 
       // Trigger widget after modal animation completes
       setTimeout(() => {
-        triggerVoiceWidget();
-      }, 300);
+        const triggered = triggerRinggWidget();
+        if (!triggered) {
+          // If widget didn't open, redirect to analysis page anyway
+          // The user can try again from there
+          toast.info("Widget is loading, please try clicking the button again");
+        }
+      }, 500);
+
+      // Set up a listener for when the call ends to redirect to analysis
+      // This is a simple approach - the widget will stay open and when user closes it,
+      // they can navigate to the analysis page via the "Try Another Call" flow
+      // For now, we'll store the ID so the analysis page can be accessed later
+      toast.success("You can view your call analysis anytime", {
+        action: {
+          label: "View Analysis",
+          onClick: () => navigate(`/call-analysis/${data.id}`),
+        },
+        duration: 10000,
+      });
 
     } catch (err) {
       console.error("Error:", err);

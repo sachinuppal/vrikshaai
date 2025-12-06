@@ -526,6 +526,9 @@ export type Database = {
       }
       voice_widget_calls: {
         Row: {
+          call_duration: number | null
+          call_status: string | null
+          client_analysis: Json | null
           country_code: string
           created_at: string | null
           full_phone: string
@@ -533,9 +536,17 @@ export type Database = {
           name: string
           page_url: string | null
           phone: string
+          platform_analysis: Json | null
+          recording_url: string | null
+          ringg_call_id: string | null
           source: string | null
+          transcript: Json | null
+          updated_at: string | null
         }
         Insert: {
+          call_duration?: number | null
+          call_status?: string | null
+          client_analysis?: Json | null
           country_code: string
           created_at?: string | null
           full_phone: string
@@ -543,9 +554,17 @@ export type Database = {
           name: string
           page_url?: string | null
           phone: string
+          platform_analysis?: Json | null
+          recording_url?: string | null
+          ringg_call_id?: string | null
           source?: string | null
+          transcript?: Json | null
+          updated_at?: string | null
         }
         Update: {
+          call_duration?: number | null
+          call_status?: string | null
+          client_analysis?: Json | null
           country_code?: string
           created_at?: string | null
           full_phone?: string
@@ -553,7 +572,12 @@ export type Database = {
           name?: string
           page_url?: string | null
           phone?: string
+          platform_analysis?: Json | null
+          recording_url?: string | null
+          ringg_call_id?: string | null
           source?: string | null
+          transcript?: Json | null
+          updated_at?: string | null
         }
         Relationships: []
       }
