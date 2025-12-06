@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { VoiceChatProvider } from "@/contexts/VoiceChatContext";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
+import { AdminRoute } from "@/components/AdminRoute";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import TermsOfUse from "./pages/TermsOfUse";
@@ -14,6 +15,8 @@ import Contact from "./pages/Contact";
 import CookieSettings from "./pages/CookieSettings";
 import Auth from "./pages/Auth";
 import DemoLogin from "./pages/DemoLogin";
+import AdminLogin from "./pages/AdminLogin";
+import Admin from "./pages/Admin";
 import Apply from "./pages/Apply";
 import Applications from "./pages/Applications";
 import Investors from "./pages/Investors";
@@ -46,6 +49,15 @@ const App = () => (
               <Route path="/cookies" element={<CookieSettings />} />
               <Route path="/auth" element={<Auth />} />
               <Route path="/demo-login" element={<DemoLogin />} />
+              <Route path="/admin-login" element={<AdminLogin />} />
+              <Route
+                path="/admin"
+                element={
+                  <AdminRoute>
+                    <Admin />
+                  </AdminRoute>
+                }
+              />
               <Route path="/my-calls" element={<MyCalls />} />
               <Route path="/enterprises" element={<Enterprises />} />
               <Route path="/crm" element={<CRM />} />
