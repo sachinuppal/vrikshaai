@@ -29,45 +29,45 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <AuthProvider>
-        <VoiceChatProvider>
-          <Toaster />
-          <Sonner />
-          <BrowserRouter>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <VoiceChatProvider>
             <AICallingConsentModal />
             <CookieConsent />
             <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/terms" element={<TermsOfUse />} />
-            <Route path="/privacy" element={<PrivacyPolicy />} />
-            <Route path="/contact" element={<Contact />} />
-            <Route path="/cookies" element={<CookieSettings />} />
-            <Route path="/auth" element={<Auth />} />
-            <Route path="/investors" element={<Investors />} />
-            <Route path="/enterprises" element={<Enterprises />} />
-            <Route path="/crm" element={<CRM />} />
-            <Route path="/voice" element={<Voice />} />
-            <Route path="/call-analysis/:id" element={<CallAnalysis />} />
-            <Route
-              path="/applications"
-              element={
-                <ProtectedRoute>
-                  <Applications />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/apply/:applicationId"
-              element={
-                <ProtectedRoute>
-                  <Apply />
-                </ProtectedRoute>
-              }
-            />
+              <Route path="/" element={<Index />} />
+              <Route path="/terms" element={<TermsOfUse />} />
+              <Route path="/privacy" element={<PrivacyPolicy />} />
+              <Route path="/contact" element={<Contact />} />
+              <Route path="/cookies" element={<CookieSettings />} />
+              <Route path="/auth" element={<Auth />} />
+              <Route path="/investors" element={<Investors />} />
+              <Route path="/enterprises" element={<Enterprises />} />
+              <Route path="/crm" element={<CRM />} />
+              <Route path="/voice" element={<Voice />} />
+              <Route path="/call-analysis/:id" element={<CallAnalysis />} />
+              <Route
+                path="/applications"
+                element={
+                  <ProtectedRoute>
+                    <Applications />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/apply/:applicationId"
+                element={
+                  <ProtectedRoute>
+                    <Apply />
+                  </ProtectedRoute>
+                }
+              />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>
-          </BrowserRouter>
-        </VoiceChatProvider>
+          </VoiceChatProvider>
+        </BrowserRouter>
       </AuthProvider>
     </TooltipProvider>
   </QueryClientProvider>
