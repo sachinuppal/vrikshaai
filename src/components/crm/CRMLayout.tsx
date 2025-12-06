@@ -50,7 +50,6 @@ const crmNavItems = [
   { title: "Triggers", url: "/crm/triggers", icon: Zap },
   { title: "Flow Builder", url: "/crm/flow-builder", icon: Workflow },
   { title: "Integrations", url: "/crm/integrations", icon: Plug },
-  { title: "ROI Dashboard", url: "/crm/roi", icon: BarChart3 },
 ];
 
 const voiceNavItems = [
@@ -134,6 +133,28 @@ export function CRMLayout({ children }: CRMLayoutProps) {
                 </div>
               </div>
             </div>
+
+            {/* ROI Dashboard - Top Level */}
+            <SidebarGroup>
+              <SidebarGroupContent>
+                <SidebarMenu>
+                  <SidebarMenuItem>
+                    <SidebarMenuButton
+                      asChild
+                      isActive={isActive("/crm/roi")}
+                    >
+                      <button
+                        onClick={() => navigate("/crm/roi")}
+                        className="w-full flex items-center gap-2"
+                      >
+                        <BarChart3 className="h-4 w-4" />
+                        <span>ROI Dashboard</span>
+                      </button>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </SidebarGroup>
 
             {/* CRM Section */}
             <Collapsible open={crmOpen} onOpenChange={setCrmOpen}>
