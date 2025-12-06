@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Phone, User, X, Loader2 } from "lucide-react";
-import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -27,7 +26,6 @@ export const VoiceCaptureModal = ({ isOpen, onClose }: VoiceCaptureModalProps) =
   const [countryCode, setCountryCode] = useState("IN");
   const [phone, setPhone] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const navigate = useNavigate();
 
   const selectedCountry = countries.find((c) => c.code === countryCode);
 
@@ -82,20 +80,16 @@ export const VoiceCaptureModal = ({ isOpen, onClose }: VoiceCaptureModalProps) =
       setTimeout(() => {
         const triggered = triggerRinggWidget();
         if (!triggered) {
-          // If widget didn't open, redirect to analysis page anyway
-          // The user can try again from there
           toast.info("Widget is loading, please try clicking the button again");
         }
       }, 500);
 
-      // Set up a listener for when the call ends to redirect to analysis
-      // This is a simple approach - the widget will stay open and when user closes it,
-      // they can navigate to the analysis page via the "Try Another Call" flow
-      // For now, we'll store the ID so the analysis page can be accessed later
-      toast.success("You can view your call analysis anytime", {
+      // Show toast with link to analysis page
+      const recordId = data.id;
+      toast.success("Call started! View analysis after the call", {
         action: {
           label: "View Analysis",
-          onClick: () => navigate(`/call-analysis/${data.id}`),
+          onClick: () => window.location.href = `/call-analysis/${recordId}`,
         },
         duration: 10000,
       });
