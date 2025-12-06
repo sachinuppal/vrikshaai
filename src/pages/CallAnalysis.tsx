@@ -29,6 +29,7 @@ import { toast } from "sonner";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { ObservabilityCard } from "@/components/ObservabilityCard";
+import { maskPhoneNumber } from "@/lib/utils";
 
 interface TranscriptEntry {
   role?: string;
@@ -270,7 +271,7 @@ const CallAnalysis = () => {
             <div>
               <h1 className="text-2xl font-bold text-foreground">Call Analysis</h1>
               <p className="text-muted-foreground">
-                {callData.name} • {callData.full_phone}
+                {callData.name} • {maskPhoneNumber(callData.full_phone)}
               </p>
             </div>
           </div>
