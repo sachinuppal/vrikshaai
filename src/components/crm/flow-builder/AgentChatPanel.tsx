@@ -62,7 +62,7 @@ export const AgentChatPanel: React.FC<AgentChatPanelProps> = ({
     }
   };
 
-  // Minimized floating bubble
+  // Minimized floating tile with Vriksha logo
   if (isMinimized) {
     return (
       <motion.button
@@ -70,11 +70,15 @@ export const AgentChatPanel: React.FC<AgentChatPanelProps> = ({
         animate={{ scale: 1, opacity: 1 }}
         exit={{ scale: 0, opacity: 0 }}
         onClick={onToggleMinimize}
-        className="absolute bottom-4 right-4 z-40 w-14 h-14 rounded-full bg-gradient-to-br from-primary to-primary/80 shadow-lg flex items-center justify-center hover:scale-105 transition-transform group"
+        className="absolute bottom-4 right-4 z-40 w-14 h-14 rounded-xl bg-white shadow-lg border border-border/50 flex items-center justify-center hover:scale-105 hover:shadow-xl transition-all group"
       >
-        <Bot className="w-6 h-6 text-primary-foreground" />
+        <img 
+          src="/images/vriksha-logo.png" 
+          alt="Vriksha AI" 
+          className="w-9 h-9 object-contain"
+        />
         {messages.length > 0 && (
-          <span className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-destructive text-destructive-foreground text-xs flex items-center justify-center font-medium">
+          <span className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-primary text-primary-foreground text-xs flex items-center justify-center font-medium shadow-sm">
             {messages.filter(m => m.role === 'assistant').length}
           </span>
         )}
