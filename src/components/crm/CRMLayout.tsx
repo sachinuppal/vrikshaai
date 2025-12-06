@@ -11,6 +11,7 @@ import {
   Phone,
   FileText,
   ChevronDown,
+  LogOut,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -32,6 +33,7 @@ import {
 } from "@/components/ui/collapsible";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/contexts/AuthContext";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 
@@ -59,10 +61,29 @@ export function CRMLayout({ children }: CRMLayoutProps) {
   const navigate = useNavigate();
   const location = useLocation();
   const { toast } = useToast();
+  const { user, signOut } = useAuth();
   const [syncing, setSyncing] = useState(false);
   const [crmOpen, setCrmOpen] = useState(true);
   const [voiceOpen, setVoiceOpen] = useState(location.pathname.includes('/crm/calls'));
   const [acceleratorOpen, setAcceleratorOpen] = useState(location.pathname.includes('/crm/applications'));
+
+  const handleLogout = async () => {
+    try {
+      await signOut();
+      toast({
+        title: "Signed out",
+        description: "You have been signed out successfully",
+      });
+      navigate("/admin-login");
+    } catch (error) {
+      console.error("Logout error:", error);
+      toast({
+        title: "Error",
+        description: "Failed to sign out",
+        variant: "destructive",
+      });
+    }
+  };
 
   const handleSync = async () => {
     setSyncing(true);
@@ -236,8 +257,13 @@ export function CRMLayout({ children }: CRMLayoutProps) {
               </SidebarGroupContent>
             </SidebarGroup>
 
-            {/* Back to main site */}
-            <div className="mt-auto p-4 border-t">
+            {/* Footer with user info and logout */}
+            <div className="mt-auto p-4 border-t space-y-2">
+              {user?.email && (
+                <p className="text-xs text-muted-foreground truncate px-2">
+                  {user.email}
+                </p>
+              )}
               <Button
                 variant="ghost"
                 className="w-full justify-start"
@@ -245,6 +271,14 @@ export function CRMLayout({ children }: CRMLayoutProps) {
               >
                 <ArrowLeft className="h-4 w-4 mr-2" />
                 Back to Site
+              </Button>
+              <Button
+                variant="ghost"
+                className="w-full justify-start text-destructive hover:text-destructive hover:bg-destructive/10"
+                onClick={handleLogout}
+              >
+                <LogOut className="h-4 w-4 mr-2" />
+                Sign Out
               </Button>
             </div>
           </SidebarContent>
