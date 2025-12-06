@@ -12,6 +12,7 @@ import {
   FileText,
   ChevronDown,
   LogOut,
+  Plug,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -47,6 +48,7 @@ const crmNavItems = [
   { title: "Tasks", url: "/crm/tasks", icon: CheckSquare },
   { title: "Triggers", url: "/crm/triggers", icon: Zap },
   { title: "Flow Builder", url: "/crm/flow-builder", icon: Workflow },
+  { title: "Integrations", url: "/crm/integrations", icon: Plug },
 ];
 
 const voiceNavItems = [
