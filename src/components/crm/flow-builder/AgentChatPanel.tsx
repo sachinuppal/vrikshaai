@@ -87,15 +87,16 @@ export const AgentChatPanel: React.FC<AgentChatPanelProps> = ({
                 </div>
                 <div>
                   <p className="text-sm text-foreground mb-3">
-                    Hi! I'm your Flow Builder Agent. Describe the automation you want to create, and I'll design it for you.
+                    Hi! I'll instantly build automation flows for you. Just describe what you need and I'll create it on the canvas.
                   </p>
                   <div className="space-y-2">
-                    <p className="text-xs text-muted-foreground font-medium">Try saying:</p>
+                    <p className="text-xs text-muted-foreground font-medium">Quick starts:</p>
                     <div className="flex flex-wrap gap-2">
                       {[
-                        "Create a lead qualification flow",
-                        "Build a follow-up sequence",
-                        "Design a support escalation workflow"
+                        "Lead qualification with BANT",
+                        "Appointment booking agent",
+                        "Order tracking for e-commerce",
+                        "Payment reminder calls"
                       ].map((suggestion, i) => (
                         <button
                           key={i}
@@ -228,7 +229,7 @@ export const AgentChatPanel: React.FC<AgentChatPanelProps> = ({
               </div>
               <div className="bg-muted rounded-xl px-4 py-3">
                 <div className="flex items-center gap-2">
-                  <span className="text-sm text-muted-foreground">Thinking</span>
+                  <span className="text-sm text-muted-foreground">Designing your flow</span>
                   <span className="flex gap-1">
                     <span className="w-1.5 h-1.5 rounded-full bg-primary animate-bounce" style={{ animationDelay: '0ms' }} />
                     <span className="w-1.5 h-1.5 rounded-full bg-primary animate-bounce" style={{ animationDelay: '150ms' }} />

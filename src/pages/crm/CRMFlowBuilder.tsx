@@ -95,7 +95,8 @@ const CRMFlowBuilder: React.FC = () => {
             role: m.role,
             content: m.content
           })),
-          session_id: sessionId
+          session_id: sessionId,
+          force_generate: messages.length === 0 // Force flow generation on first message
         }
       });
 
@@ -106,25 +107,36 @@ const CRMFlowBuilder: React.FC = () => {
       const data = response.data;
 
       if (data.type === 'flow_generated') {
-        // Show thinking steps
-        if (data.thinking_steps) {
-          setThinkingSteps(data.thinking_steps);
-          await new Promise(resolve => setTimeout(resolve, 1500));
+        // Animate thinking steps one by one
+        if (data.thinking_steps && data.thinking_steps.length > 0) {
+          for (let i = 0; i < data.thinking_steps.length; i++) {
+            setThinkingSteps(prev => [...prev, data.thinking_steps[i]]);
+            await new Promise(resolve => setTimeout(resolve, 400));
+          }
+          await new Promise(resolve => setTimeout(resolve, 600));
         }
 
-        // Update flow
+        // Update flow with animation
         setFlowName(data.flow_name || flowName);
+        setFlowDescription(data.flow_description || '');
         setGlobalPrompt(data.global_prompt || '');
         
-        // Transform nodes with positions
+        // Add nodes one by one with animation
         const newNodes = (data.nodes || []).map((n: any, i: number) => ({
           ...n,
           position_x: n.position_x || 400,
-          position_y: n.position_y || 100 + i * 150
+          position_y: n.position_y || 80 + i * 140
         }));
         
-        setNodes(newNodes);
+        // Animate nodes appearing
+        for (let i = 0; i < newNodes.length; i++) {
+          setNodes(prev => [...prev.filter(p => !newNodes.slice(0, i + 1).find((n: FlowNodeData) => n.id === p.id)), ...newNodes.slice(0, i + 1)]);
+          setHighlightedNodeId(newNodes[i].id);
+          await new Promise(resolve => setTimeout(resolve, 200));
+        }
+        
         setEdges(data.edges || []);
+        setHighlightedNodeId(null);
 
         // Add assistant message
         const assistantMessage: ChatMessage = {
@@ -138,6 +150,39 @@ const CRMFlowBuilder: React.FC = () => {
           }
         };
         setMessages(prev => [...prev, assistantMessage]);
+        
+      } else if (data.type === 'flow_modified') {
+        // Handle flow modifications
+        if (data.action === 'add_node' && data.new_nodes) {
+          const nodesToAdd = data.new_nodes.map((n: any, i: number) => ({
+            ...n,
+            id: n.id || crypto.randomUUID(),
+            position_x: n.position_x || 400,
+            position_y: n.position_y || (nodes.length + i) * 140 + 80
+          }));
+          setNodes(prev => [...prev, ...nodesToAdd]);
+        }
+        
+        if (data.action === 'remove_node' && data.target_id) {
+          setNodes(prev => prev.filter(n => n.id !== data.target_id));
+          setEdges(prev => prev.filter(e => 
+            e.source_node_id !== data.target_id && e.target_node_id !== data.target_id
+          ));
+        }
+        
+        if (data.new_edges) {
+          setEdges(prev => [...prev, ...data.new_edges]);
+        }
+
+        const assistantMessage: ChatMessage = {
+          id: crypto.randomUUID(),
+          role: 'assistant',
+          content: data.message,
+          timestamp: new Date(),
+          metadata: { type: 'message' }
+        };
+        setMessages(prev => [...prev, assistantMessage]);
+        
       } else if (data.type === 'clarification') {
         const clarificationMessage: ChatMessage = {
           id: crypto.randomUUID(),
