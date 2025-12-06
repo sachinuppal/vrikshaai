@@ -534,6 +534,8 @@ export type Database = {
           full_phone: string
           id: string
           name: string
+          observability_analysis: Json | null
+          observability_status: string | null
           page_url: string | null
           phone: string
           platform_analysis: Json | null
@@ -552,6 +554,8 @@ export type Database = {
           full_phone: string
           id?: string
           name: string
+          observability_analysis?: Json | null
+          observability_status?: string | null
           page_url?: string | null
           phone: string
           platform_analysis?: Json | null
@@ -570,6 +574,8 @@ export type Database = {
           full_phone?: string
           id?: string
           name?: string
+          observability_analysis?: Json | null
+          observability_status?: string | null
           page_url?: string | null
           phone?: string
           platform_analysis?: Json | null

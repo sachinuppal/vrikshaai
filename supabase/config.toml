@@ -20,3 +20,6 @@ verify_jwt = false
 
 [functions.ringg-webhook]
 verify_jwt = false
+
+[functions.observe-call-script]
+verify_jwt = false
