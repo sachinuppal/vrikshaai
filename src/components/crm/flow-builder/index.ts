@@ -5,6 +5,7 @@ export { NodeConfigPanel } from './NodeConfigPanel';
 export { NodePalette } from './NodePalette';
 export { FlowTestingPanel } from './FlowTestingPanel';
 export { FlowTemplatesModal } from './FlowTemplatesModal';
+export { Minimap } from './Minimap';
 export { NODE_TYPES, NODE_CATEGORIES } from './nodeTypes';
 export type { ChatMessage } from './AgentChatPanel';
 export type { FlowNodeData, ConnectionPoint } from './FlowNode';

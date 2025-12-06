@@ -1,8 +1,9 @@
-import React, { useState, useRef, useCallback } from 'react';
-import { motion } from 'framer-motion';
-import { ZoomIn, ZoomOut, Maximize2, Grid3X3 } from 'lucide-react';
+import React, { useState, useRef, useCallback, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { ZoomIn, ZoomOut, Maximize2, Grid3X3, Undo2, Redo2, Map } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { FlowNode, FlowNodeData, ConnectionPoint } from './FlowNode';
+import { Minimap } from './Minimap';
 import { NODE_TYPES } from './nodeTypes';
 
 export interface FlowEdgeData {
@@ -21,6 +22,11 @@ interface ConnectionState {
   currentY: number;
 }
 
+interface HistoryState {
+  nodes: FlowNodeData[];
+  edges: FlowEdgeData[];
+}
+
 interface AgenticFlowCanvasProps {
   nodes: FlowNodeData[];
   edges: FlowEdgeData[];
@@ -32,6 +38,10 @@ interface AgenticFlowCanvasProps {
   onEdgeAdd?: (sourceNodeId: string, targetNodeId: string, sourcePoint: ConnectionPoint) => void;
   onEdgeDelete?: (edgeId: string) => void;
   onEdgeClick?: (edgeId: string) => void;
+  onUndo?: () => void;
+  onRedo?: () => void;
+  canUndo?: boolean;
+  canRedo?: boolean;
 }
 
 export const AgenticFlowCanvas: React.FC<AgenticFlowCanvasProps> = ({
@@ -44,31 +54,85 @@ export const AgenticFlowCanvas: React.FC<AgenticFlowCanvasProps> = ({
   onNodeAdd,
   onEdgeAdd,
   onEdgeDelete,
-  onEdgeClick
+  onEdgeClick,
+  onUndo,
+  onRedo,
+  canUndo = false,
+  canRedo = false
 }) => {
   const [zoom, setZoom] = useState(1);
-  const [pan, setPan] = useState({ x: 0, y: 0 });
+  const [pan, setPan] = useState({ x: 50, y: 50 });
   const [isPanning, setIsPanning] = useState(false);
   const [showGrid, setShowGrid] = useState(true);
+  const [showMinimap, setShowMinimap] = useState(true);
   const [selectedEdgeId, setSelectedEdgeId] = useState<string | null>(null);
+  const [hoveredEdgeId, setHoveredEdgeId] = useState<string | null>(null);
   const [connectionState, setConnectionState] = useState<ConnectionState | null>(null);
   const canvasRef = useRef<HTMLDivElement>(null);
   const lastPanPosition = useRef({ x: 0, y: 0 });
 
-  const handleZoomIn = () => setZoom(z => Math.min(z + 0.1, 2));
-  const handleZoomOut = () => setZoom(z => Math.max(z - 0.1, 0.5));
+  // Keyboard shortcuts
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'z') {
+        e.preventDefault();
+        if (e.shiftKey) {
+          onRedo?.();
+        } else {
+          onUndo?.();
+        }
+      }
+      if ((e.metaKey || e.ctrlKey) && e.key === 'y') {
+        e.preventDefault();
+        onRedo?.();
+      }
+      if (e.key === 'Delete' || e.key === 'Backspace') {
+        if (selectedEdgeId) {
+          onEdgeDelete?.(selectedEdgeId);
+          setSelectedEdgeId(null);
+        }
+      }
+      if (e.key === 'Escape') {
+        setConnectionState(null);
+        setSelectedEdgeId(null);
+        onNodeSelect(null);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [selectedEdgeId, onEdgeDelete, onNodeSelect, onUndo, onRedo]);
+
+  // Mouse wheel zoom
+  const handleWheel = useCallback((e: React.WheelEvent) => {
+    if (e.ctrlKey || e.metaKey) {
+      e.preventDefault();
+      const delta = e.deltaY > 0 ? -0.1 : 0.1;
+      setZoom(z => Math.min(Math.max(z + delta, 0.25), 2));
+    } else {
+      // Pan with scroll
+      setPan(p => ({
+        x: p.x - e.deltaX,
+        y: p.y - e.deltaY
+      }));
+    }
+  }, []);
+
+  const handleZoomIn = () => setZoom(z => Math.min(z + 0.15, 2));
+  const handleZoomOut = () => setZoom(z => Math.max(z - 0.15, 0.25));
   const handleResetView = () => {
     setZoom(1);
-    setPan({ x: 0, y: 0 });
+    setPan({ x: 50, y: 50 });
   };
 
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
-    if (connectionState) return; // Don't pan while connecting
+    if (connectionState) return;
     
     if (e.target === canvasRef.current || (e.target as HTMLElement).classList.contains('canvas-bg')) {
       setIsPanning(true);
       lastPanPosition.current = { x: e.clientX, y: e.clientY };
       onNodeSelect(null);
+      setSelectedEdgeId(null);
     }
   }, [onNodeSelect, connectionState]);
 
@@ -91,7 +155,6 @@ export const AgenticFlowCanvas: React.FC<AgenticFlowCanvasProps> = ({
 
   const handleMouseUp = useCallback(() => {
     setIsPanning(false);
-    // Cancel connection if released on empty space
     if (connectionState) {
       setConnectionState(null);
     }
@@ -106,14 +169,12 @@ export const AgenticFlowCanvas: React.FC<AgenticFlowCanvasProps> = ({
     const x = (e.clientX - rect.left - pan.x) / zoom;
     const y = (e.clientY - rect.top - pan.y) / zoom;
     
-    // Check if dropping a new node from palette
     const newNodeType = e.dataTransfer.getData('newNodeType');
     if (newNodeType && onNodeAdd) {
       onNodeAdd(newNodeType, x, y);
       return;
     }
     
-    // Otherwise, moving an existing node
     const nodeId = e.dataTransfer.getData('nodeId');
     if (nodeId) {
       onNodeMove(nodeId, x, y);
@@ -124,16 +185,14 @@ export const AgenticFlowCanvas: React.FC<AgenticFlowCanvasProps> = ({
     e.preventDefault();
   };
 
-  // Connection handlers
   const handleConnectionStart = useCallback((nodeId: string, point: ConnectionPoint) => {
     const node = nodes.find(n => n.id === nodeId);
     if (!node) return;
 
-    // Only allow starting from output points
     if (point === 'input') return;
 
     const startX = node.position_x;
-    const startY = node.position_y + 40; // Bottom of node
+    const startY = node.position_y + 60;
 
     setConnectionState({
       sourceNodeId: nodeId,
@@ -146,37 +205,31 @@ export const AgenticFlowCanvas: React.FC<AgenticFlowCanvasProps> = ({
   const handleConnectionEnd = useCallback((nodeId: string, point: ConnectionPoint) => {
     if (!connectionState) return;
     
-    // Only allow ending on input points
     if (point !== 'input') {
       setConnectionState(null);
       return;
     }
 
-    // Don't allow self-connections
     if (connectionState.sourceNodeId === nodeId) {
       setConnectionState(null);
       return;
     }
 
-    // Create the edge
     onEdgeAdd?.(connectionState.sourceNodeId, nodeId, connectionState.sourcePoint);
     setConnectionState(null);
   }, [connectionState, onEdgeAdd]);
 
-  // Get connection point position based on point type
   const getConnectionPointOffset = (point: ConnectionPoint, isSource: boolean) => {
-    const yOffset = isSource ? 40 : -40; // Bottom for source, top for target
+    const yOffset = isSource ? 60 : -60;
     
-    if (point === 'output-left') return { x: -40, y: yOffset };
-    if (point === 'output-right') return { x: 40, y: yOffset };
+    if (point === 'output-left') return { x: -55, y: yOffset };
+    if (point === 'output-right') return { x: 55, y: yOffset };
     return { x: 0, y: yOffset };
   };
 
-  // Handle edge click for selection/deletion
   const handleEdgeClick = (edgeId: string, e: React.MouseEvent) => {
     e.stopPropagation();
     if (selectedEdgeId === edgeId) {
-      // Double click or same edge - delete it
       onEdgeDelete?.(edgeId);
       setSelectedEdgeId(null);
     } else {
@@ -185,7 +238,7 @@ export const AgenticFlowCanvas: React.FC<AgenticFlowCanvasProps> = ({
     }
   };
 
-  // Calculate edge paths
+  // Render beautiful curved edges
   const renderEdges = () => {
     return edges.map(edge => {
       const sourceNode = nodes.find(n => n.id === edge.source_node_id);
@@ -196,87 +249,140 @@ export const AgenticFlowCanvas: React.FC<AgenticFlowCanvasProps> = ({
       const sourceType = NODE_TYPES[sourceNode.node_type];
       const sourceOffset = getConnectionPointOffset(edge.source_point || 'output', true);
       const isSelected = selectedEdgeId === edge.id;
+      const isHovered = hoveredEdgeId === edge.id;
       
       const startX = sourceNode.position_x + sourceOffset.x;
       const startY = sourceNode.position_y + sourceOffset.y;
       const endX = targetNode.position_x;
-      const endY = targetNode.position_y - 40; // Top of node
+      const endY = targetNode.position_y - 60;
 
-      // Calculate control points for smooth curve
+      // Smooth bezier curve
+      const dx = endX - startX;
+      const dy = endY - startY;
+      const controlOffset = Math.min(Math.abs(dy) * 0.5, 100);
+      
+      const path = `M ${startX} ${startY} 
+                    C ${startX} ${startY + controlOffset}, 
+                      ${endX} ${endY - controlOffset}, 
+                      ${endX} ${endY}`;
+
+      const edgeColor = sourceType?.color || 'hsl(var(--primary))';
+      const midX = (startX + endX) / 2;
       const midY = (startY + endY) / 2;
-      const path = `M ${startX} ${startY} C ${startX} ${midY}, ${endX} ${midY}, ${endX} ${endY}`;
 
       return (
-        <g key={edge.id} onClick={(e) => handleEdgeClick(edge.id, e)} className="cursor-pointer group">
-          {/* Invisible wider hit area */}
+        <g 
+          key={edge.id} 
+          onClick={(e) => handleEdgeClick(edge.id, e)} 
+          onMouseEnter={() => setHoveredEdgeId(edge.id)}
+          onMouseLeave={() => setHoveredEdgeId(null)}
+          className="cursor-pointer"
+        >
+          {/* Hit area */}
           <path
             d={path}
             fill="none"
             stroke="transparent"
             strokeWidth={20}
-            strokeLinecap="round"
           />
-          {/* Edge shadow */}
-          <path
+          
+          {/* Glow effect */}
+          {(isSelected || isHovered) && (
+            <path
+              d={path}
+              fill="none"
+              stroke={isSelected ? 'hsl(var(--destructive))' : edgeColor}
+              strokeWidth={8}
+              strokeLinecap="round"
+              opacity={0.2}
+              className="transition-opacity"
+            />
+          )}
+          
+          {/* Main edge line */}
+          <motion.path
             d={path}
             fill="none"
-            stroke={isSelected ? 'hsl(var(--destructive))' : 'hsl(var(--muted))'}
-            strokeWidth={isSelected ? 6 : 4}
+            stroke={isSelected ? 'hsl(var(--destructive))' : edgeColor}
+            strokeWidth={isSelected || isHovered ? 3 : 2}
             strokeLinecap="round"
-            className="transition-all"
+            initial={{ pathLength: 0 }}
+            animate={{ pathLength: 1 }}
+            transition={{ duration: 0.5, ease: 'easeOut' }}
           />
-          {/* Edge line */}
-          <path
-            d={path}
-            fill="none"
-            stroke={isSelected ? 'hsl(var(--destructive))' : (sourceType?.color || 'hsl(var(--primary))')}
-            strokeWidth={isSelected ? 3 : 2}
-            strokeLinecap="round"
-            className="transition-all group-hover:stroke-[3px]"
+          
+          {/* Animated flow dots */}
+          {!isSelected && (
+            <circle r={3} fill={edgeColor}>
+              <animateMotion dur="2s" repeatCount="indefinite" path={path} />
+            </circle>
+          )}
+          
+          {/* Arrow marker */}
+          <motion.polygon
+            points={`${endX},${endY} ${endX - 8},${endY - 14} ${endX + 8},${endY - 14}`}
+            fill={isSelected ? 'hsl(var(--destructive))' : edgeColor}
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            transition={{ delay: 0.3 }}
           />
-          {/* Arrow head */}
-          <polygon
-            points={`${endX},${endY} ${endX - 6},${endY - 10} ${endX + 6},${endY - 10}`}
-            fill={isSelected ? 'hsl(var(--destructive))' : (sourceType?.color || 'hsl(var(--primary))')}
-            className="transition-all"
-          />
-          {/* Delete indicator when selected */}
-          {isSelected && (
-            <>
-              <circle
-                cx={(startX + endX) / 2}
-                cy={(startY + endY) / 2}
-                r={12}
-                fill="hsl(var(--destructive))"
-                className="animate-pulse"
+          
+          {/* Edge label */}
+          {edge.label && (
+            <g>
+              <rect
+                x={midX - 40}
+                y={midY - 12}
+                width={80}
+                height={24}
+                rx={12}
+                fill="white"
+                stroke={edgeColor}
+                strokeWidth={1}
+                className="shadow-sm"
               />
               <text
-                x={(startX + endX) / 2}
-                y={(startY + endY) / 2 + 4}
+                x={midX}
+                y={midY + 4}
                 textAnchor="middle"
-                className="text-xs fill-white font-bold pointer-events-none"
+                className="text-xs font-medium pointer-events-none"
+                fill={edgeColor}
+              >
+                {edge.label}
+              </text>
+            </g>
+          )}
+          
+          {/* Delete indicator */}
+          {isSelected && (
+            <motion.g
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ type: 'spring', stiffness: 500 }}
+            >
+              <circle
+                cx={midX}
+                cy={midY}
+                r={16}
+                fill="hsl(var(--destructive))"
+                className="shadow-lg"
+              />
+              <text
+                x={midX}
+                y={midY + 5}
+                textAnchor="middle"
+                className="text-sm fill-white font-bold pointer-events-none"
               >
                 ×
               </text>
-            </>
-          )}
-          {/* Edge label */}
-          {edge.label && !isSelected && (
-            <text
-              x={(startX + endX) / 2}
-              y={(startY + endY) / 2 - 10}
-              textAnchor="middle"
-              className="text-xs fill-muted-foreground pointer-events-none"
-            >
-              {edge.label}
-            </text>
+            </motion.g>
           )}
         </g>
       );
     });
   };
 
-  // Render the in-progress connection line
+  // Render connection line being drawn
   const renderConnectionLine = () => {
     if (!connectionState) return null;
 
@@ -291,74 +397,124 @@ export const AgenticFlowCanvas: React.FC<AgenticFlowCanvasProps> = ({
     const endX = connectionState.currentX;
     const endY = connectionState.currentY;
 
-    const midY = (startY + endY) / 2;
-    const path = `M ${startX} ${startY} C ${startX} ${midY}, ${endX} ${midY}, ${endX} ${endY}`;
+    const controlOffset = Math.min(Math.abs(endY - startY) * 0.5, 100);
+    const path = `M ${startX} ${startY} 
+                  C ${startX} ${startY + controlOffset}, 
+                    ${endX} ${endY - controlOffset}, 
+                    ${endX} ${endY}`;
+
+    const color = sourceType?.color || 'hsl(var(--primary))';
 
     return (
       <g className="pointer-events-none">
-        {/* Connection line */}
-        <path
+        <motion.path
           d={path}
           fill="none"
-          stroke={sourceType?.color || 'hsl(var(--primary))'}
+          stroke={color}
           strokeWidth={2}
           strokeLinecap="round"
-          strokeDasharray="6 4"
-          className="animate-pulse"
+          strokeDasharray="8 4"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
         />
-        {/* End point indicator */}
-        <circle
+        <motion.circle
           cx={endX}
           cy={endY}
-          r={6}
-          fill={sourceType?.color || 'hsl(var(--primary))'}
-          className="animate-pulse"
+          r={8}
+          fill={color}
+          initial={{ scale: 0 }}
+          animate={{ scale: [0.8, 1.2, 0.8] }}
+          transition={{ repeat: Infinity, duration: 1 }}
         />
       </g>
     );
   };
 
   return (
-    <div className="relative w-full h-full overflow-hidden bg-background rounded-lg border">
+    <div 
+      className="relative w-full h-full bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 rounded-lg border overflow-hidden"
+      onWheel={handleWheel}
+    >
       {/* Canvas Controls */}
-      <div className="absolute top-4 right-4 z-10 flex items-center gap-2">
-        <Button variant="outline" size="icon" onClick={handleZoomOut}>
+      <div className="absolute top-4 right-4 z-10 flex items-center gap-1 bg-white/90 dark:bg-slate-800/90 backdrop-blur-sm rounded-lg border shadow-sm p-1">
+        <Button 
+          variant="ghost" 
+          size="icon" 
+          onClick={onUndo}
+          disabled={!canUndo}
+          className="h-8 w-8"
+          title="Undo (Ctrl+Z)"
+        >
+          <Undo2 className="w-4 h-4" />
+        </Button>
+        <Button 
+          variant="ghost" 
+          size="icon" 
+          onClick={onRedo}
+          disabled={!canRedo}
+          className="h-8 w-8"
+          title="Redo (Ctrl+Y)"
+        >
+          <Redo2 className="w-4 h-4" />
+        </Button>
+        <div className="w-px h-6 bg-border mx-1" />
+        <Button variant="ghost" size="icon" onClick={handleZoomOut} className="h-8 w-8">
           <ZoomOut className="w-4 h-4" />
         </Button>
-        <span className="text-sm text-muted-foreground min-w-[50px] text-center">
+        <span className="text-xs text-muted-foreground min-w-[40px] text-center font-medium">
           {Math.round(zoom * 100)}%
         </span>
-        <Button variant="outline" size="icon" onClick={handleZoomIn}>
+        <Button variant="ghost" size="icon" onClick={handleZoomIn} className="h-8 w-8">
           <ZoomIn className="w-4 h-4" />
         </Button>
-        <Button variant="outline" size="icon" onClick={handleResetView}>
+        <div className="w-px h-6 bg-border mx-1" />
+        <Button variant="ghost" size="icon" onClick={handleResetView} className="h-8 w-8" title="Reset view">
           <Maximize2 className="w-4 h-4" />
         </Button>
         <Button 
-          variant={showGrid ? "default" : "outline"} 
+          variant={showGrid ? "secondary" : "ghost"} 
           size="icon" 
           onClick={() => setShowGrid(!showGrid)}
+          className="h-8 w-8"
+          title="Toggle grid"
         >
           <Grid3X3 className="w-4 h-4" />
+        </Button>
+        <Button 
+          variant={showMinimap ? "secondary" : "ghost"} 
+          size="icon" 
+          onClick={() => setShowMinimap(!showMinimap)}
+          className="h-8 w-8"
+          title="Toggle minimap"
+        >
+          <Map className="w-4 h-4" />
         </Button>
       </div>
 
       {/* Connection Mode Indicator */}
-      {connectionState && (
-        <div className="absolute top-4 left-4 z-10 px-3 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-medium animate-pulse">
-          🔗 Connecting... Release on a node's input
-        </div>
-      )}
+      <AnimatePresence>
+        {connectionState && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            className="absolute top-4 left-4 z-10 px-4 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-medium shadow-lg flex items-center gap-2"
+          >
+            <div className="w-2 h-2 rounded-full bg-white animate-pulse" />
+            Connecting... Release on a node's input
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Canvas Area */}
       <div
         ref={canvasRef}
-        className={`w-full h-full canvas-bg ${connectionState ? 'cursor-crosshair' : 'cursor-grab active:cursor-grabbing'}`}
+        className={`w-full h-full canvas-bg ${connectionState ? 'cursor-crosshair' : isPanning ? 'cursor-grabbing' : 'cursor-grab'}`}
         style={{
           backgroundImage: showGrid 
-            ? `radial-gradient(circle, hsl(var(--muted-foreground) / 0.2) 1px, transparent 1px)`
+            ? `radial-gradient(circle, hsl(var(--muted-foreground) / 0.15) 1px, transparent 1px)`
             : 'none',
-          backgroundSize: `${20 * zoom}px ${20 * zoom}px`,
+          backgroundSize: `${24 * zoom}px ${24 * zoom}px`,
           backgroundPosition: `${pan.x}px ${pan.y}px`
         }}
         onMouseDown={handleMouseDown}
@@ -368,7 +524,6 @@ export const AgenticFlowCanvas: React.FC<AgenticFlowCanvasProps> = ({
         onDrop={handleDrop}
         onDragOver={handleDragOver}
       >
-        {/* Transformed content */}
         <div
           style={{
             transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom})`,
@@ -383,6 +538,15 @@ export const AgenticFlowCanvas: React.FC<AgenticFlowCanvasProps> = ({
             className="absolute inset-0 w-full h-full pointer-events-none"
             style={{ overflow: 'visible' }}
           >
+            <defs>
+              <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+                <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+                <feMerge>
+                  <feMergeNode in="coloredBlur"/>
+                  <feMergeNode in="SourceGraphic"/>
+                </feMerge>
+              </filter>
+            </defs>
             <g className="pointer-events-auto">
               {renderEdges()}
             </g>
@@ -406,23 +570,37 @@ export const AgenticFlowCanvas: React.FC<AgenticFlowCanvasProps> = ({
           {/* Empty State */}
           {nodes.length === 0 && (
             <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
               className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center"
             >
-              <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-muted flex items-center justify-center">
-                <Grid3X3 className="w-8 h-8 text-muted-foreground" />
+              <div className="w-20 h-20 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-primary/10 to-primary/5 flex items-center justify-center border border-primary/20">
+                <Grid3X3 className="w-10 h-10 text-primary/50" />
               </div>
-              <h3 className="text-lg font-medium text-foreground mb-2">
-                No flow yet
+              <h3 className="text-lg font-semibold text-foreground mb-2">
+                Start Building Your Flow
               </h3>
-              <p className="text-sm text-muted-foreground max-w-[300px]">
-                Drag nodes from the palette or describe your flow in chat
+              <p className="text-sm text-muted-foreground max-w-[280px]">
+                Drag nodes from the palette or describe your flow in chat to get started
               </p>
             </motion.div>
           )}
         </div>
       </div>
+
+      {/* Minimap */}
+      <AnimatePresence>
+        {showMinimap && nodes.length > 0 && (
+          <Minimap
+            nodes={nodes}
+            edges={edges}
+            zoom={zoom}
+            pan={pan}
+            onPanChange={setPan}
+            canvasRef={canvasRef}
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 };

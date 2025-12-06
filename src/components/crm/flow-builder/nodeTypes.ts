@@ -2,7 +2,7 @@ import {
   Webhook, Clock, Zap, GitBranch, HelpCircle, TrendingUp,
   MessageSquare, MessageCircle, Phone, Mail,
   Brain, Sparkles, Tag, Hash, Globe, Timer, User,
-  Circle, Users
+  Circle, Users, Send, Bot, Database, Workflow
 } from 'lucide-react';
 
 export interface NodeTypeConfig {
@@ -11,6 +11,7 @@ export interface NodeTypeConfig {
   color: string;
   bgColor: string;
   category: 'trigger' | 'router' | 'channel' | 'ai' | 'utility' | 'end';
+  description?: string;
   configFields?: ConfigField[];
 }
 
@@ -28,9 +29,10 @@ export const NODE_TYPES: Record<string, NodeTypeConfig> = {
   api_trigger: {
     label: 'API Request',
     icon: Webhook,
-    color: 'hsl(var(--orange-500))',
-    bgColor: 'hsl(var(--orange-500) / 0.1)',
+    color: '#f97316',
+    bgColor: '#fff7ed',
     category: 'trigger',
+    description: 'Starts when an API endpoint is called',
     configFields: [
       { name: 'endpoint', label: 'Endpoint Path', type: 'text', placeholder: '/webhook/lead' },
       { name: 'method', label: 'HTTP Method', type: 'select', options: [
@@ -43,9 +45,10 @@ export const NODE_TYPES: Record<string, NodeTypeConfig> = {
   schedule_trigger: {
     label: 'Schedule',
     icon: Clock,
-    color: 'hsl(var(--blue-500))',
-    bgColor: 'hsl(var(--blue-500) / 0.1)',
+    color: '#3b82f6',
+    bgColor: '#eff6ff',
     category: 'trigger',
+    description: 'Runs on a scheduled time',
     configFields: [
       { name: 'cron', label: 'Cron Expression', type: 'text', placeholder: '0 9 * * *' },
       { name: 'timezone', label: 'Timezone', type: 'text', placeholder: 'Asia/Kolkata' }
@@ -54,9 +57,10 @@ export const NODE_TYPES: Record<string, NodeTypeConfig> = {
   event_trigger: {
     label: 'CRM Event',
     icon: Zap,
-    color: 'hsl(var(--yellow-500))',
-    bgColor: 'hsl(var(--yellow-500) / 0.1)',
+    color: '#eab308',
+    bgColor: '#fefce8',
     category: 'trigger',
+    description: 'Triggers on CRM events',
     configFields: [
       { name: 'event_type', label: 'Event Type', type: 'select', options: [
         { value: 'new_lead', label: 'New Lead' },
@@ -71,9 +75,10 @@ export const NODE_TYPES: Record<string, NodeTypeConfig> = {
   channel_router: {
     label: 'Channel Router',
     icon: GitBranch,
-    color: 'hsl(var(--purple-500))',
-    bgColor: 'hsl(var(--purple-500) / 0.1)',
+    color: '#8b5cf6',
+    bgColor: '#f5f3ff',
     category: 'router',
+    description: 'Routes based on preferred channel',
     configFields: [
       { name: 'field', label: 'Route By', type: 'select', options: [
         { value: 'preferred_channel', label: 'Preferred Channel' },
@@ -84,9 +89,10 @@ export const NODE_TYPES: Record<string, NodeTypeConfig> = {
   conditional: {
     label: 'Conditional',
     icon: HelpCircle,
-    color: 'hsl(var(--amber-500))',
-    bgColor: 'hsl(var(--amber-500) / 0.1)',
+    color: '#f59e0b',
+    bgColor: '#fffbeb',
     category: 'router',
+    description: 'Branch based on conditions',
     configFields: [
       { name: 'conditions', label: 'Conditions', type: 'json', placeholder: '{"field": "score", "operator": ">", "value": 50}' }
     ]
@@ -94,16 +100,17 @@ export const NODE_TYPES: Record<string, NodeTypeConfig> = {
   score_router: {
     label: 'Score Router',
     icon: TrendingUp,
-    color: 'hsl(var(--indigo-500))',
-    bgColor: 'hsl(var(--indigo-500) / 0.1)',
+    color: '#6366f1',
+    bgColor: '#eef2ff',
     category: 'router',
+    description: 'Routes based on score thresholds',
     configFields: [
       { name: 'score_type', label: 'Score Type', type: 'select', options: [
         { value: 'intent_score', label: 'Intent Score' },
         { value: 'engagement_score', label: 'Engagement Score' },
         { value: 'churn_risk', label: 'Churn Risk' }
       ]},
-      { name: 'thresholds', label: 'Thresholds', type: 'json', placeholder: '[{"min": 0, "max": 30, "label": "Low"}, {"min": 31, "max": 70, "label": "Medium"}]' }
+      { name: 'thresholds', label: 'Thresholds', type: 'json', placeholder: '[{"min": 0, "max": 30, "label": "Low"}]' }
     ]
   },
 
@@ -111,9 +118,10 @@ export const NODE_TYPES: Record<string, NodeTypeConfig> = {
   sms_message: {
     label: 'Send SMS',
     icon: MessageSquare,
-    color: 'hsl(var(--green-500))',
-    bgColor: 'hsl(var(--green-500) / 0.1)',
+    color: '#22c55e',
+    bgColor: '#f0fdf4',
     category: 'channel',
+    description: 'Send an SMS message',
     configFields: [
       { name: 'template', label: 'Message Template', type: 'textarea', placeholder: 'Hi {{name}}, ...' },
       { name: 'sender_id', label: 'Sender ID', type: 'text' }
@@ -122,9 +130,10 @@ export const NODE_TYPES: Record<string, NodeTypeConfig> = {
   whatsapp_message: {
     label: 'WhatsApp',
     icon: MessageCircle,
-    color: 'hsl(var(--emerald-500))',
-    bgColor: 'hsl(var(--emerald-500) / 0.1)',
+    color: '#10b981',
+    bgColor: '#ecfdf5',
     category: 'channel',
+    description: 'Send a WhatsApp message',
     configFields: [
       { name: 'template_name', label: 'Template Name', type: 'text' },
       { name: 'template_params', label: 'Template Params', type: 'json' }
@@ -133,9 +142,10 @@ export const NODE_TYPES: Record<string, NodeTypeConfig> = {
   voice_call: {
     label: 'Voice Call',
     icon: Phone,
-    color: 'hsl(var(--violet-500))',
-    bgColor: 'hsl(var(--violet-500) / 0.1)',
+    color: '#8b5cf6',
+    bgColor: '#f5f3ff',
     category: 'channel',
+    description: 'Initiate an AI voice call',
     configFields: [
       { name: 'agent_id', label: 'AI Agent ID', type: 'text' },
       { name: 'initial_message', label: 'Initial Message', type: 'textarea' }
@@ -144,9 +154,10 @@ export const NODE_TYPES: Record<string, NodeTypeConfig> = {
   email_action: {
     label: 'Send Email',
     icon: Mail,
-    color: 'hsl(var(--sky-500))',
-    bgColor: 'hsl(var(--sky-500) / 0.1)',
+    color: '#0ea5e9',
+    bgColor: '#f0f9ff',
     category: 'channel',
+    description: 'Send an email',
     configFields: [
       { name: 'subject', label: 'Subject', type: 'text' },
       { name: 'template', label: 'Email Template', type: 'textarea' }
@@ -157,9 +168,10 @@ export const NODE_TYPES: Record<string, NodeTypeConfig> = {
   ai_conversation: {
     label: 'AI Conversation',
     icon: Brain,
-    color: 'hsl(var(--pink-500))',
-    bgColor: 'hsl(var(--pink-500) / 0.1)',
+    color: '#ec4899',
+    bgColor: '#fdf2f8',
     category: 'ai',
+    description: 'Have an AI-driven conversation',
     configFields: [
       { name: 'prompt', label: 'Conversation Prompt', type: 'textarea' },
       { name: 'expected_outputs', label: 'Expected Outputs', type: 'json', placeholder: '["name", "intent", "budget"]' }
@@ -168,9 +180,10 @@ export const NODE_TYPES: Record<string, NodeTypeConfig> = {
   ai_action: {
     label: 'AI Action',
     icon: Sparkles,
-    color: 'hsl(var(--cyan-500))',
-    bgColor: 'hsl(var(--cyan-500) / 0.1)',
+    color: '#06b6d4',
+    bgColor: '#ecfeff',
     category: 'ai',
+    description: 'Perform an AI-powered action',
     configFields: [
       { name: 'action_prompt', label: 'Action Prompt', type: 'textarea' },
       { name: 'action_type', label: 'Action Type', type: 'select', options: [
@@ -183,11 +196,25 @@ export const NODE_TYPES: Record<string, NodeTypeConfig> = {
   ai_classify: {
     label: 'AI Classify',
     icon: Tag,
-    color: 'hsl(var(--rose-500))',
-    bgColor: 'hsl(var(--rose-500) / 0.1)',
+    color: '#f43f5e',
+    bgColor: '#fff1f2',
     category: 'ai',
+    description: 'Classify input into categories',
     configFields: [
       { name: 'categories', label: 'Categories', type: 'json', placeholder: '["Sales", "Support", "Billing"]' }
+    ]
+  },
+  ai_agent: {
+    label: 'AI Agent',
+    icon: Bot,
+    color: '#a855f7',
+    bgColor: '#faf5ff',
+    category: 'ai',
+    description: 'Autonomous AI agent with tools',
+    configFields: [
+      { name: 'agent_prompt', label: 'Agent System Prompt', type: 'textarea' },
+      { name: 'tools', label: 'Available Tools', type: 'json', placeholder: '["search", "calculate", "lookup"]' },
+      { name: 'max_iterations', label: 'Max Iterations', type: 'number', placeholder: '5' }
     ]
   },
 
@@ -195,9 +222,10 @@ export const NODE_TYPES: Record<string, NodeTypeConfig> = {
   counter: {
     label: 'Counter',
     icon: Hash,
-    color: 'hsl(var(--slate-500))',
-    bgColor: 'hsl(var(--slate-500) / 0.1)',
+    color: '#64748b',
+    bgColor: '#f8fafc',
     category: 'utility',
+    description: 'Track and limit iterations',
     configFields: [
       { name: 'counter_name', label: 'Counter Name', type: 'text' },
       { name: 'max_count', label: 'Max Count', type: 'number' }
@@ -206,9 +234,10 @@ export const NODE_TYPES: Record<string, NodeTypeConfig> = {
   http_request: {
     label: 'HTTP Request',
     icon: Globe,
-    color: 'hsl(var(--blue-600))',
-    bgColor: 'hsl(var(--blue-600) / 0.1)',
+    color: '#2563eb',
+    bgColor: '#eff6ff',
     category: 'utility',
+    description: 'Make an external API call',
     configFields: [
       { name: 'url', label: 'URL', type: 'text' },
       { name: 'method', label: 'Method', type: 'select', options: [
@@ -223,9 +252,10 @@ export const NODE_TYPES: Record<string, NodeTypeConfig> = {
   delay: {
     label: 'Delay',
     icon: Timer,
-    color: 'hsl(var(--gray-500))',
-    bgColor: 'hsl(var(--gray-500) / 0.1)',
+    color: '#6b7280',
+    bgColor: '#f9fafb',
     category: 'utility',
+    description: 'Wait before next step',
     configFields: [
       { name: 'duration', label: 'Duration (seconds)', type: 'number' }
     ]
@@ -233,11 +263,41 @@ export const NODE_TYPES: Record<string, NodeTypeConfig> = {
   update_contact: {
     label: 'Update Contact',
     icon: User,
-    color: 'hsl(var(--teal-500))',
-    bgColor: 'hsl(var(--teal-500) / 0.1)',
+    color: '#14b8a6',
+    bgColor: '#f0fdfa',
     category: 'utility',
+    description: 'Update contact data',
     configFields: [
       { name: 'updates', label: 'Field Updates', type: 'json', placeholder: '{"lifecycle_stage": "qualified"}' }
+    ]
+  },
+  database_query: {
+    label: 'Database Query',
+    icon: Database,
+    color: '#059669',
+    bgColor: '#ecfdf5',
+    category: 'utility',
+    description: 'Query or update database',
+    configFields: [
+      { name: 'operation', label: 'Operation', type: 'select', options: [
+        { value: 'select', label: 'Select' },
+        { value: 'insert', label: 'Insert' },
+        { value: 'update', label: 'Update' }
+      ]},
+      { name: 'table', label: 'Table Name', type: 'text' },
+      { name: 'query', label: 'Query/Data', type: 'json' }
+    ]
+  },
+  subflow: {
+    label: 'Run Subflow',
+    icon: Workflow,
+    color: '#7c3aed',
+    bgColor: '#f5f3ff',
+    category: 'utility',
+    description: 'Execute another flow',
+    configFields: [
+      { name: 'flow_id', label: 'Flow ID', type: 'text' },
+      { name: 'input_mapping', label: 'Input Mapping', type: 'json' }
     ]
   },
 
@@ -245,9 +305,10 @@ export const NODE_TYPES: Record<string, NodeTypeConfig> = {
   end_conversation: {
     label: 'End Flow',
     icon: Circle,
-    color: 'hsl(var(--red-500))',
-    bgColor: 'hsl(var(--red-500) / 0.1)',
+    color: '#ef4444',
+    bgColor: '#fef2f2',
     category: 'end',
+    description: 'Terminate the flow',
     configFields: [
       { name: 'summary', label: 'End Summary', type: 'textarea' }
     ]
@@ -255,9 +316,10 @@ export const NODE_TYPES: Record<string, NodeTypeConfig> = {
   queue_transfer: {
     label: 'Transfer to Agent',
     icon: Users,
-    color: 'hsl(var(--orange-600))',
-    bgColor: 'hsl(var(--orange-600) / 0.1)',
+    color: '#ea580c',
+    bgColor: '#fff7ed',
     category: 'end',
+    description: 'Hand off to human agent',
     configFields: [
       { name: 'queue_name', label: 'Queue Name', type: 'text' },
       { name: 'priority', label: 'Priority', type: 'select', options: [
@@ -266,14 +328,54 @@ export const NODE_TYPES: Record<string, NodeTypeConfig> = {
         { value: 'low', label: 'Low' }
       ]}
     ]
+  },
+  send_notification: {
+    label: 'Send Notification',
+    icon: Send,
+    color: '#0891b2',
+    bgColor: '#ecfeff',
+    category: 'end',
+    description: 'Send internal notification',
+    configFields: [
+      { name: 'channel', label: 'Channel', type: 'select', options: [
+        { value: 'slack', label: 'Slack' },
+        { value: 'email', label: 'Email' },
+        { value: 'webhook', label: 'Webhook' }
+      ]},
+      { name: 'message', label: 'Message', type: 'textarea' }
+    ]
   }
 };
 
 export const NODE_CATEGORIES = {
-  trigger: { label: 'Triggers', description: 'Start points for your flow' },
-  router: { label: 'Routers', description: 'Decision points' },
-  channel: { label: 'Channels', description: 'Communication actions' },
-  ai: { label: 'AI Actions', description: 'AI-powered steps' },
-  utility: { label: 'Utilities', description: 'Helper actions' },
-  end: { label: 'End Points', description: 'Flow termination' }
+  trigger: { 
+    label: 'Triggers', 
+    description: 'Start points for your flow',
+    color: '#f97316'
+  },
+  router: { 
+    label: 'Routers', 
+    description: 'Decision points',
+    color: '#8b5cf6'
+  },
+  channel: { 
+    label: 'Channels', 
+    description: 'Communication actions',
+    color: '#22c55e'
+  },
+  ai: { 
+    label: 'AI Actions', 
+    description: 'AI-powered steps',
+    color: '#ec4899'
+  },
+  utility: { 
+    label: 'Utilities', 
+    description: 'Helper actions',
+    color: '#64748b'
+  },
+  end: { 
+    label: 'End Points', 
+    description: 'Flow termination',
+    color: '#ef4444'
+  }
 };

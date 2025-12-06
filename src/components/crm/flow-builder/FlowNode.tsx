@@ -1,5 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
+import { Pencil, GripVertical } from 'lucide-react';
 import { NODE_TYPES } from './nodeTypes';
 import { cn } from '@/lib/utils';
 
@@ -10,6 +11,7 @@ export interface FlowNodeData {
   config: Record<string, any>;
   position_x: number;
   position_y: number;
+  description?: string;
 }
 
 export type ConnectionPoint = 'input' | 'output' | 'output-left' | 'output-right';
@@ -51,29 +53,43 @@ export const FlowNode: React.FC<FlowNodeProps> = ({
     onConnectionEnd?.(node.id, point);
   };
 
+  // Get node description from config or use default
+  const getNodeDescription = () => {
+    if (node.description) return node.description;
+    
+    const config = node.config || {};
+    if (config.template) return config.template.substring(0, 50) + '...';
+    if (config.prompt) return config.prompt.substring(0, 50) + '...';
+    if (config.endpoint) return `${config.method || 'POST'} ${config.endpoint}`;
+    if (config.cron) return `Cron: ${config.cron}`;
+    if (config.event_type) return `Event: ${config.event_type}`;
+    
+    return nodeType.configFields?.[0]?.placeholder || 'Configure this node';
+  };
+
   const connectionPointClasses = cn(
-    "absolute transform -translate-x-1/2 rounded-full border-2 bg-background transition-all duration-200",
-    "hover:scale-125 hover:shadow-md cursor-crosshair",
-    isConnecting && "animate-pulse"
+    "absolute transform -translate-x-1/2 rounded-full border-2 transition-all duration-200",
+    "hover:scale-150 cursor-crosshair z-10",
+    isConnecting && "animate-pulse scale-125"
   );
 
   return (
     <motion.div
-      initial={{ scale: 0, opacity: 0 }}
+      initial={{ scale: 0.8, opacity: 0 }}
       animate={{ 
-        scale: isHighlighted ? 1.05 : 1, 
+        scale: isHighlighted ? 1.02 : 1, 
         opacity: 1,
-        boxShadow: isHighlighted ? '0 0 30px hsl(var(--primary) / 0.5)' : undefined
       }}
+      transition={{ type: 'spring', stiffness: 300, damping: 25 }}
       className={cn(
-        "absolute cursor-pointer select-none",
-        "min-w-[160px] rounded-xl border-2 bg-card shadow-lg",
-        "transition-all duration-200",
+        "absolute cursor-pointer select-none group",
+        "w-[220px] rounded-xl bg-white shadow-md",
+        "transition-all duration-200 border",
         isHighlighted
-          ? "border-primary ring-4 ring-primary/40 shadow-2xl z-10"
+          ? "border-primary ring-4 ring-primary/30 shadow-xl scale-102"
           : isSelected 
-            ? "border-primary ring-2 ring-primary/30 shadow-xl" 
-            : "border-border hover:border-primary/50 hover:shadow-xl"
+            ? "border-primary/60 ring-2 ring-primary/20 shadow-lg" 
+            : "border-slate-200 hover:border-primary/40 hover:shadow-lg"
       )}
       style={{
         left: node.position_x,
@@ -82,83 +98,154 @@ export const FlowNode: React.FC<FlowNodeProps> = ({
       }}
       onClick={onClick}
     >
-      {/* Node Header */}
-      <div 
-        className="flex items-center gap-2 px-3 py-2 rounded-t-xl"
-        style={{ backgroundColor: nodeType.bgColor }}
-      >
-        <div 
-          className="w-8 h-8 rounded-lg flex items-center justify-center"
-          style={{ backgroundColor: nodeType.color }}
-        >
-          <Icon className="w-4 h-4 text-white" />
-        </div>
-        <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-          {nodeType.label}
-        </span>
+      {/* Drag Handle */}
+      <div className="absolute -left-1 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity cursor-grab">
+        <GripVertical className="w-4 h-4 text-muted-foreground" />
       </div>
 
-      {/* Node Body */}
-      <div className="px-3 py-2">
-        <p className="text-sm font-medium text-foreground truncate">
-          {node.label}
+      {/* Edit Button */}
+      <div className="absolute -right-2 -top-2 opacity-0 group-hover:opacity-100 transition-opacity z-20">
+        <div className="w-6 h-6 rounded-full bg-primary text-white flex items-center justify-center shadow-md cursor-pointer hover:scale-110 transition-transform">
+          <Pencil className="w-3 h-3" />
+        </div>
+      </div>
+
+      {/* Node Type Badge */}
+      <div 
+        className="absolute -top-2.5 left-4 px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wider text-white shadow-sm"
+        style={{ backgroundColor: nodeType.color }}
+      >
+        {nodeType.category}
+      </div>
+
+      {/* Node Content */}
+      <div className="p-4 pt-5">
+        {/* Header Row */}
+        <div className="flex items-center gap-3 mb-2">
+          <div 
+            className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0 shadow-sm"
+            style={{ 
+              backgroundColor: nodeType.bgColor,
+              border: `1px solid ${nodeType.color}20`
+            }}
+          >
+            <Icon className="w-5 h-5" style={{ color: nodeType.color }} />
+          </div>
+          <div className="flex-1 min-w-0">
+            <h4 className="font-semibold text-sm text-slate-800 truncate">
+              {node.label}
+            </h4>
+            <p className="text-xs text-slate-500">
+              {nodeType.label}
+            </p>
+          </div>
+        </div>
+
+        {/* Description */}
+        <p className="text-xs text-slate-500 mt-2 line-clamp-2 min-h-[32px]">
+          {getNodeDescription()}
         </p>
+
+        {/* Config Indicator */}
         {node.config && Object.keys(node.config).length > 0 && (
-          <p className="text-xs text-muted-foreground mt-1 truncate">
-            {Object.keys(node.config).length} settings
-          </p>
+          <div className="mt-2 flex items-center gap-1">
+            <div className="w-1.5 h-1.5 rounded-full bg-emerald-500"></div>
+            <span className="text-[10px] text-slate-400">
+              {Object.keys(node.config).length} configured
+            </span>
+          </div>
         )}
       </div>
 
       {/* Input Connection Point (top) */}
       {nodeType.category !== 'trigger' && (
         <div 
-          className={cn(connectionPointClasses, "-top-2 left-1/2 w-4 h-4")}
+          className={cn(
+            connectionPointClasses, 
+            "-top-3 left-1/2 w-5 h-5 bg-white shadow-md"
+          )}
           style={{ borderColor: nodeType.color }}
           onMouseDown={(e) => handleConnectionMouseDown('input', e)}
           onMouseUp={(e) => handleConnectionMouseUp('input', e)}
           title="Drop connection here"
-        />
+        >
+          <div 
+            className="absolute inset-1 rounded-full"
+            style={{ backgroundColor: nodeType.color }}
+          />
+        </div>
       )}
 
       {/* Output Connection Point (bottom - single) */}
       {nodeType.category !== 'end' && nodeType.category !== 'router' && (
         <div 
-          className={cn(connectionPointClasses, "-bottom-2 left-1/2 w-4 h-4")}
+          className={cn(
+            connectionPointClasses, 
+            "-bottom-3 left-1/2 w-5 h-5 bg-white shadow-md"
+          )}
           style={{ borderColor: nodeType.color }}
           onMouseDown={(e) => handleConnectionMouseDown('output', e)}
           onMouseUp={(e) => handleConnectionMouseUp('output', e)}
           title="Drag to connect"
-        />
+        >
+          <div 
+            className="absolute inset-1 rounded-full"
+            style={{ backgroundColor: nodeType.color }}
+          />
+        </div>
       )}
 
       {/* Multiple outputs for routers */}
       {nodeType.category === 'router' && (
         <>
-          {/* Center output */}
-          <div 
-            className={cn(connectionPointClasses, "-bottom-2 left-1/2 w-4 h-4")}
-            style={{ borderColor: nodeType.color }}
-            onMouseDown={(e) => handleConnectionMouseDown('output', e)}
-            onMouseUp={(e) => handleConnectionMouseUp('output', e)}
-            title="Default output"
-          />
           {/* Left output */}
           <div 
-            className={cn(connectionPointClasses, "-bottom-2 left-1/4 w-3 h-3")}
+            className={cn(
+              connectionPointClasses, 
+              "-bottom-3 left-1/4 w-4 h-4 bg-white shadow-md"
+            )}
             style={{ borderColor: nodeType.color }}
             onMouseDown={(e) => handleConnectionMouseDown('output-left', e)}
             onMouseUp={(e) => handleConnectionMouseUp('output-left', e)}
-            title="Condition A"
-          />
+            title="Path A"
+          >
+            <div 
+              className="absolute inset-0.5 rounded-full"
+              style={{ backgroundColor: nodeType.color }}
+            />
+          </div>
+          {/* Center output */}
+          <div 
+            className={cn(
+              connectionPointClasses, 
+              "-bottom-3 left-1/2 w-5 h-5 bg-white shadow-md"
+            )}
+            style={{ borderColor: nodeType.color }}
+            onMouseDown={(e) => handleConnectionMouseDown('output', e)}
+            onMouseUp={(e) => handleConnectionMouseUp('output', e)}
+            title="Default path"
+          >
+            <div 
+              className="absolute inset-1 rounded-full"
+              style={{ backgroundColor: nodeType.color }}
+            />
+          </div>
           {/* Right output */}
           <div 
-            className={cn(connectionPointClasses, "-bottom-2 left-3/4 w-3 h-3")}
+            className={cn(
+              connectionPointClasses, 
+              "-bottom-3 left-3/4 w-4 h-4 bg-white shadow-md"
+            )}
             style={{ borderColor: nodeType.color }}
             onMouseDown={(e) => handleConnectionMouseDown('output-right', e)}
             onMouseUp={(e) => handleConnectionMouseUp('output-right', e)}
-            title="Condition B"
-          />
+            title="Path B"
+          >
+            <div 
+              className="absolute inset-0.5 rounded-full"
+              style={{ backgroundColor: nodeType.color }}
+            />
+          </div>
         </>
       )}
     </motion.div>

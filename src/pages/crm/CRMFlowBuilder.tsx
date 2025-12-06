@@ -44,6 +44,37 @@ const CRMFlowBuilder: React.FC = () => {
   const [isTestingOpen, setIsTestingOpen] = useState(false);
   const [isTemplatesOpen, setIsTemplatesOpen] = useState(false);
 
+  // Undo/Redo history
+  const [history, setHistory] = useState<{ nodes: FlowNodeData[]; edges: FlowEdgeData[] }[]>([]);
+  const [historyIndex, setHistoryIndex] = useState(-1);
+
+  const saveToHistory = useCallback((newNodes: FlowNodeData[], newEdges: FlowEdgeData[]) => {
+    setHistory(prev => {
+      const newHistory = prev.slice(0, historyIndex + 1);
+      newHistory.push({ nodes: newNodes, edges: newEdges });
+      return newHistory.slice(-50); // Keep last 50 states
+    });
+    setHistoryIndex(prev => Math.min(prev + 1, 49));
+  }, [historyIndex]);
+
+  const handleUndo = useCallback(() => {
+    if (historyIndex > 0) {
+      const prevState = history[historyIndex - 1];
+      setNodes(prevState.nodes);
+      setEdges(prevState.edges);
+      setHistoryIndex(prev => prev - 1);
+    }
+  }, [history, historyIndex]);
+
+  const handleRedo = useCallback(() => {
+    if (historyIndex < history.length - 1) {
+      const nextState = history[historyIndex + 1];
+      setNodes(nextState.nodes);
+      setEdges(nextState.edges);
+      setHistoryIndex(prev => prev + 1);
+    }
+  }, [history, historyIndex]);
+
   // Load existing flow if editing
   useEffect(() => {
     if (flowId) {
@@ -461,6 +492,10 @@ const CRMFlowBuilder: React.FC = () => {
               onNodeAdd={handleNodeAdd}
               onEdgeAdd={handleEdgeAdd}
               onEdgeDelete={handleEdgeDelete}
+              onUndo={handleUndo}
+              onRedo={handleRedo}
+              canUndo={historyIndex > 0}
+              canRedo={historyIndex < history.length - 1}
             />
 
             {/* Node Config Panel */}
