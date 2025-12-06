@@ -130,22 +130,29 @@ serve(async (req) => {
 
     if (existingCall) {
       callRecord = existingCall;
-    } else if (payload.event_type === "call_completed") {
-      // For call_completed, try to match by phone number from custom_args
-      const callPayload = payload as CallCompletedPayload;
-      const callerPhone = callPayload.custom_args_values?.caller_phone;
+    } else {
+      // Try to match by phone number from custom_args or to_number (fallback for all event types)
+      const callerPhone = rawPayload.custom_args_values?.mobile_number || 
+                          rawPayload.to_number || 
+                          rawPayload.custom_args_values?.caller_phone;
+      
+      console.log("No ringg_call_id match, trying phone fallback:", callerPhone);
       
       if (callerPhone) {
+        // Try matching full_phone with various formats
         const { data: phoneMatch } = await supabase
           .from("voice_widget_calls")
           .select("*")
-          .eq("full_phone", callerPhone)
+          .or(`full_phone.eq.${callerPhone},full_phone.eq.+${callerPhone.replace(/^\+/, '')}`)
           .is("ringg_call_id", null)
           .order("created_at", { ascending: false })
           .limit(1)
-          .single();
+          .maybeSingle();
         
-        callRecord = phoneMatch;
+        if (phoneMatch) {
+          callRecord = phoneMatch;
+          console.log("Found call by phone match:", phoneMatch.id);
+        }
       }
     }
 
