@@ -16,7 +16,8 @@ import {
   Banknote,
   Heart,
   Zap,
-  TreeDeciduous
+  TreeDeciduous,
+  LayoutDashboard
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -47,6 +48,7 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import { useAuth } from "@/contexts/AuthContext";
+import { useAdminCheck } from "@/hooks/useAdminCheck";
 import { cn } from "@/lib/utils";
 
 const products = [
@@ -134,6 +136,7 @@ const Header = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [solutionsOpen, setSolutionsOpen] = useState(false);
   const { user, signOut } = useAuth();
+  const { isAdmin } = useAdminCheck();
 
   const navLinks = [
     { name: "For Investors", path: "/investors" },
@@ -254,6 +257,17 @@ const Header = () => {
               </Link>
             ))}
             
+            {/* Admin CRM Link */}
+            {isAdmin && (
+              <Link
+                to="/crm/dashboard"
+                className="flex items-center gap-2 text-sm font-medium text-primary hover:text-primary/80 transition-colors"
+              >
+                <LayoutDashboard className="w-4 h-4" />
+                CRM
+              </Link>
+            )}
+            
             {/* Auth Section - Only show when logged in */}
             {user && (
               <DropdownMenu>
@@ -298,6 +312,19 @@ const Header = () => {
                 </SheetHeader>
                 
                 <nav className="flex flex-col gap-2 mt-8">
+                  {isAdmin && (
+                    <>
+                      <Link
+                        to="/crm/dashboard"
+                        onClick={() => setIsOpen(false)}
+                        className="flex items-center gap-3 px-4 py-3 rounded-lg bg-primary/10 text-primary hover:bg-primary/20 transition-colors"
+                      >
+                        <LayoutDashboard className="w-5 h-5" />
+                        <span className="font-medium">CRM Dashboard</span>
+                      </Link>
+                      <div className="border-t border-border my-2" />
+                    </>
+                  )}
                   {user && (
                     <>
                       <Link
