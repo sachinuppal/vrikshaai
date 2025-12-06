@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useEffect } from 'react';
-import { motion } from 'framer-motion';
-import { Save, Play, MoreVertical, ChevronLeft, FileText, TestTube2, LayoutTemplate } from 'lucide-react';
+import { AnimatePresence, motion } from 'framer-motion';
+import { Save, Play, MoreVertical, ChevronLeft, FileText, TestTube2, LayoutTemplate, MessageSquare, PanelLeft } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -43,6 +43,27 @@ const CRMFlowBuilder: React.FC = () => {
   // Panel states
   const [isTestingOpen, setIsTestingOpen] = useState(false);
   const [isTemplatesOpen, setIsTemplatesOpen] = useState(false);
+  const [isChatMinimized, setIsChatMinimized] = useState(false);
+  const [isPaletteCollapsed, setIsPaletteCollapsed] = useState(false);
+
+  // Keyboard shortcuts for panels
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Cmd/Ctrl + B to toggle palette
+      if ((e.metaKey || e.ctrlKey) && e.key === 'b') {
+        e.preventDefault();
+        setIsPaletteCollapsed(prev => !prev);
+      }
+      // Cmd/Ctrl + J to toggle chat
+      if ((e.metaKey || e.ctrlKey) && e.key === 'j') {
+        e.preventDefault();
+        setIsChatMinimized(prev => !prev);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   // Undo/Redo history
   const [history, setHistory] = useState<{ nodes: FlowNodeData[]; edges: FlowEdgeData[] }[]>([]);
@@ -466,20 +487,42 @@ const CRMFlowBuilder: React.FC = () => {
         </div>
 
         {/* Main Content */}
-        <div className="flex-1 flex overflow-hidden">
+        <div className="flex-1 flex overflow-hidden relative">
           {/* Chat Panel */}
-          <div className="w-[350px] flex-shrink-0">
-            <AgentChatPanel
-              messages={messages}
-              isLoading={isLoading}
-              thinkingSteps={thinkingSteps}
-              onSendMessage={handleSendMessage}
-              onOptionSelect={handleOptionSelect}
-            />
-          </div>
+          <AnimatePresence mode="wait">
+            {!isChatMinimized && (
+              <AgentChatPanel
+                messages={messages}
+                isLoading={isLoading}
+                thinkingSteps={thinkingSteps}
+                onSendMessage={handleSendMessage}
+                onOptionSelect={handleOptionSelect}
+                isMinimized={isChatMinimized}
+                onToggleMinimize={() => setIsChatMinimized(prev => !prev)}
+              />
+            )}
+          </AnimatePresence>
+          
+          {/* Minimized Chat Bubble */}
+          <AnimatePresence>
+            {isChatMinimized && (
+              <AgentChatPanel
+                messages={messages}
+                isLoading={isLoading}
+                thinkingSteps={thinkingSteps}
+                onSendMessage={handleSendMessage}
+                onOptionSelect={handleOptionSelect}
+                isMinimized={isChatMinimized}
+                onToggleMinimize={() => setIsChatMinimized(prev => !prev)}
+              />
+            )}
+          </AnimatePresence>
 
           {/* Node Palette */}
-          <NodePalette />
+          <NodePalette 
+            isCollapsed={isPaletteCollapsed}
+            onToggleCollapse={() => setIsPaletteCollapsed(prev => !prev)}
+          />
 
           {/* Canvas */}
           <div className="flex-1 relative">
