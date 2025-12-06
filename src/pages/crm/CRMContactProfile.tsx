@@ -28,6 +28,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
 import { CRMLayout } from "@/components/crm/CRMLayout";
 import { DynamicIndustryGraph } from "@/components/crm/DynamicIndustryGraph";
+import { PredictiveTimeline } from "@/components/crm/PredictiveTimeline";
 
 interface Contact360 {
   contact: any;
@@ -449,117 +450,19 @@ export default function CRMContactProfile() {
             )}
           </div>
 
-          {/* Right Column - Timeline */}
+          {/* Right Column - Predictive Timeline */}
           <div className="lg:col-span-2">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
             >
-              <Card className="border-none shadow-card">
-                <CardHeader>
-                  <div className="flex items-center justify-between">
-                    <CardTitle className="text-lg">Interaction Timeline</CardTitle>
-                    <div className="flex gap-2">
-                      {Object.entries(timeline_summary.channel_breakdown).map(([channel, count]) => (
-                        <Badge key={channel} variant="outline" className="text-xs">
-                          {channel}: {count as number}
-                        </Badge>
-                      ))}
-                    </div>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  {interactions.length === 0 ? (
-                    <p className="text-muted-foreground text-center py-8">
-                      No interactions recorded yet
-                    </p>
-                  ) : (
-                    <div className="relative">
-                      {/* Timeline line */}
-                      <div className="absolute left-6 top-0 bottom-0 w-px bg-border" />
-
-                      <div className="space-y-6">
-                        {interactions.map((interaction, index) => {
-                          const Icon = channelIcons[interaction.channel] || MessageSquare;
-                          const sentimentColors: Record<string, string> = {
-                            positive: "bg-green-100 text-green-800",
-                            negative: "bg-red-100 text-red-800",
-                            neutral: "bg-gray-100 text-gray-800",
-                            mixed: "bg-amber-100 text-amber-800",
-                          };
-
-                          return (
-                            <motion.div
-                              key={interaction.id}
-                              initial={{ opacity: 0, x: -20 }}
-                              animate={{ opacity: 1, x: 0 }}
-                              transition={{ delay: index * 0.05 }}
-                              className="relative pl-14"
-                            >
-                              {/* Icon */}
-                              <div className="absolute left-0 w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
-                                <Icon className="h-5 w-5 text-primary" />
-                              </div>
-
-                              {/* Content */}
-                              <div className="p-4 rounded-lg border bg-card hover:shadow-md transition-shadow">
-                                <div className="flex items-center justify-between mb-2">
-                                  <div className="flex items-center gap-2">
-                                    <Badge variant="outline">{interaction.channel}</Badge>
-                                    <Badge variant="secondary">{interaction.direction}</Badge>
-                                    {interaction.sentiment && (
-                                      <Badge className={sentimentColors[interaction.sentiment]}>
-                                        {interaction.sentiment}
-                                      </Badge>
-                                    )}
-                                  </div>
-                                  <span className="text-xs text-muted-foreground">
-                                    {new Date(interaction.occurred_at).toLocaleString()}
-                                  </span>
-                                </div>
-
-                                {interaction.summary && (
-                                  <p className="text-sm mb-2">{interaction.summary}</p>
-                                )}
-
-                                {interaction.duration_seconds && (
-                                  <p className="text-xs text-muted-foreground flex items-center gap-1">
-                                    <Clock className="h-3 w-3" />
-                                    Duration: {Math.floor(interaction.duration_seconds / 60)}m {interaction.duration_seconds % 60}s
-                                  </p>
-                                )}
-
-                                {interaction.recording_url && (
-                                  <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    className="mt-2"
-                                    onClick={() => window.open(interaction.recording_url, "_blank")}
-                                  >
-                                    <Play className="h-3 w-3 mr-1" />
-                                    Play Recording
-                                  </Button>
-                                )}
-
-                                {interaction.intent_detected && interaction.intent_detected.length > 0 && (
-                                  <div className="flex flex-wrap gap-1 mt-2">
-                                    {interaction.intent_detected.map((intent: string) => (
-                                      <Badge key={intent} variant="outline" className="text-xs">
-                                        {intent}
-                                      </Badge>
-                                    ))}
-                                  </div>
-                                )}
-                              </div>
-                            </motion.div>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
+              <PredictiveTimeline
+                contactId={contact.id}
+                interactions={interactions}
+                tasks={tasks}
+                contact={contact}
+              />
             </motion.div>
           </div>
         </div>
