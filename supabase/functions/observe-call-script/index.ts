@@ -127,26 +127,91 @@ serve(async (req) => {
       .update({ observability_status: "analyzing" })
       .eq("id", call_id);
 
-    // Call Lovable AI (Gemini) for analysis
-    const analysisPrompt = `You are an AI Call Quality Analyst for Vriksha.ai. Your task is to compare a call transcript against the expected script/prompt to evaluate how well the AI agent followed the script.
+    // Call Lovable AI (Gemini) for analysis with conditional path detection and semantic matching
+    const analysisPrompt = `You are an AI Call Quality Analyst for Vriksha.ai. Your task is to analyze a call transcript using CONDITIONAL PATH DETECTION and SEMANTIC MATCHING.
 
-EXPECTED SCRIPT/PROMPT:
+=== EXPECTED SCRIPT/PROMPT ===
 ${VRIKSHA_SCRIPT}
 
-ACTUAL CALL TRANSCRIPT:
+=== ACTUAL CALL TRANSCRIPT ===
 ${transcriptText}
 
-Analyze the call and return a JSON response with EXACTLY this structure:
+=== ANALYSIS INSTRUCTIONS ===
+
+STEP 1: DETECT USER TYPE
+First, analyze the transcript to determine what type of user the caller is:
+- "founder" - startup founder, entrepreneur, building a company
+- "developer" - software developer, engineer, technical person
+- "enterprise" - corporate representative, enterprise customer, procurement, business development
+- "investor" - VC, angel investor, LP, fund manager
+- "general" - doesn't fit other categories, general inquiry
+- "hybrid" - both founder AND developer (technical founder)
+
+Look for explicit mentions or contextual clues:
+- "I'm the CTO at..." → enterprise or developer
+- "I'm building a startup..." → founder
+- "I work at [big company]..." → enterprise
+- "I'm a developer looking for..." → developer
+- "I'm interested in investing..." → investor
+
+STEP 2: DETERMINE APPLICABLE SECTIONS
+Based on user type, only these sections should be evaluated:
+
+MANDATORY FOR ALL:
+- Introduction and Objective
+- Entry Classification
+- Universal Identity Capture
+- Final Steps for All Users
+- Closing Line
+
+CONDITIONAL (only if user type matches):
+- Founder Section → ONLY for "founder" or "hybrid"
+- Developer Section → ONLY for "developer" or "hybrid"
+- Enterprise Section → ONLY for "enterprise"
+- Investor Section → ONLY for "investor"
+- General User Section → ONLY for "general"
+
+STEP 3: SEMANTIC MATCHING (CRITICAL!)
+Do NOT do exact phrase matching. Use SEMANTIC analysis:
+
+✅ CREDIT the agent if:
+- The ESSENCE of a question was conveyed (different wording is fine)
+- User VOLUNTEERED information without being asked
+- Data point was CAPTURED through natural conversation
+- Question was asked differently but achieved same goal
+
+Example matches:
+- Script: "Ask for company_name" → Agent: "Which organization are you calling from?" → ✅ MATCH
+- Script: "Ask for position_of_caller" → User volunteers "I'm the Head of Procurement" → ✅ MATCH (user-initiated)
+- Script: "Ask for use_case_or_problem" → Agent: "What challenges are you looking to solve?" → ✅ MATCH
+
+❌ DO NOT penalize if:
+- Section is not applicable to user type
+- Information was obtained through natural flow
+- Question wording differs but intent matches
+
+STEP 4: RETURN JSON RESPONSE
+Return ONLY this JSON structure:
+
 {
-  "overall_score": <number 0-100>,
+  "detected_user_type": "<founder|developer|enterprise|investor|general|hybrid>",
+  "user_type_evidence": "<brief explanation of why this user type was detected>",
+  "applicable_sections": ["<list of section names that SHOULD be evaluated based on user type>"],
+  "skipped_sections": [
+    {"section": "<section name>", "reason": "<why it was skipped - e.g., 'User is enterprise, not a founder'>"}
+  ],
+  "overall_score": <number 0-100 - calculated ONLY from applicable sections>,
   "status": "<'compliant' if score >= 80, 'partial' if score 50-79, 'non_compliant' if score < 50>",
   "sections_covered": [
     {
-      "section": "<section name like 'Entry Classification', 'Identity Capture', 'Founder Section', etc.>",
-      "covered": <boolean>,
+      "section": "<section name>",
+      "applicable": true,
+      "covered": <boolean - was the section addressed>,
       "compliance_score": <number 0-100>,
-      "questions_asked": ["<list of questions that were asked>"],
-      "questions_missed": ["<list of questions that should have been asked but weren't>"]
+      "semantic_match": <boolean - did agent capture intent/essence>,
+      "key_intents_captured": ["<list of data points/intents that were successfully captured>"],
+      "key_intents_missed": ["<list of data points/intents that were NOT captured>"],
+      "notes": "<optional brief explanation>"
     }
   ],
   "tone_analysis": {
@@ -154,18 +219,21 @@ Analyze the call and return a JSON response with EXACTLY this structure:
     "empathetic": <boolean>,
     "clear": <boolean>
   },
-  "guardrail_violations": ["<list any instances where the agent answered outside context or violated guidelines>"],
-  "language_compliance": <boolean - did agent maintain consistent language>,
+  "guardrail_violations": ["<list any instances where agent answered outside context>"],
+  "language_compliance": <boolean>,
   "strengths": ["<list of things done well>"],
-  "improvements": ["<list of actionable improvements>"],
-  "summary": "<2-3 sentence summary of the call quality>"
+  "improvements": ["<list of actionable improvements - only for APPLICABLE sections>"],
+  "summary": "<2-3 sentence summary focusing on applicable sections and semantic performance>"
 }
 
-Important:
-- Be thorough but fair in your assessment
-- Only mark sections as not covered if they were relevant to the user type
-- Consider the flow and natural conversation when evaluating
-- Return ONLY valid JSON, no markdown or extra text`;
+IMPORTANT SCORING RULES:
+- Calculate overall_score ONLY from applicable sections (ignore skipped sections)
+- Use semantic matching - give credit for intent, not exact wording
+- If user volunteered info, credit the agent for capturing it
+- Short calls with limited scope should still score well if they handled what was covered correctly
+- Do NOT mark skipped sections as 0% - they should NOT be in sections_covered
+
+Return ONLY valid JSON, no markdown or extra text.`;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",

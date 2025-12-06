@@ -9,19 +9,34 @@ import {
   MessageSquare,
   Target,
   Lightbulb,
-  Loader2
+  Loader2,
+  MinusCircle,
+  User,
+  Building2,
+  Code,
+  Briefcase,
+  HelpCircle
 } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
+
+interface SkippedSection {
+  section: string;
+  reason: string;
+}
 
 interface SectionCoverage {
   section: string;
+  applicable?: boolean;
   covered: boolean;
   compliance_score: number;
+  semantic_match?: boolean;
+  key_intents_captured?: string[];
+  key_intents_missed?: string[];
   questions_asked?: string[];
   questions_missed?: string[];
+  notes?: string;
 }
 
 interface ToneAnalysis {
@@ -31,6 +46,10 @@ interface ToneAnalysis {
 }
 
 interface ObservabilityAnalysis {
+  detected_user_type?: 'founder' | 'developer' | 'enterprise' | 'investor' | 'general' | 'hybrid';
+  user_type_evidence?: string;
+  applicable_sections?: string[];
+  skipped_sections?: SkippedSection[];
   overall_score: number;
   status: string;
   sections_covered: SectionCoverage[];
@@ -49,6 +68,15 @@ interface ObservabilityCardProps {
   isAnalyzing?: boolean;
 }
 
+const userTypeConfig: Record<string, { icon: React.ReactNode; label: string; color: string }> = {
+  founder: { icon: <Briefcase className="h-4 w-4" />, label: "Founder", color: "bg-purple-500/10 text-purple-500" },
+  developer: { icon: <Code className="h-4 w-4" />, label: "Developer", color: "bg-blue-500/10 text-blue-500" },
+  enterprise: { icon: <Building2 className="h-4 w-4" />, label: "Enterprise", color: "bg-emerald-500/10 text-emerald-500" },
+  investor: { icon: <Briefcase className="h-4 w-4" />, label: "Investor", color: "bg-amber-500/10 text-amber-500" },
+  general: { icon: <User className="h-4 w-4" />, label: "General", color: "bg-gray-500/10 text-gray-500" },
+  hybrid: { icon: <Code className="h-4 w-4" />, label: "Hybrid (Founder + Developer)", color: "bg-indigo-500/10 text-indigo-500" },
+};
+
 export const ObservabilityCard = ({ 
   analysis, 
   status, 
@@ -56,6 +84,7 @@ export const ObservabilityCard = ({
   isAnalyzing = false 
 }: ObservabilityCardProps) => {
   const [expandedSections, setExpandedSections] = useState<string[]>([]);
+  const [showSkipped, setShowSkipped] = useState(false);
 
   const toggleSection = (section: string) => {
     setExpandedSections(prev => 
@@ -173,7 +202,7 @@ export const ObservabilityCard = ({
           <h3 className="text-lg font-semibold">Analyzing Script Compliance...</h3>
         </div>
         <p className="text-muted-foreground">
-          Comparing the call transcript against the expected script using AI...
+          Detecting user type and performing semantic analysis...
         </p>
       </motion.div>
     );
@@ -181,8 +210,13 @@ export const ObservabilityCard = ({
 
   if (!analysis) return null;
 
-  const coveredSections = analysis.sections_covered?.filter(s => s.covered).length || 0;
-  const totalSections = analysis.sections_covered?.length || 0;
+  // Calculate covered sections from applicable sections only
+  const applicableSections = analysis.sections_covered?.filter(s => s.applicable !== false) || analysis.sections_covered || [];
+  const coveredSections = applicableSections.filter(s => s.covered).length;
+  const totalApplicable = applicableSections.length;
+  const skippedSections = analysis.skipped_sections || [];
+  const userType = analysis.detected_user_type;
+  const userTypeInfo = userType ? userTypeConfig[userType] : null;
 
   return (
     <motion.div
@@ -208,32 +242,51 @@ export const ObservabilityCard = ({
         </div>
       </div>
 
-      {/* Status Badge */}
-      <div className={cn(
-        "inline-flex items-center gap-2 px-4 py-2 rounded-lg",
-        getStatusColor(analysis.status)
-      )}>
-        {getStatusIcon(analysis.status)}
-        <span className="font-semibold">{getStatusLabel(analysis.status)}</span>
+      {/* Status Badge and User Type */}
+      <div className="flex flex-wrap items-center gap-2">
+        <div className={cn(
+          "inline-flex items-center gap-2 px-4 py-2 rounded-lg",
+          getStatusColor(analysis.status)
+        )}>
+          {getStatusIcon(analysis.status)}
+          <span className="font-semibold">{getStatusLabel(analysis.status)}</span>
+        </div>
+        
+        {userTypeInfo && (
+          <div className={cn(
+            "inline-flex items-center gap-2 px-3 py-2 rounded-lg",
+            userTypeInfo.color
+          )}>
+            {userTypeInfo.icon}
+            <span className="font-medium text-sm">Detected: {userTypeInfo.label}</span>
+          </div>
+        )}
       </div>
+
+      {/* User Type Evidence */}
+      {analysis.user_type_evidence && (
+        <p className="text-sm text-muted-foreground italic">
+          "{analysis.user_type_evidence}"
+        </p>
+      )}
 
       {/* Summary */}
       {analysis.summary && (
         <p className="text-muted-foreground">{analysis.summary}</p>
       )}
 
-      {/* Sections Covered */}
-      {analysis.sections_covered && analysis.sections_covered.length > 0 && (
+      {/* Applicable Sections */}
+      {applicableSections.length > 0 && (
         <div className="space-y-3">
           <div className="flex items-center justify-between">
             <h4 className="font-medium flex items-center gap-2">
               <Target className="h-4 w-4" />
-              Sections Covered ({coveredSections}/{totalSections})
+              Applicable Sections ({coveredSections}/{totalApplicable} covered)
             </h4>
           </div>
           
           <div className="space-y-2">
-            {analysis.sections_covered.map((section, index) => (
+            {applicableSections.map((section, index) => (
               <div 
                 key={index}
                 className="border border-border rounded-lg overflow-hidden"
@@ -248,7 +301,12 @@ export const ObservabilityCard = ({
                     ) : (
                       <XCircle className="h-4 w-4 text-red-500" />
                     )}
-                    <span className="font-medium">{section.section}</span>
+                    <span className="font-medium text-left">{section.section}</span>
+                    {section.semantic_match && (
+                      <span className="text-xs px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-500">
+                        Semantic Match
+                      </span>
+                    )}
                   </div>
                   <div className="flex items-center gap-3">
                     <span className={cn("text-sm font-medium", getScoreColor(section.compliance_score))}>
@@ -264,7 +322,36 @@ export const ObservabilityCard = ({
                 
                 {expandedSections.includes(section.section) && (
                   <div className="px-3 pb-3 space-y-2 border-t border-border pt-3">
-                    {section.questions_asked && section.questions_asked.length > 0 && (
+                    {/* Key Intents Captured (new format) */}
+                    {section.key_intents_captured && section.key_intents_captured.length > 0 && (
+                      <div>
+                        <p className="text-xs font-medium text-green-500 mb-1">Intents Captured:</p>
+                        <ul className="text-xs text-muted-foreground space-y-1">
+                          {section.key_intents_captured.map((intent, i) => (
+                            <li key={i} className="flex items-start gap-2">
+                              <CheckCircle className="h-3 w-3 text-green-500 mt-0.5 shrink-0" />
+                              {intent}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                    {/* Key Intents Missed (new format) */}
+                    {section.key_intents_missed && section.key_intents_missed.length > 0 && (
+                      <div>
+                        <p className="text-xs font-medium text-red-500 mb-1">Intents Missed:</p>
+                        <ul className="text-xs text-muted-foreground space-y-1">
+                          {section.key_intents_missed.map((intent, i) => (
+                            <li key={i} className="flex items-start gap-2">
+                              <XCircle className="h-3 w-3 text-red-500 mt-0.5 shrink-0" />
+                              {intent}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                    {/* Legacy format support */}
+                    {section.questions_asked && section.questions_asked.length > 0 && !section.key_intents_captured && (
                       <div>
                         <p className="text-xs font-medium text-green-500 mb-1">Questions Asked:</p>
                         <ul className="text-xs text-muted-foreground space-y-1">
@@ -277,7 +364,7 @@ export const ObservabilityCard = ({
                         </ul>
                       </div>
                     )}
-                    {section.questions_missed && section.questions_missed.length > 0 && (
+                    {section.questions_missed && section.questions_missed.length > 0 && !section.key_intents_missed && (
                       <div>
                         <p className="text-xs font-medium text-red-500 mb-1">Questions Missed:</p>
                         <ul className="text-xs text-muted-foreground space-y-1">
@@ -290,11 +377,54 @@ export const ObservabilityCard = ({
                         </ul>
                       </div>
                     )}
+                    {/* Notes */}
+                    {section.notes && (
+                      <p className="text-xs text-muted-foreground italic mt-2">
+                        Note: {section.notes}
+                      </p>
+                    )}
                   </div>
                 )}
               </div>
             ))}
           </div>
+        </div>
+      )}
+
+      {/* Skipped Sections */}
+      {skippedSections.length > 0 && (
+        <div className="space-y-3">
+          <button
+            onClick={() => setShowSkipped(!showSkipped)}
+            className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <MinusCircle className="h-4 w-4" />
+            <span className="font-medium text-sm">
+              Skipped Sections ({skippedSections.length}) - Not Applicable
+            </span>
+            {showSkipped ? (
+              <ChevronUp className="h-4 w-4" />
+            ) : (
+              <ChevronDown className="h-4 w-4" />
+            )}
+          </button>
+          
+          {showSkipped && (
+            <div className="space-y-2 pl-6">
+              {skippedSections.map((section, index) => (
+                <div 
+                  key={index}
+                  className="flex items-start gap-3 p-2 rounded-lg bg-muted/30 text-muted-foreground"
+                >
+                  <HelpCircle className="h-4 w-4 mt-0.5 shrink-0" />
+                  <div>
+                    <span className="font-medium text-sm">{section.section}</span>
+                    <p className="text-xs opacity-75">{section.reason}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       )}
 
