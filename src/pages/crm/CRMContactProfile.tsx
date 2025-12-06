@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
   ArrowLeft,
@@ -19,6 +19,10 @@ import {
   ExternalLink,
   Play,
   RefreshCw,
+  Eye,
+  CheckCircle,
+  XCircle,
+  Loader2,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -44,12 +48,26 @@ interface Contact360 {
   industry: any;
 }
 
+interface VoiceCall {
+  id: string;
+  name: string;
+  full_phone: string;
+  created_at: string;
+  call_status: string | null;
+  call_duration: number | null;
+  platform_analysis: unknown;
+  client_analysis: unknown;
+  observability_analysis: unknown;
+}
+
 export default function CRMContactProfile() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [data, setData] = useState<Contact360 | null>(null);
   const [loading, setLoading] = useState(true);
   const [scoresUpdating, setScoresUpdating] = useState(false);
+  const [voiceCalls, setVoiceCalls] = useState<VoiceCall[]>([]);
+  const [callsLoading, setCallsLoading] = useState(false);
 
   // Fetch contact data
   useEffect(() => {
@@ -193,6 +211,88 @@ export default function CRMContactProfile() {
     } finally {
       setLoading(false);
     }
+  };
+
+  // Fetch voice calls when contact data is available
+  useEffect(() => {
+    if (data?.contact?.phone) {
+      fetchVoiceCalls(data.contact.phone);
+    }
+  }, [data?.contact?.phone]);
+
+  const fetchVoiceCalls = async (phone: string) => {
+    setCallsLoading(true);
+    try {
+      // Match by full_phone field
+      const { data: calls, error } = await supabase
+        .from("voice_widget_calls")
+        .select("id, name, full_phone, created_at, call_status, call_duration, platform_analysis, client_analysis, observability_analysis")
+        .eq("full_phone", phone)
+        .order("created_at", { ascending: false });
+
+      if (error) throw error;
+      setVoiceCalls(calls || []);
+    } catch (error) {
+      console.error("Error fetching voice calls:", error);
+    } finally {
+      setCallsLoading(false);
+    }
+  };
+
+  const formatCallDuration = (seconds: number | null) => {
+    if (!seconds) return "N/A";
+    const mins = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+    return `${mins}m ${secs}s`;
+  };
+
+  const formatCallDate = (dateString: string) => {
+    return new Date(dateString).toLocaleString("en-US", {
+      month: "short",
+      day: "numeric",
+      hour: "numeric",
+      minute: "2-digit",
+      hour12: true,
+    });
+  };
+
+  const getCallStatusBadge = (status: string | null) => {
+    switch (status?.toLowerCase()) {
+      case "completed":
+        return (
+          <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30">
+            <CheckCircle className="w-3 h-3 mr-1" />
+            Completed
+          </Badge>
+        );
+      case "failed":
+      case "error":
+        return (
+          <Badge className="bg-red-500/20 text-red-400 border-red-500/30">
+            <XCircle className="w-3 h-3 mr-1" />
+            Failed
+          </Badge>
+        );
+      case "in_progress":
+      case "ringing":
+        return (
+          <Badge className="bg-yellow-500/20 text-yellow-400 border-yellow-500/30">
+            <Loader2 className="w-3 h-3 mr-1 animate-spin" />
+            In Progress
+          </Badge>
+        );
+      default:
+        return (
+          <Badge className="bg-muted text-muted-foreground border-border">
+            <Clock className="w-3 h-3 mr-1" />
+            {status || "Pending"}
+          </Badge>
+        );
+    }
+  };
+
+  const hasCallAnalysis = (call: VoiceCall) => {
+    return call.platform_analysis || call.client_analysis || call.observability_analysis;
   };
 
   const lifecycleColors: Record<string, string> = {
@@ -531,6 +631,84 @@ export default function CRMContactProfile() {
                 />
               </motion.div>
             )}
+
+            {/* Voice Calls Card */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.5 }}
+            >
+              <Card className="border-none shadow-card">
+                <CardHeader className="flex flex-row items-center justify-between">
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <Phone className="h-5 w-5" />
+                    Voice Calls
+                  </CardTitle>
+                  {voiceCalls.length > 0 && (
+                    <Badge variant="secondary">{voiceCalls.length}</Badge>
+                  )}
+                </CardHeader>
+                <CardContent>
+                  {callsLoading ? (
+                    <div className="flex items-center justify-center py-4">
+                      <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+                    </div>
+                  ) : voiceCalls.length === 0 ? (
+                    <p className="text-sm text-muted-foreground text-center py-4">
+                      No voice calls recorded
+                    </p>
+                  ) : (
+                    <div className="space-y-3">
+                      {voiceCalls.slice(0, 5).map((call) => (
+                        <div
+                          key={call.id}
+                          className="p-3 rounded-lg border bg-card hover:bg-muted/50 transition-colors"
+                        >
+                          <div className="flex items-start justify-between mb-2">
+                            <div className="flex items-center gap-2">
+                              <Phone className="h-4 w-4 text-muted-foreground" />
+                              <span className="text-sm font-medium">{call.name}</span>
+                            </div>
+                            {getCallStatusBadge(call.call_status)}
+                          </div>
+                          <div className="flex items-center justify-between text-xs text-muted-foreground">
+                            <span className="flex items-center gap-1">
+                              <Clock className="h-3 w-3" />
+                              {formatCallDate(call.created_at)}
+                            </span>
+                            <span>{formatCallDuration(call.call_duration)}</span>
+                          </div>
+                          <div className="flex items-center justify-between mt-2">
+                            {hasCallAnalysis(call) ? (
+                              <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 text-xs">
+                                Analyzed
+                              </Badge>
+                            ) : (
+                              <Badge variant="outline" className="text-xs">
+                                Pending Analysis
+                              </Badge>
+                            )}
+                            <Link to={`/call-analysis/${call.id}`}>
+                              <Button variant="ghost" size="sm" className="h-7 text-xs">
+                                <Eye className="h-3 w-3 mr-1" />
+                                View
+                              </Button>
+                            </Link>
+                          </div>
+                        </div>
+                      ))}
+                      {voiceCalls.length > 5 && (
+                        <Link to="/crm/calls" className="block">
+                          <Button variant="outline" size="sm" className="w-full">
+                            View All {voiceCalls.length} Calls
+                          </Button>
+                        </Link>
+                      )}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </motion.div>
           </div>
 
           {/* Right Column - Predictive Timeline */}
