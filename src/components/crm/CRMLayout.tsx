@@ -48,7 +48,7 @@ const crmNavItems = [
   { title: "Contacts", url: "/crm/contacts", icon: Users },
   { title: "Tasks", url: "/crm/tasks", icon: CheckSquare },
   { title: "Triggers", url: "/crm/triggers", icon: Zap },
-  { title: "Flow Builder", url: "/crm/flow-builder", icon: Workflow },
+  { title: "Flows", url: "/crm/flows", icon: Workflow },
   { title: "Integrations", url: "/crm/integrations", icon: Plug },
 ];
 

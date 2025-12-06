@@ -33,6 +33,7 @@ import CRMContactFlows from "./pages/crm/CRMContactFlows";
 import CRMTasks from "./pages/crm/CRMTasks";
 import CRMTriggers from "./pages/crm/CRMTriggers";
 import CRMFlowBuilder from "./pages/crm/CRMFlowBuilder";
+import CRMFlows from "./pages/crm/CRMFlows";
 import CRMCalls from "./pages/crm/CRMCalls";
 import CRMApplications from "./pages/crm/CRMApplications";
 import CRMIntegrations from "./pages/crm/CRMIntegrations";
@@ -78,6 +79,7 @@ const App = () => (
               <Route path="/crm/contacts/:id/flows" element={<AdminRoute><CRMContactFlows /></AdminRoute>} />
               <Route path="/crm/tasks" element={<AdminRoute><CRMTasks /></AdminRoute>} />
               <Route path="/crm/triggers" element={<AdminRoute><CRMTriggers /></AdminRoute>} />
+              <Route path="/crm/flows" element={<AdminRoute><CRMFlows /></AdminRoute>} />
               <Route path="/crm/flow-builder" element={<AdminRoute><CRMFlowBuilder /></AdminRoute>} />
               <Route path="/crm/flow-builder/:flowId" element={<AdminRoute><CRMFlowBuilder /></AdminRoute>} />
               <Route path="/crm/calls" element={<AdminRoute><CRMCalls /></AdminRoute>} />
