@@ -238,6 +238,40 @@ serve(async (req) => {
           ...(commonStatus && { call_status: commonStatus }),
         };
         console.log("Updating client_analysis data");
+        
+        // Fallback: Trigger observability if not already triggered
+        const transcriptForObservability = callRecord.transcript;
+        const alreadyTriggered = callRecord.observability_status || callRecord.observability_analysis;
+        
+        if (transcriptForObservability && transcriptForObservability.length > 0 && !alreadyTriggered) {
+          console.log("Fallback: Triggering observability analysis for call:", callRecord.id);
+          
+          const triggerObservability = async () => {
+            try {
+              const observeResponse = await fetch(`${supabaseUrl}/functions/v1/observe-call-script`, {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                  "Authorization": `Bearer ${supabaseKey}`,
+                },
+                body: JSON.stringify({
+                  call_id: callRecord.id,
+                  transcript: transcriptForObservability,
+                }),
+              });
+              
+              if (!observeResponse.ok) {
+                console.error("Observability fallback trigger failed:", await observeResponse.text());
+              } else {
+                console.log("Observability analysis triggered via fallback");
+              }
+            } catch (obsError) {
+              console.error("Error in observability fallback:", obsError);
+            }
+          };
+          
+          EdgeRuntime.waitUntil(triggerObservability());
+        }
         break;
       }
 
