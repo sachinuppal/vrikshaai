@@ -32,7 +32,7 @@ const CRMFlowBuilder: React.FC = () => {
   const [globalPrompt, setGlobalPrompt] = useState('');
   const [nodes, setNodes] = useState<FlowNodeData[]>([]);
   const [edges, setEdges] = useState<FlowEdgeData[]>([]);
-  const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
+  const [selectedNodeIds, setSelectedNodeIds] = useState<Set<string>>(new Set());
   const [highlightedNodeId, setHighlightedNodeId] = useState<string | null>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -274,7 +274,7 @@ const CRMFlowBuilder: React.FC = () => {
     setEdges(prev => prev.filter(e => 
       e.source_node_id !== nodeId && e.target_node_id !== nodeId
     ));
-    setSelectedNodeId(null);
+    setSelectedNodeIds(new Set());
     toast.success('Node deleted');
   }, []);
 
@@ -292,7 +292,7 @@ const CRMFlowBuilder: React.FC = () => {
     };
 
     setNodes(prev => [...prev, newNode]);
-    setSelectedNodeId(newNode.id);
+    setSelectedNodeIds(new Set([newNode.id]));
     toast.success(`Added ${nodeConfig.label} node`);
   }, []);
 
@@ -394,7 +394,8 @@ const CRMFlowBuilder: React.FC = () => {
     }
   };
 
-  const selectedNode = nodes.find(n => n.id === selectedNodeId) || null;
+  const selectedNodeId = selectedNodeIds.size === 1 ? Array.from(selectedNodeIds)[0] : null;
+  const selectedNode = selectedNodeId ? nodes.find(n => n.id === selectedNodeId) || null : null;
 
   return (
     <CRMLayout>
@@ -485,9 +486,9 @@ const CRMFlowBuilder: React.FC = () => {
             <AgenticFlowCanvas
               nodes={nodes}
               edges={edges}
-              selectedNodeId={selectedNodeId}
+              selectedNodeIds={selectedNodeIds}
               highlightedNodeId={highlightedNodeId}
-              onNodeSelect={setSelectedNodeId}
+              onNodeSelect={setSelectedNodeIds}
               onNodeMove={handleNodeMove}
               onNodeAdd={handleNodeAdd}
               onEdgeAdd={handleEdgeAdd}
@@ -502,7 +503,7 @@ const CRMFlowBuilder: React.FC = () => {
             {selectedNode && !isTestingOpen && (
               <NodeConfigPanel
                 node={selectedNode}
-                onClose={() => setSelectedNodeId(null)}
+                onClose={() => setSelectedNodeIds(new Set())}
                 onUpdate={handleNodeUpdate}
                 onDelete={handleNodeDelete}
               />
