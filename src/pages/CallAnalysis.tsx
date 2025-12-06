@@ -99,6 +99,7 @@ interface CallData {
   created_at: string;
   observability_analysis: ObservabilityAnalysis | null;
   observability_status: string | null;
+  ringg_call_id: string | null;
 }
 
 const CallAnalysis = () => {
@@ -108,6 +109,7 @@ const CallAnalysis = () => {
   const [loading, setLoading] = useState(true);
   const [analyzing, setAnalyzing] = useState(false);
   const [runningObservability, setRunningObservability] = useState(false);
+  const [syncing, setSyncing] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const [audioRef, setAudioRef] = useState<HTMLAudioElement | null>(null);
 
@@ -202,6 +204,35 @@ const CallAnalysis = () => {
     }
   };
 
+  const syncFromRingg = async () => {
+    if (!callData?.ringg_call_id) {
+      toast.error("No Ringg call ID available");
+      return;
+    }
+
+    setSyncing(true);
+    
+    try {
+      const response = await supabase.functions.invoke("sync-call-data", {
+        body: { db_call_id: callData.id },
+      });
+
+      if (response.error) {
+        throw new Error(response.error.message);
+      }
+
+      toast.success("Call data synced from Ringg");
+      fetchCallData();
+    } catch (error) {
+      console.error("Sync error:", error);
+      toast.error("Failed to sync call data");
+    } finally {
+      setSyncing(false);
+    }
+  };
+
+  const needsSync = callData?.ringg_call_id && !callData?.client_analysis;
+
   const formatDuration = (seconds: number | null) => {
     if (!seconds) return "—";
     const mins = Math.floor(seconds / 60);
@@ -258,16 +289,29 @@ const CallAnalysis = () => {
           animate={{ opacity: 1, y: 0 }}
           className="mb-6"
         >
-          <div className="flex items-center gap-3">
-            <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
-              <Phone className="h-6 w-6 text-primary" />
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
+                <Phone className="h-6 w-6 text-primary" />
+              </div>
+              <div>
+                <h1 className="text-2xl font-bold text-foreground">Call Analysis</h1>
+                <p className="text-muted-foreground">
+                  {callData.name} • {maskPhoneNumber(callData.full_phone)}
+                </p>
+              </div>
             </div>
-            <div>
-              <h1 className="text-2xl font-bold text-foreground">Call Analysis</h1>
-              <p className="text-muted-foreground">
-                {callData.name} • {maskPhoneNumber(callData.full_phone)}
-              </p>
-            </div>
+            {needsSync && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={syncFromRingg}
+                disabled={syncing}
+              >
+                <RefreshCw className={`h-4 w-4 mr-2 ${syncing ? "animate-spin" : ""}`} />
+                Sync from Ringg
+              </Button>
+            )}
           </div>
         </motion.div>
 

@@ -39,6 +39,8 @@ interface CallRecord {
   call_status: string | null;
   call_duration: number | null;
   source: string | null;
+  ringg_call_id: string | null;
+  platform_analysis: unknown;
 }
 
 const CallHistory = () => {
@@ -46,6 +48,8 @@ const CallHistory = () => {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [syncingCallId, setSyncingCallId] = useState<string | null>(null);
+  const [syncingAll, setSyncingAll] = useState(false);
   const { toast } = useToast();
 
   const fetchCalls = async (showRefresh = false) => {
@@ -55,7 +59,7 @@ const CallHistory = () => {
     try {
       const { data, error } = await supabase
         .from("voice_widget_calls")
-        .select("id, name, phone, country_code, created_at, call_status, call_duration, source")
+        .select("id, name, phone, country_code, created_at, call_status, call_duration, source, ringg_call_id, platform_analysis")
         .order("created_at", { ascending: false });
 
       if (error) throw error;
@@ -158,6 +162,64 @@ const CallHistory = () => {
     });
   };
 
+  const syncCallData = async (callId: string) => {
+    setSyncingCallId(callId);
+    try {
+      const { data, error } = await supabase.functions.invoke("sync-call-data", {
+        body: { db_call_id: callId },
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "Synced",
+        description: "Call data synced from Ringg successfully",
+      });
+      fetchCalls(true);
+    } catch (error) {
+      console.error("Sync error:", error);
+      toast({
+        title: "Sync failed",
+        description: "Failed to sync call data from Ringg",
+        variant: "destructive",
+      });
+    } finally {
+      setSyncingCallId(null);
+    }
+  };
+
+  const syncAllIncomplete = async () => {
+    setSyncingAll(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("sync-call-data", {
+        body: { sync_all_incomplete: true },
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "Sync complete",
+        description: `Synced ${data?.synced_count || 0} calls from Ringg`,
+      });
+      fetchCalls(true);
+    } catch (error) {
+      console.error("Sync all error:", error);
+      toast({
+        title: "Sync failed",
+        description: "Failed to sync incomplete calls",
+        variant: "destructive",
+      });
+    } finally {
+      setSyncingAll(false);
+    }
+  };
+
+  const needsSync = (call: CallRecord) => {
+    return call.ringg_call_id && !call.platform_analysis;
+  };
+
+  const incompleteCallsCount = calls.filter(needsSync).length;
+
   return (
     <div className="min-h-screen bg-background">
       <Header />
@@ -188,6 +250,17 @@ const CallHistory = () => {
             </div>
             
             <div className="flex items-center gap-3">
+              {incompleteCallsCount > 0 && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={syncAllIncomplete}
+                  disabled={syncingAll}
+                >
+                  <RefreshCw className={`h-4 w-4 mr-2 ${syncingAll ? "animate-spin" : ""}`} />
+                  Sync All ({incompleteCallsCount})
+                </Button>
+              )}
               <Button
                 variant="outline"
                 size="sm"
@@ -301,12 +374,24 @@ const CallHistory = () => {
                             </Badge>
                           </TableCell>
                           <TableCell className="text-right">
-                            <Link to={`/call-analysis/${call.id}`}>
-                              <Button variant="ghost" size="sm">
-                                <Eye className="h-4 w-4 mr-1" />
-                                View
-                              </Button>
-                            </Link>
+                            <div className="flex items-center justify-end gap-1">
+                              {needsSync(call) && (
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => syncCallData(call.id)}
+                                  disabled={syncingCallId === call.id}
+                                >
+                                  <RefreshCw className={`h-4 w-4 ${syncingCallId === call.id ? "animate-spin" : ""}`} />
+                                </Button>
+                              )}
+                              <Link to={`/call-analysis/${call.id}`}>
+                                <Button variant="ghost" size="sm">
+                                  <Eye className="h-4 w-4 mr-1" />
+                                  View
+                                </Button>
+                              </Link>
+                            </div>
                           </TableCell>
                         </TableRow>
                       ))}
