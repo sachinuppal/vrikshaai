@@ -235,8 +235,57 @@ serve(async (req) => {
 
     await supabase.from("crm_contacts").update(contactUpdate).eq("id", contactId);
 
-    // TODO: Trigger score recomputation
-    // TODO: Evaluate triggers
+    // Evaluate triggers for this new interaction
+    let triggersExecuted = 0;
+    try {
+      const triggerResponse = await fetch(`${supabaseUrl}/functions/v1/crm-evaluate-triggers`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${supabaseServiceKey}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          contact_id: contactId,
+          trigger_event: "new_interaction",
+          event_data: {
+            channel: body.channel,
+            direction: body.direction,
+            sentiment,
+            intents: intentDetected,
+          },
+        }),
+      });
+
+      if (triggerResponse.ok) {
+        const triggerResult = await triggerResponse.json();
+        const actionsToExecute = triggerResult.actions_to_execute || [];
+
+        // Execute each action
+        for (const actionItem of actionsToExecute) {
+          try {
+            await fetch(`${supabaseUrl}/functions/v1/crm-execute-action`, {
+              method: "POST",
+              headers: {
+                Authorization: `Bearer ${supabaseServiceKey}`,
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                contact_id: contactId,
+                trigger_id: actionItem.trigger_id,
+                trigger_name: actionItem.trigger_name,
+                action: actionItem.action,
+                matched_conditions: actionItem.matched_conditions,
+              }),
+            });
+            triggersExecuted++;
+          } catch (actionError) {
+            console.error("Action execution failed:", actionError);
+          }
+        }
+      }
+    } catch (triggerError) {
+      console.error("Trigger evaluation failed:", triggerError);
+    }
 
     return new Response(
       JSON.stringify({
@@ -246,6 +295,7 @@ serve(async (req) => {
         is_new_contact: isNewContact,
         variables_extracted: variablesToStore.length,
         ai_analysis_performed: !!aiAnalysis,
+        triggers_executed: triggersExecuted,
       }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
