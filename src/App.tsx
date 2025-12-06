@@ -47,8 +47,22 @@ const App = () => (
               <Route path="/enterprises" element={<Enterprises />} />
               <Route path="/crm" element={<CRM />} />
               <Route path="/voice" element={<Voice />} />
-              <Route path="/call-history" element={<CallHistory />} />
-              <Route path="/call-analysis/:id" element={<CallAnalysis />} />
+              <Route
+                path="/call-history"
+                element={
+                  <ProtectedRoute>
+                    <CallHistory />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/call-analysis/:id"
+                element={
+                  <ProtectedRoute>
+                    <CallAnalysis />
+                  </ProtectedRoute>
+                }
+              />
               <Route
                 path="/applications"
                 element={

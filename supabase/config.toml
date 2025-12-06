@@ -22,10 +22,10 @@ verify_jwt = false
 verify_jwt = false
 
 [functions.observe-call-script]
-verify_jwt = false
+verify_jwt = true
 
 [functions.initiate-outbound-call]
-verify_jwt = false
+verify_jwt = true
 
 [functions.sync-call-data]
-verify_jwt = false
+verify_jwt = true
