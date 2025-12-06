@@ -257,6 +257,42 @@ export type Database = {
         }
         Relationships: []
       }
+      crm_agentic_flows: {
+        Row: {
+          created_at: string | null
+          created_by: string | null
+          description: string | null
+          flow_json: Json | null
+          global_prompt: string | null
+          id: string
+          name: string
+          status: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          flow_json?: Json | null
+          global_prompt?: string | null
+          id?: string
+          name: string
+          status?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          flow_json?: Json | null
+          global_prompt?: string | null
+          id?: string
+          name?: string
+          status?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       crm_allied_industries: {
         Row: {
           action_template: Json | null
@@ -394,6 +430,137 @@ export type Database = {
           user_type?: string | null
         }
         Relationships: []
+      }
+      crm_flow_chat_messages: {
+        Row: {
+          content: string
+          created_at: string | null
+          flow_id: string | null
+          id: string
+          metadata: Json | null
+          role: string
+          session_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string | null
+          flow_id?: string | null
+          id?: string
+          metadata?: Json | null
+          role: string
+          session_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string | null
+          flow_id?: string | null
+          id?: string
+          metadata?: Json | null
+          role?: string
+          session_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_flow_chat_messages_flow_id_fkey"
+            columns: ["flow_id"]
+            isOneToOne: false
+            referencedRelation: "crm_agentic_flows"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      crm_flow_edges: {
+        Row: {
+          condition: Json | null
+          created_at: string | null
+          flow_id: string
+          id: string
+          label: string | null
+          source_node_id: string
+          target_node_id: string
+        }
+        Insert: {
+          condition?: Json | null
+          created_at?: string | null
+          flow_id: string
+          id?: string
+          label?: string | null
+          source_node_id: string
+          target_node_id: string
+        }
+        Update: {
+          condition?: Json | null
+          created_at?: string | null
+          flow_id?: string
+          id?: string
+          label?: string | null
+          source_node_id?: string
+          target_node_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_flow_edges_flow_id_fkey"
+            columns: ["flow_id"]
+            isOneToOne: false
+            referencedRelation: "crm_agentic_flows"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_flow_edges_source_node_id_fkey"
+            columns: ["source_node_id"]
+            isOneToOne: false
+            referencedRelation: "crm_flow_nodes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_flow_edges_target_node_id_fkey"
+            columns: ["target_node_id"]
+            isOneToOne: false
+            referencedRelation: "crm_flow_nodes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      crm_flow_nodes: {
+        Row: {
+          config: Json | null
+          created_at: string | null
+          flow_id: string
+          id: string
+          label: string
+          node_type: string
+          position_x: number | null
+          position_y: number | null
+        }
+        Insert: {
+          config?: Json | null
+          created_at?: string | null
+          flow_id: string
+          id?: string
+          label: string
+          node_type: string
+          position_x?: number | null
+          position_y?: number | null
+        }
+        Update: {
+          config?: Json | null
+          created_at?: string | null
+          flow_id?: string
+          id?: string
+          label?: string
+          node_type?: string
+          position_x?: number | null
+          position_y?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_flow_nodes_flow_id_fkey"
+            columns: ["flow_id"]
+            isOneToOne: false
+            referencedRelation: "crm_agentic_flows"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       crm_industry_nodes: {
         Row: {
