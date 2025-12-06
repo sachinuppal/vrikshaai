@@ -7,7 +7,9 @@ import { CRMLayout } from '@/components/crm/CRMLayout';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ContactFlowsList } from '@/components/crm/flows/ContactFlowsList';
+import { FlowExecutionHistory } from '@/components/crm/flows/FlowExecutionHistory';
 import { AssignFlowModal } from '@/components/crm/flows/AssignFlowModal';
 import { toast } from 'sonner';
 import {
@@ -56,6 +58,8 @@ export default function CRMContactFlows() {
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [syncing, setSyncing] = useState(false);
   const [bulkActionLoading, setBulkActionLoading] = useState(false);
+  const [runningFlowId, setRunningFlowId] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState('flows');
 
   useEffect(() => {
     if (contactId) {
@@ -137,6 +141,56 @@ export default function CRMContactFlows() {
     }
   };
 
+  const handleReorderFlows = async (reorderedFlows: ContactFlow[]) => {
+    setContactFlows(reorderedFlows);
+    
+    try {
+      // Update priorities in database
+      const updates = reorderedFlows.map((cf, idx) => 
+        supabase
+          .from('crm_contact_flows')
+          .update({ priority: idx })
+          .eq('id', cf.id)
+      );
+      
+      await Promise.all(updates);
+      toast.success('Flow order updated');
+    } catch (error) {
+      console.error('Error updating flow order:', error);
+      toast.error('Failed to save flow order');
+      fetchData(); // Revert to server state
+    }
+  };
+
+  const handleRunFlow = async (contactFlowId: string, flowId: string) => {
+    setRunningFlowId(contactFlowId);
+    
+    try {
+      const { data, error } = await supabase.functions.invoke('crm-run-flow-now', {
+        body: {
+          contact_id: contactId,
+          flow_id: flowId,
+          contact_flow_id: contactFlowId
+        }
+      });
+
+      if (error) throw error;
+
+      if (data.success) {
+        toast.success(`Flow executed successfully. ${data.nodes_executed} node(s) processed.`);
+        // Refresh the flow data to update execution count
+        fetchData();
+      } else {
+        toast.error(data.error || 'Flow execution failed');
+      }
+    } catch (error: any) {
+      console.error('Error running flow:', error);
+      toast.error(error.message || 'Failed to run flow');
+    } finally {
+      setRunningFlowId(null);
+    }
+  };
+
   const handleFlowAssigned = () => {
     fetchData();
     setIsAssignModalOpen(false);
@@ -145,7 +199,6 @@ export default function CRMContactFlows() {
   const handleSyncDefaultFlows = async () => {
     setSyncing(true);
     try {
-      // Fetch all published flows
       const { data: allFlows, error: flowsError } = await supabase
         .from('crm_agentic_flows')
         .select('id')
@@ -153,7 +206,6 @@ export default function CRMContactFlows() {
 
       if (flowsError) throw flowsError;
 
-      // Filter to flows not already assigned
       const existingFlowIds = contactFlows.map(cf => cf.flow_id);
       const newFlows = (allFlows || []).filter(f => !existingFlowIds.includes(f.id));
 
@@ -162,7 +214,6 @@ export default function CRMContactFlows() {
         return;
       }
 
-      // Insert new flow assignments
       const { error: insertError } = await supabase
         .from('crm_contact_flows')
         .insert(
@@ -258,6 +309,7 @@ export default function CRMContactFlows() {
 
   const activeFlows = contactFlows.filter(cf => cf.is_enabled);
   const totalExecutions = contactFlows.reduce((sum, cf) => sum + cf.execution_count, 0);
+  const flowsForHistory = contactFlows.map(cf => ({ id: cf.flow_id, name: cf.flow.name }));
 
   if (loading) {
     return (
@@ -371,72 +423,98 @@ export default function CRMContactFlows() {
           </motion.div>
         </div>
 
-        {/* Bulk Actions Bar */}
-        {selectedIds.length > 0 && (
-          <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="flex items-center justify-between p-4 rounded-lg bg-primary/10 border border-primary/20"
-          >
-            <span className="text-sm font-medium">
-              {selectedIds.length} flow(s) selected
-            </span>
-            <div className="flex items-center gap-2">
-              <Button 
-                size="sm" 
-                variant="outline" 
-                onClick={handleBulkEnable}
-                disabled={bulkActionLoading}
-              >
-                <Power className="h-4 w-4 mr-1" />
-                Enable All
-              </Button>
-              <Button 
-                size="sm" 
-                variant="outline" 
-                onClick={handleBulkDisable}
-                disabled={bulkActionLoading}
-              >
-                <PowerOff className="h-4 w-4 mr-1" />
-                Disable All
-              </Button>
-              <AlertDialog>
-                <AlertDialogTrigger asChild>
-                  <Button size="sm" variant="destructive" disabled={bulkActionLoading}>
-                    <Trash2 className="h-4 w-4 mr-1" />
-                    Remove All
-                  </Button>
-                </AlertDialogTrigger>
-                <AlertDialogContent>
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>Remove Selected Flows</AlertDialogTitle>
-                    <AlertDialogDescription>
-                      Are you sure you want to remove {selectedIds.length} flow(s) from this contact? 
-                      The flows themselves will not be deleted.
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel>Cancel</AlertDialogCancel>
-                    <AlertDialogAction onClick={handleBulkRemove}>
-                      Remove
-                    </AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
-            </div>
-          </motion.div>
-        )}
+        {/* Tabs for Flows and Execution History */}
+        <Tabs value={activeTab} onValueChange={setActiveTab}>
+          <TabsList className="grid w-full max-w-md grid-cols-2">
+            <TabsTrigger value="flows">
+              <Workflow className="h-4 w-4 mr-2" />
+              Flows
+            </TabsTrigger>
+            <TabsTrigger value="history">
+              <Clock className="h-4 w-4 mr-2" />
+              Execution History
+            </TabsTrigger>
+          </TabsList>
 
-        {/* Flows List */}
-        <ContactFlowsList
-          contactFlows={contactFlows}
-          onToggle={handleToggleFlow}
-          onRemove={handleRemoveFlow}
-          onEdit={(flowId) => navigate(`/crm/flow-builder/${flowId}?contactId=${contactId}`)}
-          selectable={true}
-          selectedIds={selectedIds}
-          onSelectionChange={setSelectedIds}
-        />
+          <TabsContent value="flows" className="space-y-4 mt-4">
+            {/* Bulk Actions Bar */}
+            {selectedIds.length > 0 && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="flex items-center justify-between p-4 rounded-lg bg-primary/10 border border-primary/20"
+              >
+                <span className="text-sm font-medium">
+                  {selectedIds.length} flow(s) selected
+                </span>
+                <div className="flex items-center gap-2">
+                  <Button 
+                    size="sm" 
+                    variant="outline" 
+                    onClick={handleBulkEnable}
+                    disabled={bulkActionLoading}
+                  >
+                    <Power className="h-4 w-4 mr-1" />
+                    Enable All
+                  </Button>
+                  <Button 
+                    size="sm" 
+                    variant="outline" 
+                    onClick={handleBulkDisable}
+                    disabled={bulkActionLoading}
+                  >
+                    <PowerOff className="h-4 w-4 mr-1" />
+                    Disable All
+                  </Button>
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button size="sm" variant="destructive" disabled={bulkActionLoading}>
+                        <Trash2 className="h-4 w-4 mr-1" />
+                        Remove All
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Remove Selected Flows</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          Are you sure you want to remove {selectedIds.length} flow(s) from this contact? 
+                          The flows themselves will not be deleted.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction onClick={handleBulkRemove}>
+                          Remove
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                </div>
+              </motion.div>
+            )}
+
+            {/* Flows List */}
+            <ContactFlowsList
+              contactFlows={contactFlows}
+              onToggle={handleToggleFlow}
+              onRemove={handleRemoveFlow}
+              onEdit={(flowId) => navigate(`/crm/flow-builder/${flowId}?contactId=${contactId}`)}
+              onReorder={handleReorderFlows}
+              onRunFlow={handleRunFlow}
+              runningFlowId={runningFlowId}
+              selectable={true}
+              selectedIds={selectedIds}
+              onSelectionChange={setSelectedIds}
+            />
+          </TabsContent>
+
+          <TabsContent value="history" className="mt-4">
+            <FlowExecutionHistory 
+              contactId={contactId!} 
+              flows={flowsForHistory}
+            />
+          </TabsContent>
+        </Tabs>
 
         {/* Assign Flow Modal */}
         <AssignFlowModal

@@ -575,6 +575,70 @@ export type Database = {
           },
         ]
       }
+      crm_flow_executions: {
+        Row: {
+          completed_at: string | null
+          contact_flow_id: string | null
+          contact_id: string
+          created_at: string | null
+          error_message: string | null
+          flow_id: string
+          id: string
+          nodes_executed: Json | null
+          started_at: string | null
+          status: string | null
+          triggered_by: string | null
+        }
+        Insert: {
+          completed_at?: string | null
+          contact_flow_id?: string | null
+          contact_id: string
+          created_at?: string | null
+          error_message?: string | null
+          flow_id: string
+          id?: string
+          nodes_executed?: Json | null
+          started_at?: string | null
+          status?: string | null
+          triggered_by?: string | null
+        }
+        Update: {
+          completed_at?: string | null
+          contact_flow_id?: string | null
+          contact_id?: string
+          created_at?: string | null
+          error_message?: string | null
+          flow_id?: string
+          id?: string
+          nodes_executed?: Json | null
+          started_at?: string | null
+          status?: string | null
+          triggered_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_flow_executions_contact_flow_id_fkey"
+            columns: ["contact_flow_id"]
+            isOneToOne: false
+            referencedRelation: "crm_contact_flows"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_flow_executions_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "crm_contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_flow_executions_flow_id_fkey"
+            columns: ["flow_id"]
+            isOneToOne: false
+            referencedRelation: "crm_agentic_flows"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       crm_flow_nodes: {
         Row: {
           config: Json | null
