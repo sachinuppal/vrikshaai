@@ -565,6 +565,7 @@ export type Database = {
           source: string | null
           transcript: Json | null
           updated_at: string | null
+          user_id: string | null
         }
         Insert: {
           call_duration?: number | null
@@ -585,6 +586,7 @@ export type Database = {
           source?: string | null
           transcript?: Json | null
           updated_at?: string | null
+          user_id?: string | null
         }
         Update: {
           call_duration?: number | null
@@ -605,6 +607,7 @@ export type Database = {
           source?: string | null
           transcript?: Json | null
           updated_at?: string | null
+          user_id?: string | null
         }
         Relationships: []
       }

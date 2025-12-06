@@ -27,6 +27,9 @@ verify_jwt = false
 [functions.get-call-status]
 verify_jwt = false
 
+[functions.link-calls-to-user]
+verify_jwt = true
+
 [functions.observe-call-script]
 verify_jwt = true
 
