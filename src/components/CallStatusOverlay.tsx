@@ -35,8 +35,8 @@ const statusConfig: Record<CallStatus, {
   },
   initiated: {
     icon: <Phone className="h-5 w-5" />,
-    title: "Calling you now...",
-    description: "Please answer your phone",
+    title: "Ready to connect",
+    description: "Click 'Start Call' to begin your conversation",
     color: "text-primary",
     pulse: true,
   },
