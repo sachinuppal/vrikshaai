@@ -257,6 +257,262 @@ export type Database = {
         }
         Relationships: []
       }
+      crm_allied_industries: {
+        Row: {
+          action_template: Json | null
+          allied_industry_id: string
+          created_at: string | null
+          id: string
+          is_active: boolean | null
+          primary_industry_id: string
+          relationship_strength: number | null
+          relationship_type: string | null
+          trigger_conditions: Json | null
+          trigger_stage: string | null
+        }
+        Insert: {
+          action_template?: Json | null
+          allied_industry_id: string
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          primary_industry_id: string
+          relationship_strength?: number | null
+          relationship_type?: string | null
+          trigger_conditions?: Json | null
+          trigger_stage?: string | null
+        }
+        Update: {
+          action_template?: Json | null
+          allied_industry_id?: string
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          primary_industry_id?: string
+          relationship_strength?: number | null
+          relationship_type?: string | null
+          trigger_conditions?: Json | null
+          trigger_stage?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_allied_industries_allied_industry_id_fkey"
+            columns: ["allied_industry_id"]
+            isOneToOne: false
+            referencedRelation: "crm_industry_nodes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_allied_industries_primary_industry_id_fkey"
+            columns: ["primary_industry_id"]
+            isOneToOne: false
+            referencedRelation: "crm_industry_nodes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      crm_contacts: {
+        Row: {
+          base_profile: Json | null
+          churn_risk: number | null
+          company_name: string | null
+          country_code: string | null
+          created_at: string | null
+          email: string | null
+          engagement_score: number | null
+          full_name: string | null
+          id: string
+          intent_score: number | null
+          last_channel: string | null
+          last_interaction_at: string | null
+          lifecycle_stage: string | null
+          ltv_prediction: number | null
+          optimal_contact_time: string | null
+          phone: string | null
+          preferred_channel: string | null
+          primary_industry: string | null
+          source: string | null
+          source_id: string | null
+          tags: string[] | null
+          total_interactions: number | null
+          updated_at: string | null
+          urgency_score: number | null
+          user_type: string | null
+        }
+        Insert: {
+          base_profile?: Json | null
+          churn_risk?: number | null
+          company_name?: string | null
+          country_code?: string | null
+          created_at?: string | null
+          email?: string | null
+          engagement_score?: number | null
+          full_name?: string | null
+          id?: string
+          intent_score?: number | null
+          last_channel?: string | null
+          last_interaction_at?: string | null
+          lifecycle_stage?: string | null
+          ltv_prediction?: number | null
+          optimal_contact_time?: string | null
+          phone?: string | null
+          preferred_channel?: string | null
+          primary_industry?: string | null
+          source?: string | null
+          source_id?: string | null
+          tags?: string[] | null
+          total_interactions?: number | null
+          updated_at?: string | null
+          urgency_score?: number | null
+          user_type?: string | null
+        }
+        Update: {
+          base_profile?: Json | null
+          churn_risk?: number | null
+          company_name?: string | null
+          country_code?: string | null
+          created_at?: string | null
+          email?: string | null
+          engagement_score?: number | null
+          full_name?: string | null
+          id?: string
+          intent_score?: number | null
+          last_channel?: string | null
+          last_interaction_at?: string | null
+          lifecycle_stage?: string | null
+          ltv_prediction?: number | null
+          optimal_contact_time?: string | null
+          phone?: string | null
+          preferred_channel?: string | null
+          primary_industry?: string | null
+          source?: string | null
+          source_id?: string | null
+          tags?: string[] | null
+          total_interactions?: number | null
+          updated_at?: string | null
+          urgency_score?: number | null
+          user_type?: string | null
+        }
+        Relationships: []
+      }
+      crm_industry_nodes: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          display_name: string
+          icon: string | null
+          id: string
+          is_active: boolean | null
+          name: string
+          parent_industry_id: string | null
+          sort_order: number | null
+          trigger_conditions: Json | null
+          trigger_keywords: string[] | null
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          display_name: string
+          icon?: string | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+          parent_industry_id?: string | null
+          sort_order?: number | null
+          trigger_conditions?: Json | null
+          trigger_keywords?: string[] | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          display_name?: string
+          icon?: string | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          parent_industry_id?: string | null
+          sort_order?: number | null
+          trigger_conditions?: Json | null
+          trigger_keywords?: string[] | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_industry_nodes_parent_industry_id_fkey"
+            columns: ["parent_industry_id"]
+            isOneToOne: false
+            referencedRelation: "crm_industry_nodes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      crm_interactions: {
+        Row: {
+          ai_insights: Json | null
+          channel: string
+          contact_id: string
+          created_at: string | null
+          direction: string
+          duration_seconds: number | null
+          entities_extracted: Json | null
+          id: string
+          intent_detected: string[] | null
+          occurred_at: string | null
+          raw_content: Json | null
+          recording_url: string | null
+          sentiment: string | null
+          sentiment_score: number | null
+          source_id: string | null
+          source_type: string | null
+          summary: string | null
+        }
+        Insert: {
+          ai_insights?: Json | null
+          channel: string
+          contact_id: string
+          created_at?: string | null
+          direction: string
+          duration_seconds?: number | null
+          entities_extracted?: Json | null
+          id?: string
+          intent_detected?: string[] | null
+          occurred_at?: string | null
+          raw_content?: Json | null
+          recording_url?: string | null
+          sentiment?: string | null
+          sentiment_score?: number | null
+          source_id?: string | null
+          source_type?: string | null
+          summary?: string | null
+        }
+        Update: {
+          ai_insights?: Json | null
+          channel?: string
+          contact_id?: string
+          created_at?: string | null
+          direction?: string
+          duration_seconds?: number | null
+          entities_extracted?: Json | null
+          id?: string
+          intent_detected?: string[] | null
+          occurred_at?: string | null
+          raw_content?: Json | null
+          recording_url?: string | null
+          sentiment?: string | null
+          sentiment_score?: number | null
+          source_id?: string | null
+          source_type?: string | null
+          summary?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_interactions_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "crm_contacts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       crm_leads: {
         Row: {
           company_name: string
@@ -304,6 +560,315 @@ export type Database = {
           preferred_time?: string | null
         }
         Relationships: []
+      }
+      crm_predictions: {
+        Row: {
+          acted_at: string | null
+          acted_upon: boolean | null
+          confidence: number | null
+          contact_id: string
+          generated_at: string | null
+          id: string
+          is_active: boolean | null
+          prediction_type: string
+          prediction_value: Json
+          reasoning: string | null
+          valid_until: string | null
+        }
+        Insert: {
+          acted_at?: string | null
+          acted_upon?: boolean | null
+          confidence?: number | null
+          contact_id: string
+          generated_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          prediction_type: string
+          prediction_value: Json
+          reasoning?: string | null
+          valid_until?: string | null
+        }
+        Update: {
+          acted_at?: string | null
+          acted_upon?: boolean | null
+          confidence?: number | null
+          contact_id?: string
+          generated_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          prediction_type?: string
+          prediction_value?: Json
+          reasoning?: string | null
+          valid_until?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_predictions_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "crm_contacts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      crm_scores: {
+        Row: {
+          computed_at: string | null
+          contact_id: string
+          factors: Json | null
+          id: string
+          score_type: string
+          score_value: number
+          triggered_by: string | null
+        }
+        Insert: {
+          computed_at?: string | null
+          contact_id: string
+          factors?: Json | null
+          id?: string
+          score_type: string
+          score_value: number
+          triggered_by?: string | null
+        }
+        Update: {
+          computed_at?: string | null
+          contact_id?: string
+          factors?: Json | null
+          id?: string
+          score_type?: string
+          score_value?: number
+          triggered_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_scores_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "crm_contacts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      crm_tasks: {
+        Row: {
+          ai_generated: boolean | null
+          ai_reason: string | null
+          assigned_to: string | null
+          completed_at: string | null
+          contact_id: string | null
+          created_at: string | null
+          description: string | null
+          due_at: string | null
+          id: string
+          optimal_time: string | null
+          prediction_id: string | null
+          priority: string | null
+          status: string | null
+          suggested_channel: string | null
+          suggested_content: string | null
+          task_type: string | null
+          title: string
+        }
+        Insert: {
+          ai_generated?: boolean | null
+          ai_reason?: string | null
+          assigned_to?: string | null
+          completed_at?: string | null
+          contact_id?: string | null
+          created_at?: string | null
+          description?: string | null
+          due_at?: string | null
+          id?: string
+          optimal_time?: string | null
+          prediction_id?: string | null
+          priority?: string | null
+          status?: string | null
+          suggested_channel?: string | null
+          suggested_content?: string | null
+          task_type?: string | null
+          title: string
+        }
+        Update: {
+          ai_generated?: boolean | null
+          ai_reason?: string | null
+          assigned_to?: string | null
+          completed_at?: string | null
+          contact_id?: string | null
+          created_at?: string | null
+          description?: string | null
+          due_at?: string | null
+          id?: string
+          optimal_time?: string | null
+          prediction_id?: string | null
+          priority?: string | null
+          status?: string | null
+          suggested_channel?: string | null
+          suggested_content?: string | null
+          task_type?: string | null
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_tasks_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "crm_contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_tasks_prediction_id_fkey"
+            columns: ["prediction_id"]
+            isOneToOne: false
+            referencedRelation: "crm_predictions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      crm_trigger_executions: {
+        Row: {
+          actions_executed: Json | null
+          contact_id: string
+          error_message: string | null
+          executed_at: string | null
+          execution_status: string | null
+          id: string
+          matched_conditions: Json | null
+          trigger_id: string
+        }
+        Insert: {
+          actions_executed?: Json | null
+          contact_id: string
+          error_message?: string | null
+          executed_at?: string | null
+          execution_status?: string | null
+          id?: string
+          matched_conditions?: Json | null
+          trigger_id: string
+        }
+        Update: {
+          actions_executed?: Json | null
+          contact_id?: string
+          error_message?: string | null
+          executed_at?: string | null
+          execution_status?: string | null
+          id?: string
+          matched_conditions?: Json | null
+          trigger_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_trigger_executions_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "crm_contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_trigger_executions_trigger_id_fkey"
+            columns: ["trigger_id"]
+            isOneToOne: false
+            referencedRelation: "crm_triggers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      crm_triggers: {
+        Row: {
+          actions: Json
+          conditions: Json
+          cooldown_minutes: number | null
+          created_at: string | null
+          description: string | null
+          id: string
+          is_active: boolean | null
+          max_executions_per_contact: number | null
+          name: string
+          priority: number | null
+          trigger_event: string
+          updated_at: string | null
+        }
+        Insert: {
+          actions: Json
+          conditions: Json
+          cooldown_minutes?: number | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          max_executions_per_contact?: number | null
+          name: string
+          priority?: number | null
+          trigger_event: string
+          updated_at?: string | null
+        }
+        Update: {
+          actions?: Json
+          conditions?: Json
+          cooldown_minutes?: number | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          max_executions_per_contact?: number | null
+          name?: string
+          priority?: number | null
+          trigger_event?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      crm_variables: {
+        Row: {
+          confidence: number | null
+          contact_id: string
+          created_at: string | null
+          extracted_by: string | null
+          id: string
+          is_current: boolean | null
+          source_channel: string
+          source_interaction_id: string | null
+          superseded_by: string | null
+          variable_name: string
+          variable_type: string | null
+          variable_value: string
+        }
+        Insert: {
+          confidence?: number | null
+          contact_id: string
+          created_at?: string | null
+          extracted_by?: string | null
+          id?: string
+          is_current?: boolean | null
+          source_channel: string
+          source_interaction_id?: string | null
+          superseded_by?: string | null
+          variable_name: string
+          variable_type?: string | null
+          variable_value: string
+        }
+        Update: {
+          confidence?: number | null
+          contact_id?: string
+          created_at?: string | null
+          extracted_by?: string | null
+          id?: string
+          is_current?: boolean | null
+          source_channel?: string
+          source_interaction_id?: string | null
+          superseded_by?: string | null
+          variable_name?: string
+          variable_type?: string | null
+          variable_value?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_variables_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "crm_contacts"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       enterprise_leads: {
         Row: {
