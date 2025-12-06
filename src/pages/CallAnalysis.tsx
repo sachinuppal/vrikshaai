@@ -426,20 +426,20 @@ const CallAnalysis = () => {
             )}
 
             {/* Audio Player */}
-            {callData.recording_url && (
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.25 }}
-              >
-                <Card className="border-border/50">
-                  <CardHeader className="pb-3">
-                    <CardTitle className="text-lg flex items-center gap-2">
-                      <Volume2 className="h-5 w-5 text-primary" />
-                      Call Recording
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.25 }}
+            >
+              <Card className="border-border/50">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <Volume2 className="h-5 w-5 text-primary" />
+                    Call Recording
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {callData.recording_url ? (
                     <audio
                       ref={(el) => setAudioRef(el)}
                       src={callData.recording_url}
@@ -449,10 +449,18 @@ const CallAnalysis = () => {
                       className="w-full"
                       controls
                     />
-                  </CardContent>
-                </Card>
-              </motion.div>
-            )}
+                  ) : (
+                    <div className="flex items-center justify-center py-6 text-muted-foreground bg-muted/30 rounded-lg border border-dashed border-border">
+                      <div className="text-center">
+                        <Volume2 className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                        <p className="text-sm">Recording not available yet</p>
+                        <p className="text-xs mt-1 opacity-70">The recording will appear here once processed</p>
+                      </div>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </motion.div>
 
             {/* Actions */}
             <motion.div
