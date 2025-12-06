@@ -113,6 +113,7 @@ const CallAnalysis = () => {
   const [syncing, setSyncing] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const [audioRef, setAudioRef] = useState<HTMLAudioElement | null>(null);
+  const [linkedContact, setLinkedContact] = useState<{ id: string; full_name: string } | null>(null);
 
   useEffect(() => {
     if (!id) {
@@ -144,6 +145,26 @@ const CallAnalysis = () => {
       supabase.removeChannel(channel);
     };
   }, [id, navigate]);
+
+  // Find linked CRM contact when call data is loaded
+  useEffect(() => {
+    const findLinkedContact = async () => {
+      if (!callData?.full_phone) return;
+      
+      const phoneDigits = callData.full_phone.replace(/\D/g, '').slice(-10);
+      
+      const { data } = await supabase
+        .from('crm_contacts')
+        .select('id, full_name')
+        .or(`phone.ilike.%${phoneDigits}`)
+        .limit(1)
+        .maybeSingle();
+      
+      if (data) setLinkedContact(data);
+    };
+
+    findLinkedContact();
+  }, [callData?.full_phone]);
 
   const fetchCallData = async () => {
     if (!id) return;
@@ -328,17 +349,29 @@ const CallAnalysis = () => {
                 </p>
               </div>
             </div>
-            {needsSync && (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={syncCallData}
-                disabled={syncing}
-              >
-                <RefreshCw className={`h-4 w-4 mr-2 ${syncing ? "animate-spin" : ""}`} />
-                Sync Call Data
-              </Button>
-            )}
+            <div className="flex items-center gap-2">
+              {linkedContact && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => navigate(`/crm/contacts/${linkedContact.id}`)}
+                >
+                  <User className="h-4 w-4 mr-2" />
+                  View CRM Profile
+                </Button>
+              )}
+              {needsSync && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={syncCallData}
+                  disabled={syncing}
+                >
+                  <RefreshCw className={`h-4 w-4 mr-2 ${syncing ? "animate-spin" : ""}`} />
+                  Sync Call Data
+                </Button>
+              )}
+            </div>
           </div>
         </motion.div>
 
