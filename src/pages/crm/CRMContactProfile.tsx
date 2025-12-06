@@ -1,41 +1,27 @@
-import { useEffect, useState, useCallback } from "react";
-import { useParams, useNavigate, Link } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { useParams, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import {
-  ArrowLeft,
-  Phone,
-  Mail,
-  Building,
-  MapPin,
-  Calendar,
-  Zap,
-  TrendingUp,
-  AlertTriangle,
-  DollarSign,
-  MessageSquare,
-  Clock,
-  CheckSquare,
-  Star,
-  ExternalLink,
-  Play,
-  RefreshCw,
-  Eye,
-  CheckCircle,
-  XCircle,
-  Loader2,
-  Workflow,
-} from "lucide-react";
+import { ArrowLeft, RefreshCw } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Progress } from "@/components/ui/progress";
 import { CRMLayout } from "@/components/crm/CRMLayout";
 import { DynamicIndustryGraph } from "@/components/crm/DynamicIndustryGraph";
 import { PredictiveTimeline } from "@/components/crm/PredictiveTimeline";
 import { toast } from "sonner";
+import {
+  ContactHeader,
+  CapturedVariablesCard,
+  VoiceCallsCard,
+  ContactInsightsCard,
+  TasksCard,
+} from "@/components/crm/contact-profile";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
+import { ChevronDown, Network } from "lucide-react";
 
 interface Contact360 {
   contact: any;
@@ -69,6 +55,7 @@ export default function CRMContactProfile() {
   const [scoresUpdating, setScoresUpdating] = useState(false);
   const [voiceCalls, setVoiceCalls] = useState<VoiceCall[]>([]);
   const [callsLoading, setCallsLoading] = useState(false);
+  const [industryOpen, setIndustryOpen] = useState(false);
 
   // Fetch contact data
   useEffect(() => {
@@ -81,7 +68,6 @@ export default function CRMContactProfile() {
   useEffect(() => {
     if (!id) return;
 
-    // Subscribe to contact updates (scores are stored on the contact)
     const contactChannel = supabase
       .channel(`contact-${id}`)
       .on(
@@ -96,7 +82,6 @@ export default function CRMContactProfile() {
           console.log('Contact updated:', payload);
           setScoresUpdating(true);
           
-          // Update scores in state
           setData((prev) => {
             if (!prev) return prev;
             const newContact = payload.new as any;
@@ -121,7 +106,6 @@ export default function CRMContactProfile() {
       )
       .subscribe();
 
-    // Subscribe to new tasks for this contact
     const tasksChannel = supabase
       .channel(`tasks-${id}`)
       .on(
@@ -146,7 +130,6 @@ export default function CRMContactProfile() {
       )
       .subscribe();
 
-    // Cleanup subscriptions
     return () => {
       supabase.removeChannel(contactChannel);
       supabase.removeChannel(tasksChannel);
@@ -155,15 +138,6 @@ export default function CRMContactProfile() {
 
   const fetchContact360 = async () => {
     try {
-      const { data: response, error } = await supabase.functions.invoke(
-        "crm-get-contact-360",
-        {
-          body: {},
-          headers: {},
-        }
-      );
-
-      // Since we can't pass query params easily, fetch directly
       const [contactRes, variablesRes, interactionsRes, tasksRes] = await Promise.all([
         supabase.from("crm_contacts").select("*").eq("id", id).single(),
         supabase.from("crm_variables").select("*").eq("contact_id", id).eq("is_current", true),
@@ -173,13 +147,11 @@ export default function CRMContactProfile() {
 
       if (contactRes.error) throw contactRes.error;
 
-      // Build variables by name
       const variablesByName: Record<string, any> = {};
       for (const v of variablesRes.data || []) {
         variablesByName[v.variable_name] = v;
       }
 
-      // Channel breakdown
       const channelBreakdown: Record<string, number> = {};
       for (const i of interactionsRes.data || []) {
         channelBreakdown[i.channel] = (channelBreakdown[i.channel] || 0) + 1;
@@ -214,7 +186,6 @@ export default function CRMContactProfile() {
     }
   };
 
-  // Fetch voice calls when contact data is available
   useEffect(() => {
     if (data?.contact?.phone) {
       fetchVoiceCalls(data.contact.phone);
@@ -224,7 +195,6 @@ export default function CRMContactProfile() {
   const fetchVoiceCalls = async (phone: string) => {
     setCallsLoading(true);
     try {
-      // Match by full_phone field
       const { data: calls, error } = await supabase
         .from("voice_widget_calls")
         .select("id, name, full_phone, created_at, call_status, call_duration, platform_analysis, client_analysis, observability_analysis")
@@ -240,94 +210,23 @@ export default function CRMContactProfile() {
     }
   };
 
-  const formatCallDuration = (seconds: number | null) => {
-    if (!seconds) return "N/A";
-    const mins = Math.floor(seconds / 60);
-    const secs = Math.floor(seconds % 60);
-    return `${mins}m ${secs}s`;
-  };
-
-  const formatCallDate = (dateString: string) => {
-    return new Date(dateString).toLocaleString("en-US", {
-      month: "short",
-      day: "numeric",
-      hour: "numeric",
-      minute: "2-digit",
-      hour12: true,
-    });
-  };
-
-  const getCallStatusBadge = (status: string | null) => {
-    switch (status?.toLowerCase()) {
-      case "completed":
-        return (
-          <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30">
-            <CheckCircle className="w-3 h-3 mr-1" />
-            Completed
-          </Badge>
-        );
-      case "failed":
-      case "error":
-        return (
-          <Badge className="bg-red-500/20 text-red-400 border-red-500/30">
-            <XCircle className="w-3 h-3 mr-1" />
-            Failed
-          </Badge>
-        );
-      case "in_progress":
-      case "ringing":
-        return (
-          <Badge className="bg-yellow-500/20 text-yellow-400 border-yellow-500/30">
-            <Loader2 className="w-3 h-3 mr-1 animate-spin" />
-            In Progress
-          </Badge>
-        );
-      default:
-        return (
-          <Badge className="bg-muted text-muted-foreground border-border">
-            <Clock className="w-3 h-3 mr-1" />
-            {status || "Pending"}
-          </Badge>
-        );
-    }
-  };
-
-  const hasCallAnalysis = (call: VoiceCall) => {
-    return call.platform_analysis || call.client_analysis || call.observability_analysis;
-  };
-
-  const lifecycleColors: Record<string, string> = {
-    lead: "bg-blue-500",
-    qualified: "bg-amber-500",
-    opportunity: "bg-purple-500",
-    customer: "bg-green-500",
-    churned: "bg-red-500",
-  };
-
-  const getScoreColor = (score: number) => {
-    if (score >= 70) return "text-green-600";
-    if (score >= 40) return "text-amber-600";
-    return "text-red-600";
-  };
-
-  const channelIcons: Record<string, any> = {
-    voice_ai: Phone,
-    voice_human: Phone,
-    email: Mail,
-    whatsapp: MessageSquare,
-    sms: MessageSquare,
-    web: ExternalLink,
-    meeting: Calendar,
-  };
-
   if (loading) {
     return (
       <CRMLayout>
         <div className="space-y-6">
-          <Skeleton className="h-8 w-48" />
+          <div className="flex items-center gap-4">
+            <Skeleton className="h-9 w-32" />
+          </div>
+          <Skeleton className="h-48" />
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <Skeleton className="h-96 lg:col-span-1" />
-            <Skeleton className="h-96 lg:col-span-2" />
+            <div className="space-y-6">
+              <Skeleton className="h-40" />
+              <Skeleton className="h-64" />
+              <Skeleton className="h-48" />
+            </div>
+            <div className="lg:col-span-2">
+              <Skeleton className="h-[500px]" />
+            </div>
           </div>
         </div>
       </CRMLayout>
@@ -348,384 +247,73 @@ export default function CRMContactProfile() {
     );
   }
 
-  const { contact, variables, interactions, scores, tasks, timeline_summary } = data;
+  const { contact, variables, interactions, scores, tasks } = data;
 
   return (
     <CRMLayout>
       <div className="space-y-6">
         {/* Back Button */}
-        <Button variant="ghost" onClick={() => navigate("/crm/contacts")}>
+        <Button variant="ghost" size="sm" onClick={() => navigate("/crm/contacts")}>
           <ArrowLeft className="mr-2 h-4 w-4" />
           Back to Contacts
         </Button>
 
-        {/* Header Card */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-        >
-          <Card className="border-none shadow-card overflow-hidden">
-            <div className={`h-2 ${lifecycleColors[contact.lifecycle_stage] || "bg-gray-500"}`} />
-            <CardContent className="pt-6">
-              <div className="flex flex-col md:flex-row md:items-center gap-6">
-                {/* Avatar */}
-                <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-                  <span className="text-3xl font-bold text-primary">
-                    {(contact.full_name || "U")[0].toUpperCase()}
-                  </span>
-                </div>
+        {/* Header Card - Full Width */}
+        <ContactHeader
+          contact={contact}
+          scores={scores}
+          scoresUpdating={scoresUpdating}
+        />
 
-                {/* Main Info */}
-                <div className="flex-1">
-                  <div className="flex flex-wrap items-center gap-2 mb-2">
-                    <h1 className="text-2xl font-bold">
-                      {contact.full_name || "Unknown Contact"}
-                    </h1>
-                    <Badge className={`${lifecycleColors[contact.lifecycle_stage]} text-white`}>
-                      {contact.lifecycle_stage}
-                    </Badge>
-                    {contact.user_type && (
-                      <Badge variant="outline">{contact.user_type}</Badge>
-                    )}
-                    {contact.primary_industry && (
-                      <Badge variant="secondary">{contact.primary_industry}</Badge>
-                    )}
-                  </div>
-
-                  <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
-                    {contact.company_name && (
-                      <span className="flex items-center gap-1">
-                        <Building className="h-4 w-4" />
-                        {contact.company_name}
-                      </span>
-                    )}
-                    {contact.email && (
-                      <span className="flex items-center gap-1">
-                        <Mail className="h-4 w-4" />
-                        {contact.email}
-                      </span>
-                    )}
-                    {contact.phone && (
-                      <span className="flex items-center gap-1">
-                        <Phone className="h-4 w-4" />
-                        {contact.phone}
-                      </span>
-                    )}
-                  </div>
-                  
-                  {/* Quick Actions */}
-                  <div className="mt-3 flex gap-2">
-                    <Button 
-                      variant="outline" 
-                      size="sm"
-                      onClick={() => navigate(`/crm/contacts/${id}/flows`)}
-                    >
-                      <Workflow className="h-4 w-4 mr-2" />
-                      Manage Flows
-                    </Button>
-                  </div>
-                </div>
-
-                {/* Quick Scores */}
-                <div className="flex gap-6">
-                  <div className="text-center">
-                    <div className={`text-2xl font-bold ${getScoreColor(scores.current.intent)}`}>
-                      {scores.current.intent}%
-                    </div>
-                    <div className="text-xs text-muted-foreground flex items-center gap-1 justify-center">
-                      <Zap className="h-3 w-3" /> Intent
-                    </div>
-                  </div>
-                  <div className="text-center">
-                    <div className={`text-2xl font-bold ${getScoreColor(scores.current.engagement)}`}>
-                      {scores.current.engagement}%
-                    </div>
-                    <div className="text-xs text-muted-foreground flex items-center gap-1 justify-center">
-                      <TrendingUp className="h-3 w-3" /> Engagement
-                    </div>
-                  </div>
-                  <div className="text-center">
-                    <div className={`text-2xl font-bold ${getScoreColor(100 - scores.current.churn_risk)}`}>
-                      {scores.current.churn_risk}%
-                    </div>
-                    <div className="text-xs text-muted-foreground flex items-center gap-1 justify-center">
-                      <AlertTriangle className="h-3 w-3" /> Churn Risk
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </motion.div>
-
+        {/* Main Content Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Left Column - Variables & Scores */}
-          <div className="space-y-6">
-            {/* Scores Card */}
+          {/* Left Column - Key Information */}
+          <div className="space-y-5">
+            {/* AI Insights - Most Important */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
             >
-            <Card className="border-none shadow-card">
-                <CardHeader className="flex flex-row items-center justify-between">
-                  <CardTitle className="text-lg">AI Scores</CardTitle>
-                  {scoresUpdating && (
-                    <RefreshCw className="h-4 w-4 animate-spin text-primary" />
-                  )}
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div>
-                    <div className="flex justify-between text-sm mb-1">
-                      <span className="flex items-center gap-1">
-                        <Zap className="h-4 w-4 text-amber-500" /> Intent
-                      </span>
-                      <span className="font-medium">{scores.current.intent}%</span>
-                    </div>
-                    <Progress value={scores.current.intent} className="h-2" />
-                  </div>
-                  <div>
-                    <div className="flex justify-between text-sm mb-1">
-                      <span className="flex items-center gap-1">
-                        <TrendingUp className="h-4 w-4 text-blue-500" /> Engagement
-                      </span>
-                      <span className="font-medium">{scores.current.engagement}%</span>
-                    </div>
-                    <Progress value={scores.current.engagement} className="h-2" />
-                  </div>
-                  <div>
-                    <div className="flex justify-between text-sm mb-1">
-                      <span className="flex items-center gap-1">
-                        <Clock className="h-4 w-4 text-purple-500" /> Urgency
-                      </span>
-                      <span className="font-medium">{scores.current.urgency}%</span>
-                    </div>
-                    <Progress value={scores.current.urgency} className="h-2" />
-                  </div>
-                  <div>
-                    <div className="flex justify-between text-sm mb-1">
-                      <span className="flex items-center gap-1">
-                        <AlertTriangle className="h-4 w-4 text-red-500" /> Churn Risk
-                      </span>
-                      <span className="font-medium">{scores.current.churn_risk}%</span>
-                    </div>
-                    <Progress value={scores.current.churn_risk} className="h-2 [&>div]:bg-red-500" />
-                  </div>
-                  {scores.current.ltv_prediction > 0 && (
-                    <div className="pt-2 border-t">
-                      <div className="flex items-center gap-2">
-                        <DollarSign className="h-5 w-5 text-green-500" />
-                        <div>
-                          <div className="text-sm text-muted-foreground">Predicted LTV</div>
-                          <div className="text-xl font-bold text-green-600">
-                            ₹{scores.current.ltv_prediction.toLocaleString()}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
+              <ContactInsightsCard
+                contact={contact}
+                scores={scores}
+                interactions={interactions}
+                tasks={tasks}
+              />
             </motion.div>
 
-            {/* Variables Card */}
+            {/* Captured Variables */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.15 }}
+            >
+              <CapturedVariablesCard variables={variables} />
+            </motion.div>
+
+            {/* Voice Calls */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
             >
-              <Card className="border-none shadow-card">
-                <CardHeader>
-                  <CardTitle className="text-lg">Captured Variables</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  {variables.length === 0 ? (
-                    <p className="text-sm text-muted-foreground text-center py-4">
-                      No variables captured yet
-                    </p>
-                  ) : (
-                    <div className="space-y-3">
-                      {variables.map((variable) => (
-                        <div
-                          key={variable.id}
-                          className="p-3 rounded-lg bg-muted/50"
-                        >
-                          <div className="flex items-center justify-between mb-1">
-                            <span className="text-xs font-medium text-muted-foreground uppercase">
-                              {variable.variable_name.replace(/_/g, " ")}
-                            </span>
-                            <Badge variant="outline" className="text-xs">
-                              {variable.source_channel}
-                            </Badge>
-                          </div>
-                          <div className="text-sm font-medium">
-                            {variable.variable_value}
-                          </div>
-                          <div className="text-xs text-muted-foreground mt-1">
-                            Confidence: {Math.round(variable.confidence * 100)}%
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
+              <VoiceCallsCard calls={voiceCalls} loading={callsLoading} />
             </motion.div>
+          </div>
 
+          {/* Right Column - Timeline & Tasks */}
+          <div className="lg:col-span-2 space-y-5">
             {/* Tasks Card */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3 }}
+              transition={{ delay: 0.15 }}
             >
-              <Card className="border-none shadow-card">
-                <CardHeader>
-                  <CardTitle className="text-lg flex items-center gap-2">
-                    <CheckSquare className="h-5 w-5" />
-                    Pending Tasks
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  {tasks.length === 0 ? (
-                    <p className="text-sm text-muted-foreground text-center py-4">
-                      No pending tasks
-                    </p>
-                  ) : (
-                    <div className="space-y-3">
-                      {tasks.map((task) => (
-                        <div
-                          key={task.id}
-                          className="p-3 rounded-lg border bg-card"
-                        >
-                          <div className="flex items-start justify-between mb-1">
-                            <span className="font-medium text-sm">{task.title}</span>
-                            <Badge
-                              variant={
-                                task.priority === "urgent"
-                                  ? "destructive"
-                                  : task.priority === "high"
-                                  ? "default"
-                                  : "secondary"
-                              }
-                              className="text-xs"
-                            >
-                              {task.priority}
-                            </Badge>
-                          </div>
-                          {task.due_at && (
-                            <p className="text-xs text-muted-foreground flex items-center gap-1">
-                              <Clock className="h-3 w-3" />
-                              Due: {new Date(task.due_at).toLocaleDateString()}
-                            </p>
-                          )}
-                          {task.ai_generated && (
-                            <Badge variant="outline" className="text-xs mt-2">
-                              <Zap className="h-3 w-3 mr-1" /> AI Generated
-                            </Badge>
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
+              <TasksCard tasks={tasks} />
             </motion.div>
 
-            {/* Industry Graph */}
-            {contact.primary_industry && (
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.4 }}
-              >
-                <DynamicIndustryGraph
-                  primaryIndustry={contact.primary_industry}
-                  contactId={contact.id}
-                />
-              </motion.div>
-            )}
-
-            {/* Voice Calls Card */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.5 }}
-            >
-              <Card className="border-none shadow-card">
-                <CardHeader className="flex flex-row items-center justify-between">
-                  <CardTitle className="text-lg flex items-center gap-2">
-                    <Phone className="h-5 w-5" />
-                    Voice Calls
-                  </CardTitle>
-                  {voiceCalls.length > 0 && (
-                    <Badge variant="secondary">{voiceCalls.length}</Badge>
-                  )}
-                </CardHeader>
-                <CardContent>
-                  {callsLoading ? (
-                    <div className="flex items-center justify-center py-4">
-                      <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
-                    </div>
-                  ) : voiceCalls.length === 0 ? (
-                    <p className="text-sm text-muted-foreground text-center py-4">
-                      No voice calls recorded
-                    </p>
-                  ) : (
-                    <div className="space-y-3">
-                      {voiceCalls.slice(0, 5).map((call) => (
-                        <div
-                          key={call.id}
-                          className="p-3 rounded-lg border bg-card hover:bg-muted/50 transition-colors"
-                        >
-                          <div className="flex items-start justify-between mb-2">
-                            <div className="flex items-center gap-2">
-                              <Phone className="h-4 w-4 text-muted-foreground" />
-                              <span className="text-sm font-medium">{call.name}</span>
-                            </div>
-                            {getCallStatusBadge(call.call_status)}
-                          </div>
-                          <div className="flex items-center justify-between text-xs text-muted-foreground">
-                            <span className="flex items-center gap-1">
-                              <Clock className="h-3 w-3" />
-                              {formatCallDate(call.created_at)}
-                            </span>
-                            <span>{formatCallDuration(call.call_duration)}</span>
-                          </div>
-                          <div className="flex items-center justify-between mt-2">
-                            {hasCallAnalysis(call) ? (
-                              <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 text-xs">
-                                Analyzed
-                              </Badge>
-                            ) : (
-                              <Badge variant="outline" className="text-xs">
-                                Pending Analysis
-                              </Badge>
-                            )}
-                            <Link to={`/call-analysis/${call.id}`}>
-                              <Button variant="ghost" size="sm" className="h-7 text-xs">
-                                <Eye className="h-3 w-3 mr-1" />
-                                View
-                              </Button>
-                            </Link>
-                          </div>
-                        </div>
-                      ))}
-                      {voiceCalls.length > 5 && (
-                        <Link to="/crm/calls" className="block">
-                          <Button variant="outline" size="sm" className="w-full">
-                            View All {voiceCalls.length} Calls
-                          </Button>
-                        </Link>
-                      )}
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            </motion.div>
-          </div>
-
-          {/* Right Column - Predictive Timeline */}
-          <div className="lg:col-span-2">
+            {/* Predictive Timeline */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -740,6 +328,40 @@ export default function CRMContactProfile() {
             </motion.div>
           </div>
         </div>
+
+        {/* Industry Graph - Collapsible at Bottom */}
+        {contact.primary_industry && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+          >
+            <Collapsible open={industryOpen} onOpenChange={setIndustryOpen}>
+              <CollapsibleTrigger asChild>
+                <Button
+                  variant="outline"
+                  className="w-full justify-between h-12"
+                >
+                  <span className="flex items-center gap-2">
+                    <Network className="h-4 w-4 text-primary" />
+                    Industry Network Graph
+                  </span>
+                  <ChevronDown
+                    className={`h-4 w-4 transition-transform duration-200 ${
+                      industryOpen ? "rotate-180" : ""
+                    }`}
+                  />
+                </Button>
+              </CollapsibleTrigger>
+              <CollapsibleContent className="mt-4">
+                <DynamicIndustryGraph
+                  primaryIndustry={contact.primary_industry}
+                  contactId={contact.id}
+                />
+              </CollapsibleContent>
+            </Collapsible>
+          </motion.div>
+        )}
       </div>
     </CRMLayout>
   );
