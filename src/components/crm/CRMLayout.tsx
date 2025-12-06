@@ -35,6 +35,7 @@ const navItems = [
   { title: "Dashboard", url: "/crm/dashboard", icon: LayoutDashboard },
   { title: "Contacts", url: "/crm/contacts", icon: Users },
   { title: "Tasks", url: "/crm/tasks", icon: CheckSquare },
+  { title: "Triggers", url: "/crm/triggers", icon: Zap },
 ];
 
 export function CRMLayout({ children }: CRMLayoutProps) {

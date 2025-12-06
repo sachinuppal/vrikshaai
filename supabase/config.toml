@@ -65,3 +65,9 @@ verify_jwt = true
 
 [functions.crm-compute-scores]
 verify_jwt = true
+
+[functions.crm-evaluate-triggers]
+verify_jwt = true
+
+[functions.crm-execute-action]
+verify_jwt = true

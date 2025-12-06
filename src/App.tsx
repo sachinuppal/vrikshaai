@@ -30,6 +30,7 @@ import CRMDashboard from "./pages/crm/CRMDashboard";
 import CRMContacts from "./pages/crm/CRMContacts";
 import CRMContactProfile from "./pages/crm/CRMContactProfile";
 import CRMTasks from "./pages/crm/CRMTasks";
+import CRMTriggers from "./pages/crm/CRMTriggers";
 import AICallingConsentModal from "./components/AICallingConsentModal";
 import { CookieConsent } from "./components/CookieConsent";
 
@@ -69,6 +70,7 @@ const App = () => (
               <Route path="/crm/contacts" element={<AdminRoute><CRMContacts /></AdminRoute>} />
               <Route path="/crm/contacts/:id" element={<AdminRoute><CRMContactProfile /></AdminRoute>} />
               <Route path="/crm/tasks" element={<AdminRoute><CRMTasks /></AdminRoute>} />
+              <Route path="/crm/triggers" element={<AdminRoute><CRMTriggers /></AdminRoute>} />
               <Route path="/voice" element={<Voice />} />
               <Route
                 path="/call-history"
