@@ -20,7 +20,7 @@ interface FlowNodeProps {
   node: FlowNodeData;
   isSelected: boolean;
   isHighlighted?: boolean;
-  onClick: () => void;
+  onClick: (e?: React.MouseEvent) => void;
   onConnectionStart?: (nodeId: string, point: ConnectionPoint) => void;
   onConnectionEnd?: (nodeId: string, point: ConnectionPoint) => void;
   isConnecting?: boolean;
@@ -53,7 +53,11 @@ export const FlowNode: React.FC<FlowNodeProps> = ({
     onConnectionEnd?.(node.id, point);
   };
 
-  // Get node description from config or use default
+  const handleClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    onClick(e);
+  };
+
   const getNodeDescription = () => {
     if (node.description) return node.description;
     
@@ -76,10 +80,7 @@ export const FlowNode: React.FC<FlowNodeProps> = ({
   return (
     <motion.div
       initial={{ scale: 0.8, opacity: 0 }}
-      animate={{ 
-        scale: isHighlighted ? 1.02 : 1, 
-        opacity: 1,
-      }}
+      animate={{ scale: isHighlighted ? 1.02 : 1, opacity: 1 }}
       transition={{ type: 'spring', stiffness: 300, damping: 25 }}
       className={cn(
         "absolute cursor-pointer select-none group",
@@ -96,21 +97,18 @@ export const FlowNode: React.FC<FlowNodeProps> = ({
         top: node.position_y,
         transform: 'translate(-50%, -50%)'
       }}
-      onClick={onClick}
+      onClick={handleClick}
     >
-      {/* Drag Handle */}
       <div className="absolute -left-1 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity cursor-grab">
         <GripVertical className="w-4 h-4 text-muted-foreground" />
       </div>
 
-      {/* Edit Button */}
       <div className="absolute -right-2 -top-2 opacity-0 group-hover:opacity-100 transition-opacity z-20">
         <div className="w-6 h-6 rounded-full bg-primary text-white flex items-center justify-center shadow-md cursor-pointer hover:scale-110 transition-transform">
           <Pencil className="w-3 h-3" />
         </div>
       </div>
 
-      {/* Node Type Badge */}
       <div 
         className="absolute -top-2.5 left-4 px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wider text-white shadow-sm"
         style={{ backgroundColor: nodeType.color }}
@@ -118,133 +116,82 @@ export const FlowNode: React.FC<FlowNodeProps> = ({
         {nodeType.category}
       </div>
 
-      {/* Node Content */}
       <div className="p-4 pt-5">
-        {/* Header Row */}
         <div className="flex items-center gap-3 mb-2">
           <div 
             className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0 shadow-sm"
-            style={{ 
-              backgroundColor: nodeType.bgColor,
-              border: `1px solid ${nodeType.color}20`
-            }}
+            style={{ backgroundColor: nodeType.bgColor, border: `1px solid ${nodeType.color}20` }}
           >
             <Icon className="w-5 h-5" style={{ color: nodeType.color }} />
           </div>
           <div className="flex-1 min-w-0">
-            <h4 className="font-semibold text-sm text-slate-800 truncate">
-              {node.label}
-            </h4>
-            <p className="text-xs text-slate-500">
-              {nodeType.label}
-            </p>
+            <h4 className="font-semibold text-sm text-slate-800 truncate">{node.label}</h4>
+            <p className="text-xs text-slate-500">{nodeType.label}</p>
           </div>
         </div>
 
-        {/* Description */}
-        <p className="text-xs text-slate-500 mt-2 line-clamp-2 min-h-[32px]">
-          {getNodeDescription()}
-        </p>
+        <p className="text-xs text-slate-500 mt-2 line-clamp-2 min-h-[32px]">{getNodeDescription()}</p>
 
-        {/* Config Indicator */}
         {node.config && Object.keys(node.config).length > 0 && (
           <div className="mt-2 flex items-center gap-1">
             <div className="w-1.5 h-1.5 rounded-full bg-emerald-500"></div>
-            <span className="text-[10px] text-slate-400">
-              {Object.keys(node.config).length} configured
-            </span>
+            <span className="text-[10px] text-slate-400">{Object.keys(node.config).length} configured</span>
           </div>
         )}
       </div>
 
-      {/* Input Connection Point (top) */}
       {nodeType.category !== 'trigger' && (
         <div 
-          className={cn(
-            connectionPointClasses, 
-            "-top-3 left-1/2 w-5 h-5 bg-white shadow-md"
-          )}
+          className={cn(connectionPointClasses, "-top-3 left-1/2 w-5 h-5 bg-white shadow-md")}
           style={{ borderColor: nodeType.color }}
           onMouseDown={(e) => handleConnectionMouseDown('input', e)}
           onMouseUp={(e) => handleConnectionMouseUp('input', e)}
           title="Drop connection here"
         >
-          <div 
-            className="absolute inset-1 rounded-full"
-            style={{ backgroundColor: nodeType.color }}
-          />
+          <div className="absolute inset-1 rounded-full" style={{ backgroundColor: nodeType.color }} />
         </div>
       )}
 
-      {/* Output Connection Point (bottom - single) */}
       {nodeType.category !== 'end' && nodeType.category !== 'router' && (
         <div 
-          className={cn(
-            connectionPointClasses, 
-            "-bottom-3 left-1/2 w-5 h-5 bg-white shadow-md"
-          )}
+          className={cn(connectionPointClasses, "-bottom-3 left-1/2 w-5 h-5 bg-white shadow-md")}
           style={{ borderColor: nodeType.color }}
           onMouseDown={(e) => handleConnectionMouseDown('output', e)}
           onMouseUp={(e) => handleConnectionMouseUp('output', e)}
           title="Drag to connect"
         >
-          <div 
-            className="absolute inset-1 rounded-full"
-            style={{ backgroundColor: nodeType.color }}
-          />
+          <div className="absolute inset-1 rounded-full" style={{ backgroundColor: nodeType.color }} />
         </div>
       )}
 
-      {/* Multiple outputs for routers */}
       {nodeType.category === 'router' && (
         <>
-          {/* Left output */}
           <div 
-            className={cn(
-              connectionPointClasses, 
-              "-bottom-3 left-1/4 w-4 h-4 bg-white shadow-md"
-            )}
+            className={cn(connectionPointClasses, "-bottom-3 left-1/4 w-4 h-4 bg-white shadow-md")}
             style={{ borderColor: nodeType.color }}
             onMouseDown={(e) => handleConnectionMouseDown('output-left', e)}
             onMouseUp={(e) => handleConnectionMouseUp('output-left', e)}
             title="Path A"
           >
-            <div 
-              className="absolute inset-0.5 rounded-full"
-              style={{ backgroundColor: nodeType.color }}
-            />
+            <div className="absolute inset-0.5 rounded-full" style={{ backgroundColor: nodeType.color }} />
           </div>
-          {/* Center output */}
           <div 
-            className={cn(
-              connectionPointClasses, 
-              "-bottom-3 left-1/2 w-5 h-5 bg-white shadow-md"
-            )}
+            className={cn(connectionPointClasses, "-bottom-3 left-1/2 w-5 h-5 bg-white shadow-md")}
             style={{ borderColor: nodeType.color }}
             onMouseDown={(e) => handleConnectionMouseDown('output', e)}
             onMouseUp={(e) => handleConnectionMouseUp('output', e)}
             title="Default path"
           >
-            <div 
-              className="absolute inset-1 rounded-full"
-              style={{ backgroundColor: nodeType.color }}
-            />
+            <div className="absolute inset-1 rounded-full" style={{ backgroundColor: nodeType.color }} />
           </div>
-          {/* Right output */}
           <div 
-            className={cn(
-              connectionPointClasses, 
-              "-bottom-3 left-3/4 w-4 h-4 bg-white shadow-md"
-            )}
+            className={cn(connectionPointClasses, "-bottom-3 left-3/4 w-4 h-4 bg-white shadow-md")}
             style={{ borderColor: nodeType.color }}
             onMouseDown={(e) => handleConnectionMouseDown('output-right', e)}
             onMouseUp={(e) => handleConnectionMouseUp('output-right', e)}
             title="Path B"
           >
-            <div 
-              className="absolute inset-0.5 rounded-full"
-              style={{ backgroundColor: nodeType.color }}
-            />
+            <div className="absolute inset-0.5 rounded-full" style={{ backgroundColor: nodeType.color }} />
           </div>
         </>
       )}
