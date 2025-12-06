@@ -39,12 +39,21 @@ export const useCallStatus = (): UseCallStatusReturn => {
     if (!data) return "idle";
     
     const hasAnalysis = data.platform_analysis && data.client_analysis;
-    const isCompleted = data.call_status === "completed";
+    const callStatus = data.call_status;
     
+    // Has full analysis → ready to view
     if (hasAnalysis) return "analysis_ready";
-    if (isCompleted && !hasAnalysis) return "analyzing";
-    if (data.call_status === "in_progress") return "in_progress";
-    if (data.call_status) return "completed";
+    
+    // Completed but still processing analysis
+    if (callStatus === "completed" && !hasAnalysis) return "analyzing";
+    
+    // Active call states
+    if (callStatus === "in_progress") return "in_progress";
+    
+    // Initial state - call created but not yet connected
+    if (callStatus === "initiated" || !callStatus) return "initiated";
+    
+    // Fallback
     return "initiated";
   }, []);
 
