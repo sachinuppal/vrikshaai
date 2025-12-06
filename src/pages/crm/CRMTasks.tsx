@@ -13,6 +13,7 @@ import {
   MessageSquare,
   Calendar,
   User,
+  Radio,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -22,6 +23,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { CRMLayout } from "@/components/crm/CRMLayout";
+import { useCRMRealtime } from "@/hooks/useCRMRealtime";
 
 interface Task {
   id: string;
@@ -49,6 +51,12 @@ export default function CRMTasks() {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("pending");
+
+  // Real-time updates
+  useCRMRealtime({
+    tables: ['crm_tasks'],
+    showToasts: true,
+  });
 
   useEffect(() => {
     fetchTasks();
@@ -155,7 +163,13 @@ export default function CRMTasks() {
       <div className="space-y-6">
         {/* Header */}
         <div>
-          <h1 className="text-3xl font-bold text-foreground">Tasks</h1>
+          <h1 className="text-3xl font-bold text-foreground flex items-center gap-3">
+            Tasks
+            <Badge variant="outline" className="text-xs font-normal flex items-center gap-1">
+              <Radio className="h-3 w-3 text-green-500 animate-pulse" />
+              Live
+            </Badge>
+          </h1>
           <p className="text-muted-foreground">
             AI-generated and manual follow-up tasks
           </p>

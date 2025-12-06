@@ -13,6 +13,7 @@ import {
   ChevronRight,
   Zap,
   TrendingUp,
+  Radio,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -28,6 +29,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { CRMLayout } from "@/components/crm/CRMLayout";
+import { useCRMRealtime } from "@/hooks/useCRMRealtime";
 
 interface Contact {
   id: string;
@@ -61,6 +63,12 @@ export default function CRMContacts() {
   const [sortBy, setSortBy] = useState(searchParams.get("sort") || "last_interaction_at");
   const [page, setPage] = useState(1);
   const limit = 20;
+
+  // Real-time updates
+  useCRMRealtime({
+    tables: ['crm_contacts'],
+    showToasts: true,
+  });
 
   useEffect(() => {
     fetchContacts();
@@ -148,7 +156,13 @@ export default function CRMContacts() {
         {/* Header */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-bold text-foreground">Contacts</h1>
+            <h1 className="text-3xl font-bold text-foreground flex items-center gap-3">
+              Contacts
+              <Badge variant="outline" className="text-xs font-normal flex items-center gap-1">
+                <Radio className="h-3 w-3 text-green-500 animate-pulse" />
+                Live
+              </Badge>
+            </h1>
             <p className="text-muted-foreground">
               {totalCount} contacts in your CRM
             </p>

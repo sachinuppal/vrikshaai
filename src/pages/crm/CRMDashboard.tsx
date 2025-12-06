@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { 
@@ -10,7 +10,8 @@ import {
   Zap,
   Target,
   Clock,
-  AlertTriangle
+  AlertTriangle,
+  Radio
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -18,6 +19,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { CRMLayout } from "@/components/crm/CRMLayout";
+import { useCRMRealtime } from "@/hooks/useCRMRealtime";
 
 interface DashboardStats {
   totalContacts: number;
@@ -32,6 +34,13 @@ export default function CRMDashboard() {
   const navigate = useNavigate();
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isLive, setIsLive] = useState(true);
+
+  // Real-time updates
+  useCRMRealtime({
+    tables: ['crm_contacts', 'crm_interactions', 'crm_tasks'],
+    showToasts: true,
+  });
 
   useEffect(() => {
     fetchDashboardStats();
@@ -113,7 +122,13 @@ export default function CRMDashboard() {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-foreground">CRM Dashboard</h1>
+            <h1 className="text-3xl font-bold text-foreground flex items-center gap-3">
+              CRM Dashboard
+              <Badge variant="outline" className="text-xs font-normal flex items-center gap-1">
+                <Radio className="h-3 w-3 text-green-500 animate-pulse" />
+                Live
+              </Badge>
+            </h1>
             <p className="text-muted-foreground">
               Agentic CRM with AI-powered insights
             </p>
