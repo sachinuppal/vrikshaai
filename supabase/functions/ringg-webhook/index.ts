@@ -89,8 +89,25 @@ serve(async (req) => {
       });
     }
 
-    const payload: WebhookPayload = await req.json();
-    console.log("Received Ringg webhook:", payload.event_type, payload.call_id);
+    const rawPayload = await req.json();
+    
+    // Log the FULL raw payload for debugging
+    console.log("=== RAW RINGG WEBHOOK PAYLOAD ===");
+    console.log(JSON.stringify(rawPayload, null, 2));
+    console.log("=== END RAW PAYLOAD ===");
+    
+    // Handle flexible field names (event_type vs eventType, call_id vs callId)
+    const eventType = rawPayload.event_type || rawPayload.eventType || rawPayload.event;
+    const callId = rawPayload.call_id || rawPayload.callId || rawPayload.id;
+    
+    console.log("Parsed - eventType:", eventType, "callId:", callId);
+    
+    // Normalize the payload to use consistent field names
+    const payload: WebhookPayload = {
+      ...rawPayload,
+      event_type: eventType,
+      call_id: callId,
+    } as WebhookPayload;
 
     // Initialize Supabase client
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
