@@ -78,7 +78,7 @@ Deno.serve(async (req) => {
       call_config: {
         idle_timeout_warning: 5,
         idle_timeout_end: 10,
-        max_call_length: 240,
+        max_call_length: 600,
         call_time: {
           call_start_time: "08:00",
           call_end_time: "20:00",
