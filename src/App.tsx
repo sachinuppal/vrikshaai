@@ -20,6 +20,7 @@ import Enterprises from "./pages/Enterprises";
 import CRM from "./pages/CRM";
 import Voice from "./pages/Voice";
 import CallAnalysis from "./pages/CallAnalysis";
+import CallHistory from "./pages/CallHistory";
 import AICallingConsentModal from "./components/AICallingConsentModal";
 import { CookieConsent } from "./components/CookieConsent";
 
@@ -46,6 +47,7 @@ const App = () => (
               <Route path="/enterprises" element={<Enterprises />} />
               <Route path="/crm" element={<CRM />} />
               <Route path="/voice" element={<Voice />} />
+              <Route path="/call-history" element={<CallHistory />} />
               <Route path="/call-analysis/:id" element={<CallAnalysis />} />
               <Route
                 path="/applications"
