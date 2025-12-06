@@ -55,9 +55,11 @@ CLOSING LINE:
 `;
 
 interface TranscriptEntry {
-  role: string;
-  content: string;
+  role?: string;
+  content?: string;
   timestamp?: string;
+  bot?: string;
+  user?: string;
 }
 
 serve(async (req) => {
@@ -80,16 +82,36 @@ serve(async (req) => {
       throw new Error("LOVABLE_API_KEY is not configured");
     }
 
-    // Format transcript for analysis
+    // Format transcript for analysis - handle both Ringg bot/user format and role/content format
     let transcriptText = "";
     if (Array.isArray(transcript)) {
       transcriptText = transcript
-        .map((entry: TranscriptEntry) => `${entry.role}: ${entry.content}`)
+        .map((entry: TranscriptEntry) => {
+          // Handle Ringg's bot/user format
+          if (entry.bot) {
+            return `Bot: ${entry.bot}`;
+          }
+          if (entry.user) {
+            return `User: ${entry.user}`;
+          }
+          // Fallback to role/content format
+          if (entry.role && entry.content) {
+            return `${entry.role}: ${entry.content}`;
+          }
+          return "";
+        })
+        .filter(Boolean)
         .join("\n");
     } else if (typeof transcript === "string") {
       transcriptText = transcript;
     } else {
       transcriptText = JSON.stringify(transcript, null, 2);
+    }
+
+    // Validate transcript is not empty
+    if (!transcriptText || transcriptText.trim().length === 0) {
+      console.error("Transcript is empty after parsing:", JSON.stringify(transcript));
+      throw new Error("Failed to parse transcript - no content found");
     }
 
     console.log("Analyzing transcript for call:", call_id);
