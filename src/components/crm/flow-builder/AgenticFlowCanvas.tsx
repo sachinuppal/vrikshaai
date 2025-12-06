@@ -341,10 +341,22 @@ export const AgenticFlowCanvas: React.FC<AgenticFlowCanvasProps> = ({
     setConnectionState(null);
   }, [connectionState, onEdgeAdd]);
 
-  const getConnectionPointOffset = (point: ConnectionPoint, isSource: boolean) => {
-    const yOffset = isSource ? 60 : -60;
-    if (point === 'output-left') return { x: -55, y: yOffset };
-    if (point === 'output-right') return { x: 55, y: yOffset };
+  // Node dimensions: 220px width, ~140px height (with transform translate -50%, -50%)
+  // Connection points are at -top-3 (input) and -bottom-3 (output) = ~12px from edge
+  const getConnectionPointOffset = (point: ConnectionPoint, isSource: boolean): { x: number; y: number } => {
+    const nodeHeight = 140;
+    const halfHeight = nodeHeight / 2;
+    const connectionOffset = 12; // -top-3 / -bottom-3 = 12px
+    
+    // Y offset: from center of node to connection point
+    const yOffset = isSource ? halfHeight + connectionOffset : -(halfHeight + connectionOffset);
+    
+    // X offsets for router outputs
+    const nodeWidth = 220;
+    const quarterWidth = nodeWidth / 4; // 55px
+    
+    if (point === 'output-left') return { x: -quarterWidth, y: yOffset };
+    if (point === 'output-right') return { x: quarterWidth, y: yOffset };
     return { x: 0, y: yOffset };
   };
 
@@ -397,37 +409,144 @@ export const AgenticFlowCanvas: React.FC<AgenticFlowCanvasProps> = ({
 
       const sourceType = NODE_TYPES[sourceNode.node_type];
       const sourceOffset = getConnectionPointOffset(edge.source_point || 'output', true);
+      const targetOffset = getConnectionPointOffset('input', false);
       const isSelected = selectedEdgeId === edge.id;
       const isHovered = hoveredEdgeId === edge.id;
       
+      // Calculate precise start and end points
       const startX = sourceNode.position_x + sourceOffset.x;
       const startY = sourceNode.position_y + sourceOffset.y;
-      const endX = targetNode.position_x;
-      const endY = targetNode.position_y - 60;
+      const endX = targetNode.position_x + targetOffset.x;
+      const endY = targetNode.position_y + targetOffset.y;
+      
+      // Smart Bezier curve calculation
+      const dx = endX - startX;
       const dy = endY - startY;
-      const controlOffset = Math.min(Math.abs(dy) * 0.5, 100);
-      const path = `M ${startX} ${startY} C ${startX} ${startY + controlOffset}, ${endX} ${endY - controlOffset}, ${endX} ${endY}`;
+      const absDy = Math.abs(dy);
+      const absDx = Math.abs(dx);
+      
+      // Minimum offset ensures clean curves even when nodes are close
+      const minOffset = 60;
+      // Control offset scales with distance but has min/max bounds
+      const controlOffsetY = Math.max(Math.min(absDy * 0.4, 150), minOffset);
+      
+      // Adjust control points for horizontal movement to prevent weird curves
+      const horizontalAdjust = Math.min(absDx * 0.1, 30);
+      
+      // Create smooth S-curve path
+      const path = `M ${startX} ${startY} C ${startX + (dx > 0 ? horizontalAdjust : -horizontalAdjust)} ${startY + controlOffsetY}, ${endX + (dx > 0 ? -horizontalAdjust : horizontalAdjust)} ${endY - controlOffsetY}, ${endX} ${endY}`;
+      
       const edgeColor = sourceType?.color || 'hsl(var(--primary))';
-      const midX = (startX + endX) / 2;
+      
+      // Calculate midpoint for label positioning (offset slightly from path)
+      const midX = (startX + endX) / 2 - 45;
       const midY = (startY + endY) / 2;
+      
+      // Arrow dimensions (smaller and cleaner)
+      const arrowSize = 5;
+      const arrowHeight = arrowSize * 1.8;
 
       return (
-        <g key={edge.id} onClick={(e) => handleEdgeClick(edge.id, e)} onMouseEnter={() => setHoveredEdgeId(edge.id)} onMouseLeave={() => setHoveredEdgeId(null)} className="cursor-pointer">
-          <path d={path} fill="none" stroke="transparent" strokeWidth={20} />
-          {(isSelected || isHovered) && <path d={path} fill="none" stroke={isSelected ? 'hsl(var(--destructive))' : edgeColor} strokeWidth={8} strokeLinecap="round" opacity={0.2} />}
-          <motion.path d={path} fill="none" stroke={isSelected ? 'hsl(var(--destructive))' : edgeColor} strokeWidth={isSelected || isHovered ? 3 : 2} strokeLinecap="round" initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ duration: 0.5, ease: 'easeOut' }} />
-          {!isSelected && <circle r={3} fill={edgeColor}><animateMotion dur="2s" repeatCount="indefinite" path={path} /></circle>}
-          <motion.polygon points={`${endX},${endY} ${endX - 8},${endY - 14} ${endX + 8},${endY - 14}`} fill={isSelected ? 'hsl(var(--destructive))' : edgeColor} initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ delay: 0.3 }} />
+        <g 
+          key={edge.id} 
+          data-edge-id={edge.id}
+          onClick={(e) => handleEdgeClick(edge.id, e)} 
+          onMouseEnter={() => setHoveredEdgeId(edge.id)} 
+          onMouseLeave={() => setHoveredEdgeId(null)} 
+          className="cursor-pointer"
+        >
+          {/* Invisible wider path for easier clicking */}
+          <path d={path} fill="none" stroke="transparent" strokeWidth={24} />
+          
+          {/* Glow effect on hover/select */}
+          {(isSelected || isHovered) && (
+            <path 
+              d={path} 
+              fill="none" 
+              stroke={isSelected ? 'hsl(var(--destructive))' : edgeColor} 
+              strokeWidth={10} 
+              strokeLinecap="round" 
+              opacity={0.15}
+              style={{ filter: 'blur(2px)' }}
+            />
+          )}
+          
+          {/* Main edge path */}
+          <motion.path 
+            d={path} 
+            fill="none" 
+            stroke={isSelected ? 'hsl(var(--destructive))' : edgeColor} 
+            strokeWidth={isSelected || isHovered ? 2.5 : 2} 
+            strokeLinecap="round"
+            initial={{ pathLength: 0 }} 
+            animate={{ pathLength: 1 }} 
+            transition={{ duration: 0.5, ease: 'easeOut' }} 
+          />
+          
+          {/* Animated dot flowing along the path */}
+          {!isSelected && (
+            <circle r={2.5} fill={edgeColor} opacity={0.8}>
+              <animateMotion dur="3s" repeatCount="indefinite" path={path} />
+            </circle>
+          )}
+          
+          {/* Arrow head at target connection point */}
+          <motion.polygon 
+            points={`${endX},${endY} ${endX - arrowSize},${endY - arrowHeight} ${endX + arrowSize},${endY - arrowHeight}`} 
+            fill={isSelected ? 'hsl(var(--destructive))' : edgeColor}
+            initial={{ scale: 0, opacity: 0 }} 
+            animate={{ scale: 1, opacity: 1 }} 
+            transition={{ delay: 0.3, type: 'spring', stiffness: 400 }}
+          />
+          
+          {/* Edge label with background */}
           {edge.label && (
-            <g>
-              <rect x={midX - 40} y={midY - 12} width={80} height={24} rx={12} fill="white" stroke={edgeColor} strokeWidth={1} />
-              <text x={midX} y={midY + 4} textAnchor="middle" className="text-xs font-medium pointer-events-none" fill={edgeColor}>{edge.label}</text>
+            <g style={{ pointerEvents: 'none' }}>
+              <rect 
+                x={midX - 2} 
+                y={midY - 10} 
+                width={Math.min(edge.label.length * 7 + 16, 90)} 
+                height={20} 
+                rx={10} 
+                fill="white" 
+                stroke={edgeColor} 
+                strokeWidth={1}
+                style={{ filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.1))' }}
+              />
+              <text 
+                x={midX + Math.min(edge.label.length * 7 + 16, 90) / 2 - 2} 
+                y={midY + 4} 
+                textAnchor="middle" 
+                className="text-[10px] font-medium" 
+                fill={edgeColor}
+              >
+                {edge.label.length > 10 ? edge.label.substring(0, 10) + '...' : edge.label}
+              </text>
             </g>
           )}
+          
+          {/* Delete indicator when selected */}
           {isSelected && (
-            <motion.g initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: 'spring', stiffness: 500 }}>
-              <circle cx={midX} cy={midY} r={16} fill="hsl(var(--destructive))" />
-              <text x={midX} y={midY + 5} textAnchor="middle" className="text-sm fill-white font-bold pointer-events-none">×</text>
+            <motion.g 
+              initial={{ scale: 0, opacity: 0 }} 
+              animate={{ scale: 1, opacity: 1 }} 
+              transition={{ type: 'spring', stiffness: 500 }}
+            >
+              <circle 
+                cx={(startX + endX) / 2} 
+                cy={(startY + endY) / 2} 
+                r={14} 
+                fill="hsl(var(--destructive))"
+                style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.2))' }}
+              />
+              <text 
+                x={(startX + endX) / 2} 
+                y={(startY + endY) / 2 + 4} 
+                textAnchor="middle" 
+                className="text-xs fill-white font-bold pointer-events-none"
+              >
+                ×
+              </text>
             </motion.g>
           )}
         </g>
@@ -446,14 +565,43 @@ export const AgenticFlowCanvas: React.FC<AgenticFlowCanvasProps> = ({
     const startY = sourceNode.position_y + sourceOffset.y;
     const endX = connectionState.currentX;
     const endY = connectionState.currentY;
-    const controlOffset = Math.min(Math.abs(endY - startY) * 0.5, 100);
-    const path = `M ${startX} ${startY} C ${startX} ${startY + controlOffset}, ${endX} ${endY - controlOffset}, ${endX} ${endY}`;
+    
+    // Use same curve calculation as renderEdges for consistency
+    const dx = endX - startX;
+    const dy = endY - startY;
+    const absDy = Math.abs(dy);
+    const absDx = Math.abs(dx);
+    const minOffset = 60;
+    const controlOffsetY = Math.max(Math.min(absDy * 0.4, 150), minOffset);
+    const horizontalAdjust = Math.min(absDx * 0.1, 30);
+    
+    const path = `M ${startX} ${startY} C ${startX + (dx > 0 ? horizontalAdjust : -horizontalAdjust)} ${startY + controlOffsetY}, ${endX + (dx > 0 ? -horizontalAdjust : horizontalAdjust)} ${endY - controlOffsetY}, ${endX} ${endY}`;
     const color = sourceType?.color || 'hsl(var(--primary))';
 
     return (
       <g className="pointer-events-none">
-        <motion.path d={path} fill="none" stroke={color} strokeWidth={2} strokeLinecap="round" strokeDasharray="8 4" initial={{ opacity: 0 }} animate={{ opacity: 1 }} />
-        <motion.circle cx={endX} cy={endY} r={8} fill={color} initial={{ scale: 0 }} animate={{ scale: [0.8, 1.2, 0.8] }} transition={{ repeat: Infinity, duration: 1 }} />
+        <motion.path 
+          d={path} 
+          fill="none" 
+          stroke={color} 
+          strokeWidth={2} 
+          strokeLinecap="round" 
+          strokeDasharray="8 6" 
+          initial={{ opacity: 0 }} 
+          animate={{ opacity: 1 }} 
+        />
+        <motion.circle 
+          cx={endX} 
+          cy={endY} 
+          r={6} 
+          fill={color} 
+          fillOpacity={0.4}
+          stroke={color}
+          strokeWidth={2}
+          initial={{ scale: 0 }} 
+          animate={{ scale: [1, 1.15, 1] }} 
+          transition={{ repeat: Infinity, duration: 0.8 }} 
+        />
       </g>
     );
   };
