@@ -25,7 +25,6 @@ serve(async (req) => {
     if (contact_id) {
       contactIds = [contact_id];
     } else if (compute_all) {
-      // Get all contacts
       const { data: contacts } = await supabase
         .from("crm_contacts")
         .select("id")
@@ -42,19 +41,33 @@ serve(async (req) => {
 
     const results = {
       processed: 0,
+      triggers_fired: 0,
+      tasks_created: 0,
       errors: [] as string[],
     };
 
     for (const cid of contactIds) {
       try {
-        await computeScoresForContact(supabase, cid);
+        const scores = await computeScoresForContact(supabase, cid);
         results.processed++;
+
+        // Trigger evaluation after computing scores
+        const triggerResult = await evaluateAndExecuteTriggers(
+          supabaseUrl,
+          supabaseServiceKey,
+          cid,
+          scores
+        );
+        results.triggers_fired += triggerResult.triggersFired;
+        results.tasks_created += triggerResult.tasksCreated;
       } catch (err) {
         const msg = `Error computing scores for ${cid}: ${err instanceof Error ? err.message : String(err)}`;
         console.error(msg);
         results.errors.push(msg);
       }
     }
+
+    console.log("Final results:", results);
 
     return new Response(JSON.stringify({ success: true, results }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -68,7 +81,86 @@ serve(async (req) => {
   }
 });
 
-async function computeScoresForContact(supabase: any, contactId: string) {
+async function evaluateAndExecuteTriggers(
+  supabaseUrl: string,
+  supabaseServiceKey: string,
+  contactId: string,
+  scores: { intent: number; urgency: number; engagement: number; churn: number; ltv: number }
+): Promise<{ triggersFired: number; tasksCreated: number }> {
+  let triggersFired = 0;
+  let tasksCreated = 0;
+
+  try {
+    // Call evaluate triggers
+    console.log(`Evaluating triggers for contact ${contactId} with scores:`, scores);
+    
+    const evalResponse = await fetch(`${supabaseUrl}/functions/v1/crm-evaluate-triggers`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${supabaseServiceKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        contact_id: contactId,
+        trigger_event: "score_update",
+        event_data: {
+          intent_score: scores.intent,
+          urgency_score: scores.urgency,
+          engagement_score: scores.engagement,
+          churn_risk: scores.churn,
+          ltv_prediction: scores.ltv,
+        },
+      }),
+    });
+
+    const evalResult = await evalResponse.json();
+    console.log(`Trigger evaluation result for ${contactId}:`, evalResult);
+
+    // Execute any matched actions
+    if (evalResult.actions_to_execute?.length > 0) {
+      triggersFired = evalResult.actions_to_execute.length;
+      
+      for (const actionItem of evalResult.actions_to_execute) {
+        try {
+          console.log(`Executing action for trigger: ${actionItem.trigger_name}`, actionItem.action);
+          
+          const execResponse = await fetch(`${supabaseUrl}/functions/v1/crm-execute-action`, {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${supabaseServiceKey}`,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              contact_id: contactId,
+              trigger_id: actionItem.trigger_id,
+              trigger_name: actionItem.trigger_name,
+              action: actionItem.action,
+              matched_conditions: actionItem.matched_conditions,
+            }),
+          });
+
+          const execResult = await execResponse.json();
+          console.log(`Action execution result:`, execResult);
+          
+          if (execResult.success && execResult.action_type === "create_task") {
+            tasksCreated++;
+          }
+        } catch (execError) {
+          console.error(`Failed to execute action for ${actionItem.trigger_name}:`, execError);
+        }
+      }
+    }
+  } catch (triggerError) {
+    console.error("Trigger evaluation/execution failed:", triggerError);
+  }
+
+  return { triggersFired, tasksCreated };
+}
+
+async function computeScoresForContact(
+  supabase: any,
+  contactId: string
+): Promise<{ intent: number; urgency: number; engagement: number; churn: number; ltv: number }> {
   // Fetch contact and related data
   const [contactResult, interactionsResult, variablesResult] = await Promise.all([
     supabase.from("crm_contacts").select("*").eq("id", contactId).single(),
@@ -93,19 +185,11 @@ async function computeScoresForContact(supabase: any, contactId: string) {
     throw new Error("Contact not found");
   }
 
-  // Compute Intent Score (0-100)
+  // Compute scores
   const intentScore = computeIntentScore(interactions, variables);
-
-  // Compute Urgency Score (0-100)
   const urgencyScore = computeUrgencyScore(interactions, variables);
-
-  // Compute Engagement Score (0-100)
   const engagementScore = computeEngagementScore(contact, interactions);
-
-  // Compute LTV Prediction
   const ltvPrediction = computeLTVPrediction(contact, variables);
-
-  // Compute Churn Risk (0-100)
   const churnRisk = computeChurnRisk(contact, interactions);
 
   // Update contact with new scores
@@ -138,13 +222,20 @@ async function computeScoresForContact(supabase: any, contactId: string) {
     ltv: ltvPrediction.value,
     churn: churnRisk.score,
   });
+
+  return {
+    intent: intentScore.score,
+    urgency: urgencyScore.score,
+    engagement: engagementScore.score,
+    churn: churnRisk.score,
+    ltv: ltvPrediction.value,
+  };
 }
 
 function computeIntentScore(interactions: any[], variables: any[]): { score: number; factors: any } {
   const factors: any = {};
-  let score = 30; // Base score
+  let score = 30;
 
-  // Recent interactions boost
   const recentInteractions = interactions.filter((i) => {
     const daysSince = (Date.now() - new Date(i.occurred_at).getTime()) / (1000 * 60 * 60 * 24);
     return daysSince <= 7;
@@ -152,24 +243,20 @@ function computeIntentScore(interactions: any[], variables: any[]): { score: num
   factors.recent_interactions = recentInteractions.length;
   score += Math.min(recentInteractions.length * 10, 30);
 
-  // Positive sentiment boost
   const positiveInteractions = interactions.filter((i) => i.sentiment === "positive");
   factors.positive_sentiment_count = positiveInteractions.length;
   score += Math.min(positiveInteractions.length * 5, 15);
 
-  // Purchase intent detection
   const purchaseIntentCount = interactions.filter((i) =>
     i.intent_detected?.includes("purchase_intent")
   ).length;
   factors.purchase_intent_signals = purchaseIntentCount;
   score += purchaseIntentCount * 10;
 
-  // Budget mentioned
   const hasBudget = variables.some((v) => v.variable_name === "budget" || v.variable_name === "investment_range");
   factors.budget_mentioned = hasBudget;
   if (hasBudget) score += 15;
 
-  // Timeline mentioned
   const hasTimeline = variables.some((v) => v.variable_name === "timeline");
   factors.timeline_mentioned = hasTimeline;
   if (hasTimeline) score += 10;
@@ -179,24 +266,20 @@ function computeIntentScore(interactions: any[], variables: any[]): { score: num
 
 function computeUrgencyScore(interactions: any[], variables: any[]): { score: number; factors: any } {
   const factors: any = {};
-  let score = 20; // Base score
+  let score = 20;
 
-  // Frequency of interactions
   const interactionCount = interactions.length;
   factors.total_interactions = interactionCount;
   score += Math.min(interactionCount * 5, 25);
 
-  // Multiple channels used (shows urgency)
   const channels = new Set(interactions.map((i) => i.channel));
   factors.channels_used = channels.size;
   score += (channels.size - 1) * 10;
 
-  // Inbound vs outbound ratio (high inbound = more urgent)
   const inboundCount = interactions.filter((i) => i.direction === "inbound").length;
   factors.inbound_ratio = interactionCount > 0 ? inboundCount / interactionCount : 0;
   score += factors.inbound_ratio * 20;
 
-  // Timeline urgency keywords
   const timelineVar = variables.find((v) => v.variable_name === "timeline");
   if (timelineVar) {
     const urgentKeywords = ["asap", "urgent", "immediately", "this week", "this month"];
@@ -214,11 +297,9 @@ function computeEngagementScore(contact: any, interactions: any[]): { score: num
   const factors: any = {};
   let score = 0;
 
-  // Total interactions
   factors.total_interactions = contact.total_interactions || interactions.length;
   score += Math.min(factors.total_interactions * 8, 40);
 
-  // Recency of last interaction
   if (contact.last_interaction_at) {
     const daysSinceLastInteraction =
       (Date.now() - new Date(contact.last_interaction_at).getTime()) / (1000 * 60 * 60 * 24);
@@ -230,7 +311,6 @@ function computeEngagementScore(contact: any, interactions: any[]): { score: num
     else if (daysSinceLastInteraction < 90) score += 5;
   }
 
-  // Response rate (if we have outbound that got inbound responses)
   const outboundCount = interactions.filter((i) => i.direction === "outbound").length;
   const inboundCount = interactions.filter((i) => i.direction === "inbound").length;
   if (outboundCount > 0) {
@@ -238,7 +318,6 @@ function computeEngagementScore(contact: any, interactions: any[]): { score: num
     score += Math.min(factors.response_rate * 20, 20);
   }
 
-  // Channel diversity
   const channels = new Set(interactions.map((i) => i.channel));
   factors.channel_diversity = channels.size;
   score += (channels.size - 1) * 5;
@@ -250,7 +329,6 @@ function computeLTVPrediction(contact: any, variables: any[]): { value: number; 
   const factors: any = {};
   let value = 0;
 
-  // Budget variable
   const budgetVar = variables.find(
     (v) => v.variable_name === "budget" || v.variable_name === "investment_range"
   );
@@ -263,7 +341,6 @@ function computeLTVPrediction(contact: any, variables: any[]): { value: number; 
     }
   }
 
-  // User type multiplier
   const typeMultipliers: Record<string, number> = {
     enterprise: 2.0,
     investor: 1.5,
@@ -275,7 +352,6 @@ function computeLTVPrediction(contact: any, variables: any[]): { value: number; 
   factors.user_type_multiplier = multiplier;
   value *= multiplier;
 
-  // Industry multiplier
   const industryMultipliers: Record<string, number> = {
     real_estate: 1.5,
     fintech: 1.4,
@@ -295,9 +371,8 @@ function computeLTVPrediction(contact: any, variables: any[]): { value: number; 
 
 function computeChurnRisk(contact: any, interactions: any[]): { score: number; factors: any } {
   const factors: any = {};
-  let score = 20; // Base risk
+  let score = 20;
 
-  // Days since last interaction
   if (contact.last_interaction_at) {
     const daysSince =
       (Date.now() - new Date(contact.last_interaction_at).getTime()) / (1000 * 60 * 60 * 24);
@@ -310,21 +385,18 @@ function computeChurnRisk(contact: any, interactions: any[]): { score: number; f
     else score -= 10;
   }
 
-  // Negative sentiment in recent interactions
   const recentNegative = interactions
     .slice(0, 5)
     .filter((i) => i.sentiment === "negative").length;
   factors.recent_negative_interactions = recentNegative;
   score += recentNegative * 15;
 
-  // Complaint intents
   const complaintCount = interactions.filter((i) =>
     i.intent_detected?.includes("complaint")
   ).length;
   factors.complaint_count = complaintCount;
   score += complaintCount * 10;
 
-  // Low engagement history
   if (contact.total_interactions < 3) {
     factors.low_engagement = true;
     score += 15;

@@ -12,6 +12,7 @@ interface ExecuteRequest {
   trigger_name: string;
   action: {
     type: string;
+    config?: any;
     [key: string]: any;
   };
   matched_conditions: any;
@@ -30,9 +31,8 @@ serve(async (req) => {
     const body: ExecuteRequest = await req.json();
     const { contact_id, trigger_id, trigger_name, action, matched_conditions } = body;
 
-    console.log("Executing action:", { contact_id, trigger_name, action_type: action.type });
+    console.log("Executing action:", { contact_id, trigger_name, action_type: action.type, action });
 
-    // Validate required fields
     if (!contact_id || !trigger_id || !action?.type) {
       return new Response(
         JSON.stringify({ error: "contact_id, trigger_id, and action.type are required" }),
@@ -40,38 +40,43 @@ serve(async (req) => {
       );
     }
 
+    // Merge action.config into action for backward compatibility
+    // This allows triggers to store config like { type: "create_task", config: { title: "...", priority: "..." } }
+    const mergedAction = { ...action, ...action.config };
+    console.log("Merged action:", mergedAction);
+
     let executionStatus = "success";
     let errorMessage: string | null = null;
     let actionResult: any = {};
 
     try {
-      switch (action.type) {
+      switch (mergedAction.type) {
         case "create_task":
-          actionResult = await createTask(supabase, contact_id, action);
+          actionResult = await createTask(supabase, contact_id, mergedAction, trigger_name);
           break;
 
         case "update_lifecycle":
-          actionResult = await updateLifecycle(supabase, contact_id, action);
+          actionResult = await updateLifecycle(supabase, contact_id, mergedAction);
           break;
 
         case "tag_contact":
-          actionResult = await tagContact(supabase, contact_id, action);
+          actionResult = await tagContact(supabase, contact_id, mergedAction);
           break;
 
         case "update_score":
-          actionResult = await updateScore(supabase, contact_id, action);
+          actionResult = await updateScore(supabase, contact_id, mergedAction);
           break;
 
         case "allied_industry_trigger":
-          actionResult = await triggerAlliedIndustry(supabase, contact_id, action);
+          actionResult = await triggerAlliedIndustry(supabase, contact_id, mergedAction);
           break;
 
         case "send_notification":
-          actionResult = await sendNotification(supabase, contact_id, action);
+          actionResult = await sendNotification(supabase, contact_id, mergedAction);
           break;
 
         default:
-          throw new Error(`Unknown action type: ${action.type}`);
+          throw new Error(`Unknown action type: ${mergedAction.type}`);
       }
     } catch (actionError) {
       executionStatus = "failed";
@@ -85,7 +90,7 @@ serve(async (req) => {
       contact_id,
       execution_status: executionStatus,
       matched_conditions,
-      actions_executed: { ...action, result: actionResult },
+      actions_executed: { ...mergedAction, result: actionResult },
       error_message: errorMessage,
     });
 
@@ -93,10 +98,12 @@ serve(async (req) => {
       console.error("Failed to log trigger execution:", logError);
     }
 
+    console.log("Action execution complete:", { success: executionStatus === "success", actionResult });
+
     return new Response(
       JSON.stringify({
         success: executionStatus === "success",
-        action_type: action.type,
+        action_type: mergedAction.type,
         result: actionResult,
         error: errorMessage,
       }),
@@ -111,31 +118,33 @@ serve(async (req) => {
   }
 });
 
-async function createTask(supabase: any, contactId: string, action: any): Promise<any> {
+async function createTask(supabase: any, contactId: string, action: any, triggerName: string): Promise<any> {
   const taskData = {
     contact_id: contactId,
     title: action.title || "AI Generated Task",
     description: action.description || null,
     task_type: action.task_type || "follow_up",
     priority: action.priority || "medium",
-    due_at: action.due_at || new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(), // Default: 24h
+    due_at: action.due_at || new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
     suggested_channel: action.suggested_channel || null,
     suggested_content: action.suggested_content || null,
     ai_generated: true,
-    ai_reason: action.reason || `Triggered by automation rule`,
+    ai_reason: action.reason || `Triggered by automation rule: ${triggerName}`,
     status: "pending",
   };
+
+  console.log("Creating task with data:", taskData);
 
   const { data, error } = await supabase
     .from("crm_tasks")
     .insert(taskData)
-    .select("id")
+    .select("id, title")
     .single();
 
   if (error) throw new Error(`Failed to create task: ${error.message}`);
-  
-  console.log("Created task:", data.id);
-  return { task_id: data.id };
+
+  console.log("Created task:", data);
+  return { task_id: data.id, title: data.title };
 }
 
 async function updateLifecycle(supabase: any, contactId: string, action: any): Promise<any> {
@@ -153,7 +162,7 @@ async function updateLifecycle(supabase: any, contactId: string, action: any): P
     .eq("id", contactId);
 
   if (error) throw new Error(`Failed to update lifecycle: ${error.message}`);
-  
+
   console.log("Updated lifecycle to:", newStage);
   return { new_stage: newStage };
 }
@@ -162,7 +171,6 @@ async function tagContact(supabase: any, contactId: string, action: any): Promis
   const tags = Array.isArray(action.tags) ? action.tags : [action.tag];
   if (!tags.length) throw new Error("tags are required");
 
-  // Get current tags
   const { data: contact } = await supabase
     .from("crm_contacts")
     .select("tags")
@@ -178,7 +186,7 @@ async function tagContact(supabase: any, contactId: string, action: any): Promis
     .eq("id", contactId);
 
   if (error) throw new Error(`Failed to add tags: ${error.message}`);
-  
+
   console.log("Added tags:", tags);
   return { added_tags: tags, total_tags: newTags.length };
 }
@@ -189,7 +197,7 @@ async function updateScore(supabase: any, contactId: string, action: any): Promi
 
   const scoreField = `${score_type}_score`;
   const validFields = ["intent_score", "engagement_score", "urgency_score", "churn_risk"];
-  
+
   if (!validFields.includes(scoreField)) {
     throw new Error(`Invalid score type: ${score_type}`);
   }
@@ -203,7 +211,7 @@ async function updateScore(supabase: any, contactId: string, action: any): Promi
       .single();
 
     const currentValue = contact?.[scoreField] || 0;
-    newValue = operation === "add" 
+    newValue = operation === "add"
       ? Math.min(100, currentValue + score_value)
       : Math.max(0, currentValue - score_value);
   }
@@ -215,7 +223,6 @@ async function updateScore(supabase: any, contactId: string, action: any): Promi
 
   if (error) throw new Error(`Failed to update score: ${error.message}`);
 
-  // Log to crm_scores
   await supabase.from("crm_scores").insert({
     contact_id: contactId,
     score_type: score_type,
@@ -231,7 +238,6 @@ async function triggerAlliedIndustry(supabase: any, contactId: string, action: a
   const { allied_industry_id } = action;
   if (!allied_industry_id) throw new Error("allied_industry_id is required");
 
-  // Get allied industry details
   const { data: allied } = await supabase
     .from("crm_allied_industries")
     .select("*, crm_industry_nodes!crm_allied_industries_allied_industry_id_fkey(display_name)")
@@ -240,7 +246,6 @@ async function triggerAlliedIndustry(supabase: any, contactId: string, action: a
 
   if (!allied) throw new Error("Allied industry not found");
 
-  // Create a task for the allied industry outreach
   const taskData = {
     contact_id: contactId,
     title: `Allied Industry: ${allied.crm_industry_nodes?.display_name || 'Partner Outreach'}`,
@@ -268,14 +273,12 @@ async function triggerAlliedIndustry(supabase: any, contactId: string, action: a
 async function sendNotification(supabase: any, contactId: string, action: any): Promise<any> {
   const { notification_type, message, channel } = action;
 
-  // For now, just log the notification intent
-  // In production, this would integrate with notification services
   console.log("Notification to be sent:", { contactId, notification_type, message, channel });
 
-  return { 
-    notification_type, 
+  return {
+    notification_type,
     channel,
     status: "queued",
-    message: "Notification system not fully implemented" 
+    message: "Notification system not fully implemented"
   };
 }
