@@ -79,6 +79,7 @@ export const FlowNode: React.FC<FlowNodeProps> = ({
 
   return (
     <motion.div
+      data-node-id={node.id}
       initial={{ scale: 0.8, opacity: 0 }}
       animate={{ scale: isHighlighted ? 1.02 : 1, opacity: 1 }}
       transition={{ type: 'spring', stiffness: 300, damping: 25 }}

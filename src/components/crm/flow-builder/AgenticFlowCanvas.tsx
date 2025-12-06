@@ -221,9 +221,15 @@ export const AgenticFlowCanvas: React.FC<AgenticFlowCanvasProps> = ({
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
     if (connectionState) return;
     
-    const isCanvas = e.target === canvasRef.current || (e.target as HTMLElement).classList.contains('canvas-bg');
+    const target = e.target as HTMLElement;
+    // Check if clicking on an interactive element (node, button, connection point, edge)
+    const isInteractiveElement = target.closest('[data-node-id]') || 
+                                 target.closest('button') || 
+                                 target.closest('.node-connection-point') ||
+                                 target.closest('[data-edge-id]');
     
-    if (isCanvas) {
+    // If not clicking on an interactive element, treat as canvas click for panning
+    if (!isInteractiveElement) {
       if (e.shiftKey && canvasRef.current) {
         const rect = canvasRef.current.getBoundingClientRect();
         setSelectionState({
