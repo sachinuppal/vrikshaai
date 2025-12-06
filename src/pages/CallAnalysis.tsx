@@ -175,7 +175,7 @@ const CallAnalysis = () => {
     sessionStorage.removeItem("voice_captured");
     sessionStorage.removeItem("voice_user_name");
     sessionStorage.removeItem("voice_user_phone");
-    navigate("/");
+    navigate("/call-history");
   };
 
   const runObservabilityAnalysis = async () => {
@@ -250,11 +250,11 @@ const CallAnalysis = () => {
         {/* Back button */}
         <Button
           variant="ghost"
-          onClick={() => navigate("/")}
+          onClick={() => navigate("/call-history")}
           className="mb-6"
         >
           <ArrowLeft className="mr-2 h-4 w-4" />
-          Back to Home
+          Back to Call History
         </Button>
 
         {/* Header */}
