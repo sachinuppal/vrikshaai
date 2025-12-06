@@ -204,9 +204,9 @@ const CallAnalysis = () => {
     }
   };
 
-  const syncFromRingg = async () => {
+  const syncCallData = async () => {
     if (!callData?.ringg_call_id) {
-      toast.error("No Ringg call ID available");
+      toast.error("No call ID available for sync");
       return;
     }
 
@@ -221,7 +221,7 @@ const CallAnalysis = () => {
         throw new Error(response.error.message);
       }
 
-      toast.success("Call data synced from Ringg");
+      toast.success("Call data synced successfully");
       fetchCallData();
     } catch (error) {
       console.error("Sync error:", error);
@@ -305,11 +305,11 @@ const CallAnalysis = () => {
               <Button
                 variant="outline"
                 size="sm"
-                onClick={syncFromRingg}
+                onClick={syncCallData}
                 disabled={syncing}
               >
                 <RefreshCw className={`h-4 w-4 mr-2 ${syncing ? "animate-spin" : ""}`} />
-                Sync from Ringg
+                Sync Call Data
               </Button>
             )}
           </div>
@@ -457,9 +457,29 @@ const CallAnalysis = () => {
                           </div>
                         )}
                       </>
+                    ) : callData.platform_analysis ? (
+                      <>
+                        {callData.platform_analysis.classification && (
+                          <div className="flex justify-between items-center">
+                            <span className="text-sm text-muted-foreground">Classification</span>
+                            <Badge variant="secondary">{callData.platform_analysis.classification}</Badge>
+                          </div>
+                        )}
+                        {callData.platform_analysis.call_disconnect_reason && (
+                          <div className="flex justify-between items-center">
+                            <span className="text-sm text-muted-foreground">Disconnect Reason</span>
+                            <span className="text-sm font-medium">{callData.platform_analysis.call_disconnect_reason}</span>
+                          </div>
+                        )}
+                        <div className="pt-2 border-t border-border/50">
+                          <p className="text-xs text-muted-foreground">
+                            AI insights not available for this call. Only basic call data is shown.
+                          </p>
+                        </div>
+                      </>
                     ) : (
                       <div className="flex items-center justify-center py-6 text-muted-foreground">
-                        <p className="text-sm">Insights will appear after analysis</p>
+                        <p className="text-sm">AI insights not available for this call</p>
                       </div>
                     )}
                   </CardContent>

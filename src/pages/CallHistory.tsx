@@ -173,14 +173,14 @@ const CallHistory = () => {
 
       toast({
         title: "Synced",
-        description: "Call data synced from Ringg successfully",
+        description: "Call data synced successfully",
       });
       fetchCalls(true);
     } catch (error) {
       console.error("Sync error:", error);
       toast({
         title: "Sync failed",
-        description: "Failed to sync call data from Ringg",
+        description: "Failed to sync call data",
         variant: "destructive",
       });
     } finally {
@@ -199,7 +199,7 @@ const CallHistory = () => {
 
       toast({
         title: "Sync complete",
-        description: `Synced ${data?.synced_count || 0} calls from Ringg`,
+        description: `Synced ${data?.synced_count || 0} calls successfully`,
       });
       fetchCalls(true);
     } catch (error) {
