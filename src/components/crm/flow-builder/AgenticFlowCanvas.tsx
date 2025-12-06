@@ -210,7 +210,6 @@ export const AgenticFlowCanvas: React.FC<AgenticFlowCanvasProps> = ({
               node={node}
               isSelected={selectedNodeId === node.id}
               onClick={() => onNodeSelect(node.id)}
-              onDragStart={handleNodeDragStart(node.id)}
             />
           ))}
 

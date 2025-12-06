@@ -49,6 +49,7 @@ export const FlowNode: React.FC<FlowNodeProps> = ({
         transform: 'translate(-50%, -50%)'
       }}
       onClick={onClick}
+    >
       {/* Node Header */}
       <div 
         className="flex items-center gap-2 px-3 py-2 rounded-t-xl"
