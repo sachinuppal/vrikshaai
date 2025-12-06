@@ -26,6 +26,10 @@ import Voice from "./pages/Voice";
 import CallAnalysis from "./pages/CallAnalysis";
 import CallHistory from "./pages/CallHistory";
 import MyCalls from "./pages/MyCalls";
+import CRMDashboard from "./pages/crm/CRMDashboard";
+import CRMContacts from "./pages/crm/CRMContacts";
+import CRMContactProfile from "./pages/crm/CRMContactProfile";
+import CRMTasks from "./pages/crm/CRMTasks";
 import AICallingConsentModal from "./components/AICallingConsentModal";
 import { CookieConsent } from "./components/CookieConsent";
 
@@ -61,6 +65,10 @@ const App = () => (
               <Route path="/my-calls" element={<MyCalls />} />
               <Route path="/enterprises" element={<Enterprises />} />
               <Route path="/crm" element={<CRM />} />
+              <Route path="/crm/dashboard" element={<AdminRoute><CRMDashboard /></AdminRoute>} />
+              <Route path="/crm/contacts" element={<AdminRoute><CRMContacts /></AdminRoute>} />
+              <Route path="/crm/contacts/:id" element={<AdminRoute><CRMContactProfile /></AdminRoute>} />
+              <Route path="/crm/tasks" element={<AdminRoute><CRMTasks /></AdminRoute>} />
               <Route path="/voice" element={<Voice />} />
               <Route
                 path="/call-history"
