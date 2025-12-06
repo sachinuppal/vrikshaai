@@ -25,6 +25,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { maskPhoneNumber } from "@/lib/utils";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import InitiateCallModal from "@/components/InitiateCallModal";
@@ -290,7 +291,7 @@ const CallHistory = () => {
                           </TableCell>
                           <TableCell>{call.name}</TableCell>
                           <TableCell className="text-muted-foreground">
-                            {call.country_code}{call.phone}
+                            {maskPhoneNumber(`${call.country_code}${call.phone}`)}
                           </TableCell>
                           <TableCell>{getStatusBadge(call.call_status)}</TableCell>
                           <TableCell>{formatDuration(call.call_duration)}</TableCell>
