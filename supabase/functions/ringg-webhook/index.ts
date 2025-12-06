@@ -1,6 +1,10 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
+// Declare EdgeRuntime for background tasks
+declare const EdgeRuntime: {
+  waitUntil: (promise: Promise<unknown>) => void;
+};
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-webhook-secret",
@@ -188,6 +192,40 @@ serve(async (req) => {
           ...(commonStatus && { call_status: commonStatus }),
         };
         console.log("Updating platform_analysis data");
+        
+        // Trigger observability analysis in background if transcript available
+        const transcriptForObservability = commonTranscript || callRecord.transcript;
+        if (transcriptForObservability && transcriptForObservability.length > 0) {
+          console.log("Triggering observability analysis for call:", callRecord.id);
+          
+          // Use EdgeRuntime.waitUntil for background task
+          const triggerObservability = async () => {
+            try {
+              const observeResponse = await fetch(`${supabaseUrl}/functions/v1/observe-call-script`, {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                  "Authorization": `Bearer ${supabaseKey}`,
+                },
+                body: JSON.stringify({
+                  call_id: callRecord.id,
+                  transcript: transcriptForObservability,
+                }),
+              });
+              
+              if (!observeResponse.ok) {
+                console.error("Observability trigger failed:", await observeResponse.text());
+              } else {
+                console.log("Observability analysis triggered successfully");
+              }
+            } catch (obsError) {
+              console.error("Error triggering observability:", obsError);
+            }
+          };
+          
+          // Run in background
+          EdgeRuntime.waitUntil(triggerObservability());
+        }
         break;
       }
 
