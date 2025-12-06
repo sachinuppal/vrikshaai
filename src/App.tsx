@@ -58,14 +58,7 @@ const App = () => (
                   </ProtectedRoute>
                 }
               />
-              <Route
-                path="/call-analysis/:id"
-                element={
-                  <ProtectedRoute>
-                    <CallAnalysis />
-                  </ProtectedRoute>
-                }
-              />
+              <Route path="/call-analysis/:id" element={<CallAnalysis />} />
               <Route
                 path="/applications"
                 element={
