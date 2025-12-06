@@ -1,6 +1,6 @@
 import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ZoomIn, ZoomOut, Maximize2, Grid3X3, Undo2, Redo2, Map, Search } from 'lucide-react';
+import { ZoomIn, ZoomOut, Maximize2, Grid3X3, Undo2, Redo2, Map, Search, Magnet } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ContextMenuTrigger } from '@/components/ui/context-menu';
 import { FlowNode, FlowNodeData, ConnectionPoint } from './FlowNode';
@@ -95,6 +95,7 @@ export const AgenticFlowCanvas: React.FC<AgenticFlowCanvasProps> = ({
   const [isPanning, setIsPanning] = useState(false);
   const [showGrid, setShowGrid] = useState(true);
   const [showMinimap, setShowMinimap] = useState(true);
+  const [snapToGrid, setSnapToGrid] = useState(true);
   const [selectedEdgeId, setSelectedEdgeId] = useState<string | null>(null);
   const [hoveredEdgeId, setHoveredEdgeId] = useState<string | null>(null);
   const [connectionState, setConnectionState] = useState<ConnectionState | null>(null);
@@ -103,6 +104,15 @@ export const AgenticFlowCanvas: React.FC<AgenticFlowCanvasProps> = ({
   const [selectedGroupId, setSelectedGroupId] = useState<string | null>(null);
   const canvasRef = useRef<HTMLDivElement>(null);
   const lastPanPosition = useRef({ x: 0, y: 0 });
+
+  // Grid size for snapping (matches visual grid)
+  const GRID_SIZE = 20;
+  
+  // Snap coordinates to grid
+  const snapToGridCoord = useCallback((value: number): number => {
+    if (!snapToGrid) return value;
+    return Math.round(value / GRID_SIZE) * GRID_SIZE;
+  }, [snapToGrid]);
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -313,16 +323,19 @@ export const AgenticFlowCanvas: React.FC<AgenticFlowCanvasProps> = ({
     if (!canvasRef.current) return;
     
     const pos = screenToCanvas(e.clientX, e.clientY);
+    const snappedX = snapToGridCoord(pos.x);
+    const snappedY = snapToGridCoord(pos.y);
+    
     const newNodeType = e.dataTransfer.getData('newNodeType');
     
     if (newNodeType && onNodeAdd) {
-      onNodeAdd(newNodeType, pos.x, pos.y);
+      onNodeAdd(newNodeType, snappedX, snappedY);
       return;
     }
     
     const nodeId = e.dataTransfer.getData('nodeId');
-    if (nodeId) onNodeMove(nodeId, pos.x, pos.y);
-  }, [screenToCanvas, onNodeMove, onNodeAdd]);
+    if (nodeId) onNodeMove(nodeId, snappedX, snappedY);
+  }, [screenToCanvas, onNodeMove, onNodeAdd, snapToGridCoord]);
 
   const handleDragOver = (e: React.DragEvent) => e.preventDefault();
 
@@ -623,6 +636,7 @@ export const AgenticFlowCanvas: React.FC<AgenticFlowCanvasProps> = ({
             <div className="w-px h-6 bg-border mx-1" />
             <Button variant="ghost" size="icon" onClick={handleResetView} className="h-8 w-8" title="Reset view"><Maximize2 className="w-4 h-4" /></Button>
             <Button variant={showGrid ? "secondary" : "ghost"} size="icon" onClick={() => setShowGrid(!showGrid)} className="h-8 w-8" title="Toggle grid"><Grid3X3 className="w-4 h-4" /></Button>
+            <Button variant={snapToGrid ? "secondary" : "ghost"} size="icon" onClick={() => setSnapToGrid(!snapToGrid)} className="h-8 w-8" title="Snap to grid"><Magnet className="w-4 h-4" /></Button>
             <Button variant={showMinimap ? "secondary" : "ghost"} size="icon" onClick={() => setShowMinimap(!showMinimap)} className="h-8 w-8" title="Toggle minimap"><Map className="w-4 h-4" /></Button>
           </div>
 
