@@ -19,9 +19,10 @@ import { initializeRinggWidget, triggerRinggWidget } from "@/lib/ringgWidget";
 interface VoiceCaptureModalProps {
   isOpen: boolean;
   onClose: () => void;
+  onCallStart?: (recordId: string) => void;
 }
 
-export const VoiceCaptureModal = ({ isOpen, onClose }: VoiceCaptureModalProps) => {
+export const VoiceCaptureModal = ({ isOpen, onClose, onCallStart }: VoiceCaptureModalProps) => {
   const [name, setName] = useState("");
   const [countryCode, setCountryCode] = useState("IN");
   const [phone, setPhone] = useState("");
@@ -70,6 +71,9 @@ export const VoiceCaptureModal = ({ isOpen, onClose }: VoiceCaptureModalProps) =
       sessionStorage.setItem("voice_user_phone", fullPhone);
       sessionStorage.setItem("voice_captured", "true");
 
+      // Start call tracking for the overlay
+      onCallStart?.(data.id);
+
       // Initialize widget with personalized variables
       await initializeRinggWidget(name.trim(), fullPhone);
 
@@ -83,16 +87,6 @@ export const VoiceCaptureModal = ({ isOpen, onClose }: VoiceCaptureModalProps) =
           toast.info("Widget is loading, please try clicking the button again");
         }
       }, 500);
-
-      // Show toast with link to analysis page
-      const recordId = data.id;
-      toast.success("Call started! View analysis after the call", {
-        action: {
-          label: "View Analysis",
-          onClick: () => window.location.href = `/call-analysis/${recordId}`,
-        },
-        duration: 10000,
-      });
 
     } catch (err) {
       console.error("Error:", err);

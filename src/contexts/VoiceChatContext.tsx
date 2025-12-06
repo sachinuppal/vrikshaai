@@ -1,9 +1,13 @@
 import { createContext, useContext, useState, useCallback, useEffect, ReactNode } from "react";
 import { VoiceCaptureModal } from "@/components/VoiceCaptureModal";
+import { CallStatusOverlay } from "@/components/CallStatusOverlay";
+import { useCallStatus, CallStatus } from "@/hooks/useCallStatus";
 import { triggerVoiceWidget } from "@/lib/voiceChat";
 
 interface VoiceChatContextType {
   openVoiceChat: () => void;
+  callStatus: CallStatus;
+  startCallTracking: (recordId: string) => void;
 }
 
 const VoiceChatContext = createContext<VoiceChatContextType | undefined>(undefined);
@@ -22,6 +26,7 @@ interface VoiceChatProviderProps {
 
 export const VoiceChatProvider = ({ children }: VoiceChatProviderProps) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const { status, callId, clearCall, startCall } = useCallStatus();
 
   const openVoiceChat = useCallback(() => {
     // Check if we already captured the phone number in this session
@@ -40,6 +45,10 @@ export const VoiceChatProvider = ({ children }: VoiceChatProviderProps) => {
     setIsModalOpen(false);
   }, []);
 
+  const startCallTracking = useCallback((recordId: string) => {
+    startCall(recordId);
+  }, [startCall]);
+
   // Listen for legacy openVoiceChat() calls via custom event
   useEffect(() => {
     const handleLegacyOpen = () => {
@@ -53,9 +62,10 @@ export const VoiceChatProvider = ({ children }: VoiceChatProviderProps) => {
   }, [openVoiceChat]);
 
   return (
-    <VoiceChatContext.Provider value={{ openVoiceChat }}>
+    <VoiceChatContext.Provider value={{ openVoiceChat, callStatus: status, startCallTracking }}>
       {children}
-      <VoiceCaptureModal isOpen={isModalOpen} onClose={closeModal} />
+      <VoiceCaptureModal isOpen={isModalOpen} onClose={closeModal} onCallStart={startCallTracking} />
+      <CallStatusOverlay status={status} callId={callId} onClear={clearCall} />
     </VoiceChatContext.Provider>
   );
 };
