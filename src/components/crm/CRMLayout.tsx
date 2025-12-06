@@ -9,6 +9,7 @@ import {
   Zap,
   Database,
   RefreshCw,
+  Workflow,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -36,6 +37,7 @@ const navItems = [
   { title: "Contacts", url: "/crm/contacts", icon: Users },
   { title: "Tasks", url: "/crm/tasks", icon: CheckSquare },
   { title: "Triggers", url: "/crm/triggers", icon: Zap },
+  { title: "Flow Builder", url: "/crm/flow-builder", icon: Workflow },
 ];
 
 export function CRMLayout({ children }: CRMLayoutProps) {

@@ -71,3 +71,6 @@ verify_jwt = true
 
 [functions.crm-execute-action]
 verify_jwt = true
+
+[functions.crm-agentic-builder]
+verify_jwt = true
