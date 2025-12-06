@@ -1,26 +1,49 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Mail, Loader2, ArrowLeft, Shield, Lock } from "lucide-react";
+import { Mail, Loader2, ArrowLeft, Shield, Lock, KeyRound } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useAdminCheck } from "@/hooks/useAdminCheck";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { toast } from "sonner";
 
 const AdminLogin = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [rememberMe, setRememberMe] = useState(() => {
+    return localStorage.getItem("adminRememberMe") === "true";
+  });
   const [loading, setLoading] = useState(false);
+  const [resetEmail, setResetEmail] = useState("");
+  const [resetLoading, setResetLoading] = useState(false);
+  const [resetDialogOpen, setResetDialogOpen] = useState(false);
   
-  const { user, signIn } = useAuth();
+  const { user, signIn, resetPassword } = useAuth();
   const { isAdmin, loading: adminLoading } = useAdminCheck();
   const navigate = useNavigate();
   const location = useLocation();
 
   const from = (location.state as { from?: { pathname: string } })?.from?.pathname || '/crm/dashboard';
+
+  // Load remembered email
+  useEffect(() => {
+    const savedEmail = localStorage.getItem("adminRememberEmail");
+    if (savedEmail && rememberMe) {
+      setEmail(savedEmail);
+    }
+  }, [rememberMe]);
 
   // Redirect if already logged in as admin
   useEffect(() => {
@@ -47,6 +70,14 @@ const AdminLogin = () => {
       if (error) {
         toast.error(error.message || "Login failed");
       } else {
+        // Handle remember me
+        if (rememberMe) {
+          localStorage.setItem("adminRememberMe", "true");
+          localStorage.setItem("adminRememberEmail", email);
+        } else {
+          localStorage.removeItem("adminRememberMe");
+          localStorage.removeItem("adminRememberEmail");
+        }
         toast.success("Login successful! Verifying admin access...");
       }
     } catch (err) {
@@ -54,6 +85,34 @@ const AdminLogin = () => {
       toast.error("An unexpected error occurred");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handlePasswordReset = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!resetEmail.trim()) {
+      toast.error("Please enter your email address");
+      return;
+    }
+
+    setResetLoading(true);
+    
+    try {
+      const { error } = await resetPassword(resetEmail);
+      
+      if (error) {
+        toast.error(error.message || "Failed to send reset email");
+      } else {
+        toast.success("Password reset email sent! Check your inbox.");
+        setResetDialogOpen(false);
+        setResetEmail("");
+      }
+    } catch (err) {
+      console.error("Password reset error:", err);
+      toast.error("An unexpected error occurred");
+    } finally {
+      setResetLoading(false);
     }
   };
 
@@ -138,6 +197,61 @@ const AdminLogin = () => {
                   onChange={(e) => setPassword(e.target.value)}
                   disabled={loading}
                 />
+              </div>
+
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="remember"
+                    checked={rememberMe}
+                    onCheckedChange={(checked) => setRememberMe(checked === true)}
+                  />
+                  <Label htmlFor="remember" className="text-sm font-normal cursor-pointer">
+                    Remember me
+                  </Label>
+                </div>
+                
+                <Dialog open={resetDialogOpen} onOpenChange={setResetDialogOpen}>
+                  <DialogTrigger asChild>
+                    <Button variant="link" className="px-0 text-sm text-muted-foreground">
+                      Forgot password?
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>Reset Password</DialogTitle>
+                      <DialogDescription>
+                        Enter your email address and we'll send you a link to reset your password.
+                      </DialogDescription>
+                    </DialogHeader>
+                    <form onSubmit={handlePasswordReset} className="space-y-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="reset-email">Email</Label>
+                        <Input
+                          id="reset-email"
+                          type="email"
+                          placeholder="admin@example.com"
+                          value={resetEmail}
+                          onChange={(e) => setResetEmail(e.target.value)}
+                          disabled={resetLoading}
+                        />
+                      </div>
+                      <Button type="submit" className="w-full" disabled={resetLoading}>
+                        {resetLoading ? (
+                          <>
+                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                            Sending...
+                          </>
+                        ) : (
+                          <>
+                            <KeyRound className="w-4 h-4 mr-2" />
+                            Send Reset Link
+                          </>
+                        )}
+                      </Button>
+                    </form>
+                  </DialogContent>
+                </Dialog>
               </div>
               
               <Button type="submit" className="w-full" disabled={loading}>
