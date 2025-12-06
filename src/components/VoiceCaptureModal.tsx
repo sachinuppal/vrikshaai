@@ -1,6 +1,8 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Phone, User, X, Loader2 } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -26,11 +28,25 @@ export const VoiceCaptureModal = ({ isOpen, onClose, onCallStart }: VoiceCapture
   const [countryCode, setCountryCode] = useState("IN");
   const [phone, setPhone] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const { user } = useAuth();
+  const navigate = useNavigate();
 
   const selectedCountry = countries.find((c) => c.code === countryCode);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Check if user has already made a call but is not authenticated
+    const hasAlreadyMadeCall = sessionStorage.getItem("voice_captured") === "true";
+    
+    if (hasAlreadyMadeCall && !user) {
+      // Close modal and redirect to OTP verification
+      onClose();
+      navigate("/demo-login", { 
+        state: { from: "/" } 
+      });
+      return;
+    }
     
     if (!name.trim() || !phone.trim()) {
       toast.error("Please fill in all fields");

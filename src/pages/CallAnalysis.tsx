@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
 import { motion } from "framer-motion";
 import { 
   Phone, 
@@ -180,12 +181,25 @@ const CallAnalysis = () => {
     }
   };
 
+  const { user } = useAuth();
+
   const handleTryAgain = () => {
     // Keep user info for pre-fill but clear call-specific data
     sessionStorage.removeItem("voice_call_record_id");
-    sessionStorage.removeItem("voice_captured");
-    // Redirect to home page where they can start a new call
-    navigate("/");
+    
+    if (user) {
+      // User is authenticated - allow direct new call
+      sessionStorage.removeItem("voice_captured");
+      navigate("/");
+    } else {
+      // Not authenticated - require OTP verification first
+      navigate("/demo-login", { 
+        state: { 
+          from: "/",
+          requiresVerification: true 
+        } 
+      });
+    }
   };
 
   const runObservabilityAnalysis = async () => {

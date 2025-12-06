@@ -26,8 +26,9 @@ export default function DemoLogin() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const from = (location.state as { from?: string })?.from || '/call-history';
+  const from = (location.state as { from?: string })?.from || '/';
   const callId = (location.state as { callId?: string })?.callId;
+  const requiresVerification = (location.state as { requiresVerification?: boolean })?.requiresVerification;
 
   // Pre-fill from sessionStorage (captured during first call)
   const storedName = sessionStorage.getItem('voice_user_name') || '';
@@ -59,6 +60,9 @@ export default function DemoLogin() {
     if (user) {
       // Link calls to user after login
       linkCallsToUser().then(() => {
+        // Clear the voice_captured flag so user can make new calls
+        sessionStorage.removeItem("voice_captured");
+        
         if (callId) {
           navigate(`/call-analysis/${callId}`, { replace: true });
         } else {
@@ -189,9 +193,11 @@ export default function DemoLogin() {
               </CardTitle>
               <CardDescription>
                 {step === 'phone' 
-                  ? (storedName 
-                      ? 'Verify your phone to create an account and access all your calls'
-                      : 'Enter your phone number to create an account')
+                  ? (requiresVerification 
+                      ? 'Verify your phone to start a new call'
+                      : storedName 
+                        ? 'Verify your phone to create an account and access all your calls'
+                        : 'Enter your phone number to create an account')
                   : `We sent a code to ${fullPhone}`
                 }
               </CardDescription>
