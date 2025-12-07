@@ -77,7 +77,8 @@ export const CallStatusOverlay = ({
   const [dismissed, setDismissed] = useState(false);
 
   const config = statusConfig[status];
-  const isVisible = status !== "idle" && !dismissed;
+  // Skip "initiated" status - redundant when Ringg widget is already visible
+  const isVisible = status !== "idle" && status !== "initiated" && !dismissed;
 
   // Auto-redirect countdown when analysis is ready
   useEffect(() => {
@@ -130,11 +131,11 @@ export const CallStatusOverlay = ({
     <AnimatePresence>
       {isVisible && (
         <motion.div
-          initial={{ opacity: 0, y: 100, scale: 0.9 }}
+          initial={{ opacity: 0, y: -50, scale: 0.9 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
-          exit={{ opacity: 0, y: 50, scale: 0.95 }}
+          exit={{ opacity: 0, y: -30, scale: 0.95 }}
           transition={{ type: "spring", damping: 25, stiffness: 300 }}
-          className="fixed bottom-20 left-4 right-4 z-[10000] sm:bottom-4 sm:left-1/2 sm:right-auto sm:w-auto sm:-translate-x-1/2"
+          className="fixed top-4 left-4 right-4 z-[10000] sm:top-auto sm:bottom-4 sm:left-1/2 sm:right-auto sm:w-auto sm:-translate-x-1/2"
         >
           <div className="relative overflow-hidden rounded-2xl border border-border/50 bg-card/95 backdrop-blur-xl shadow-2xl">
             {/* Gradient accent */}
