@@ -134,7 +134,7 @@ export const CallStatusOverlay = ({
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={{ opacity: 0, y: 50, scale: 0.95 }}
           transition={{ type: "spring", damping: 25, stiffness: 300 }}
-          className="fixed bottom-4 left-1/2 z-[99] -translate-x-1/2"
+          className="fixed bottom-4 left-4 right-4 z-[99] sm:left-1/2 sm:right-auto sm:w-auto sm:-translate-x-1/2"
         >
           <div className="relative overflow-hidden rounded-2xl border border-border/50 bg-card/95 backdrop-blur-xl shadow-2xl">
             {/* Gradient accent */}
@@ -147,48 +147,50 @@ export const CallStatusOverlay = ({
               </div>
             )}
 
-            <div className="relative flex items-center gap-4 px-5 py-4">
-              {/* Status Icon */}
-              <div className={`flex h-10 w-10 items-center justify-center rounded-full bg-background/50 ${config.color}`}>
-                {config.icon}
-              </div>
-
-              {/* Status Text */}
-              <div className="flex-1 min-w-[180px]">
-                <h4 className="font-semibold text-foreground text-sm">
-                  {config.title}
-                </h4>
-                <p className="text-xs text-muted-foreground">
-                  {config.description}
-                </p>
+            <div className="relative flex flex-col sm:flex-row items-center gap-3 sm:gap-4 px-4 sm:px-5 py-4">
+              {/* Status Icon & Text Row */}
+              <div className="flex items-center gap-3 w-full sm:w-auto">
+                <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-background/50 ${config.color}`}>
+                  {config.icon}
+                </div>
+                <div className="flex-1 min-w-0 sm:min-w-[180px]">
+                  <h4 className="font-semibold text-foreground text-sm">
+                    {config.title}
+                  </h4>
+                  <p className="text-xs text-muted-foreground">
+                    {config.description}
+                  </p>
+                </div>
               </div>
 
               {/* Actions */}
-              <div className="flex items-center gap-2">
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
                 {status === "analysis_ready" && (
                   <>
                     {countdown !== null && (
-                      <div className="flex items-center gap-1.5 text-xs text-muted-foreground mr-2">
-                        <Clock className="h-3.5 w-3.5" />
-                        <span>Redirecting in {countdown}s</span>
+                      <div className="flex items-center justify-center gap-1.5 text-xs text-muted-foreground sm:mr-2">
+                        <Clock className="h-3.5 w-3.5 shrink-0" />
+                        <span className="whitespace-nowrap">Redirecting in {countdown}s</span>
                       </div>
                     )}
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={handleStayHere}
-                      className="text-xs"
-                    >
-                      Stay Here
-                    </Button>
-                    <Button
-                      size="sm"
-                      onClick={handleViewNow}
-                      className="gap-1.5"
-                    >
-                      View Results
-                      <ArrowRight className="h-3.5 w-3.5" />
-                    </Button>
+                    <div className="flex gap-2 w-full sm:w-auto">
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={handleStayHere}
+                        className="text-xs flex-1 sm:flex-initial"
+                      >
+                        Stay Here
+                      </Button>
+                      <Button
+                        size="sm"
+                        onClick={handleViewNow}
+                        className="gap-1.5 flex-1 sm:flex-initial"
+                      >
+                        View Results
+                        <ArrowRight className="h-3.5 w-3.5" />
+                      </Button>
+                    </div>
                   </>
                 )}
 
@@ -198,7 +200,7 @@ export const CallStatusOverlay = ({
                     size="sm"
                     variant="outline"
                     onClick={() => callId && navigate(`/call-analysis/${callId}`)}
-                    className="text-xs"
+                    className="text-xs w-full sm:w-auto"
                   >
                     View Analysis
                   </Button>

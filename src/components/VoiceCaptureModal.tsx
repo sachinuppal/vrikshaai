@@ -133,14 +133,15 @@ export const VoiceCaptureModal = ({ isOpen, onClose, onCallStart }: VoiceCapture
             onClick={onClose}
           />
 
-          {/* Modal */}
+          {/* Modal Container - flex centering for reliable mobile positioning */}
           <motion.div
-            initial={{ opacity: 0, scale: 0.95, y: 20 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95, y: 20 }}
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.95 }}
             transition={{ duration: 0.25, ease: "easeOut" }}
-            className="fixed left-1/2 top-1/2 z-[101] w-full max-w-md -translate-x-1/2 -translate-y-1/2 px-4"
+            className="fixed inset-0 z-[101] flex items-center justify-center p-4"
           >
+            <div className="w-full max-w-md">
             <div className="relative overflow-hidden rounded-2xl border border-border/50 bg-card shadow-2xl">
               {/* Gradient accent */}
               <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-primary via-accent to-primary" />
@@ -264,6 +265,7 @@ export const VoiceCaptureModal = ({ isOpen, onClose, onCallStart }: VoiceCapture
                   </p>
                 </form>
               </div>
+            </div>
             </div>
           </motion.div>
         </>
