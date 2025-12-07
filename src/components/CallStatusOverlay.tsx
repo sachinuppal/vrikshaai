@@ -134,7 +134,7 @@ export const CallStatusOverlay = ({
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={{ opacity: 0, y: 50, scale: 0.95 }}
           transition={{ type: "spring", damping: 25, stiffness: 300 }}
-          className="fixed bottom-4 left-4 right-4 z-[99] sm:left-1/2 sm:right-auto sm:w-auto sm:-translate-x-1/2"
+          className="fixed bottom-20 left-4 right-4 z-[10000] sm:bottom-4 sm:left-1/2 sm:right-auto sm:w-auto sm:-translate-x-1/2"
         >
           <div className="relative overflow-hidden rounded-2xl border border-border/50 bg-card/95 backdrop-blur-xl shadow-2xl">
             {/* Gradient accent */}
