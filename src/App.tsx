@@ -27,6 +27,7 @@ import CallAnalysis from "./pages/CallAnalysis";
 import CallHistory from "./pages/CallHistory";
 import MyCalls from "./pages/MyCalls";
 import ScriptStudio from "./pages/ScriptStudio";
+import AgentObservability from "./pages/AgentObservability";
 import CRMDashboard from "./pages/crm/CRMDashboard";
 import CRMContacts from "./pages/crm/CRMContacts";
 import CRMContactProfile from "./pages/crm/CRMContactProfile";
@@ -89,6 +90,7 @@ const App = () => (
               <Route path="/crm/roi" element={<AdminRoute><CRMROIDashboard /></AdminRoute>} />
               <Route path="/voice" element={<Voice />} />
               <Route path="/scripttoflowchart" element={<ScriptStudio />} />
+              <Route path="/agentobservability" element={<AgentObservability />} />
               <Route
                 path="/call-history"
                 element={
