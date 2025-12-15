@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Check, ChevronsUpDown, Plus, Loader2 } from "lucide-react";
+import { Check, ChevronsUpDown, Plus, Loader2, LayoutTemplate } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Command,
@@ -8,6 +8,7 @@ import {
   CommandInput,
   CommandItem,
   CommandList,
+  CommandSeparator,
 } from "@/components/ui/command";
 import {
   Popover,
@@ -30,12 +31,14 @@ interface ScriptSelectorProps {
   currentScriptId: string | null;
   onSelectScript: (scriptId: string | null) => void;
   onNewScript: () => void;
+  onOpenTemplates?: () => void;
 }
 
 export const ScriptSelector = ({
   currentScriptId,
   onSelectScript,
   onNewScript,
+  onOpenTemplates,
 }: ScriptSelectorProps) => {
   const [open, setOpen] = useState(false);
   const [scripts, setScripts] = useState<SavedScript[]>([]);
@@ -103,7 +106,20 @@ export const ScriptSelector = ({
                 <Plus className="mr-2 h-4 w-4" />
                 Create New Script
               </CommandItem>
+              {onOpenTemplates && (
+                <CommandItem
+                  onSelect={() => {
+                    onOpenTemplates();
+                    setOpen(false);
+                  }}
+                  className="text-primary"
+                >
+                  <LayoutTemplate className="mr-2 h-4 w-4" />
+                  Browse Templates
+                </CommandItem>
+              )}
             </CommandGroup>
+            <CommandSeparator />
             {scripts.length > 0 && (
               <CommandGroup heading="Saved Scripts">
                 {scripts.map((script) => (

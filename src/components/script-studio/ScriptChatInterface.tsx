@@ -63,10 +63,10 @@ interface ScriptChatInterfaceProps {
 }
 
 const STARTER_PROMPTS = [
-  "Build me a store locator script for a retail chain",
-  "Create an appointment booking agent for a dental clinic",
-  "Design a debt collection script with compliance safeguards",
-  "Help me build a customer support agent for an e-commerce platform",
+  "Build me a healthcare appointment booking script with HIPAA compliance",
+  "Create a debt collection agent with FDCPA safeguards",
+  "Design an e-commerce order tracking voice agent",
+  "Help me build a technical support agent for SaaS",
 ];
 
 export const ScriptChatInterface = ({
