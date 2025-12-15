@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -32,16 +33,12 @@ serve(async (req) => {
   }
 
   try {
-    const { message, sessionId, currentScript, messageHistory, action } = await req.json();
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-
-    if (!LOVABLE_API_KEY) {
-      throw new Error("LOVABLE_API_KEY is not configured");
-    }
+    const { message, sessionId, currentScript, messageHistory, action, user_id } = await req.json();
 
     console.log("Script Studio Chat - Session:", sessionId);
     console.log("User message:", message);
     console.log("Action:", action);
+    console.log("User ID:", user_id);
 
     const isFlowchartGeneration = action === "generate_flowchart";
 
@@ -173,46 +170,54 @@ Be helpful, specific, and always think about edge cases and safety when building
       { role: "user", content: message },
     ];
 
-    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    // Call ai-router instead of direct API call
+    const supabaseUrl = Deno.env.get("SUPABASE_URL");
+    const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY");
+    
+    const aiRouterResponse = await fetch(`${supabaseUrl}/functions/v1/ai-router`, {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
+        "Authorization": `Bearer ${supabaseAnonKey}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
         messages,
+        model: "google/gemini-2.5-flash",
+        user_id: user_id || null,
+        feature: "script_chat",
         response_format: { type: "json_object" },
       }),
     });
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error("AI Gateway error:", response.status, errorText);
+    if (!aiRouterResponse.ok) {
+      const errorText = await aiRouterResponse.text();
+      console.error("AI Router error:", aiRouterResponse.status, errorText);
       
-      if (response.status === 429) {
+      if (aiRouterResponse.status === 429) {
         return new Response(
           JSON.stringify({ error: "Rate limit exceeded. Please try again in a moment." }),
           { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
       }
-      if (response.status === 402) {
+      if (aiRouterResponse.status === 402) {
         return new Response(
           JSON.stringify({ error: "Usage limit reached. Please add credits to continue." }),
           { status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
       }
-      throw new Error(`AI Gateway error: ${response.status}`);
+      throw new Error(`AI Router error: ${aiRouterResponse.status}`);
     }
 
-    const data = await response.json();
+    const data = await aiRouterResponse.json();
     const aiContent = data.choices?.[0]?.message?.content;
+    const usage = data.usage;
 
     if (!aiContent) {
       throw new Error("No response from AI");
     }
 
     console.log("AI Response received, length:", aiContent.length);
+    console.log("Usage data:", usage);
 
     let parsed;
     try {
@@ -276,6 +281,11 @@ Be helpful, specific, and always think about edge cases and safety when building
           metadata: { type: "general" },
         };
       }
+    }
+
+    // Add usage data to response
+    if (usage) {
+      parsed.usage = usage;
     }
 
     return new Response(JSON.stringify(parsed), {

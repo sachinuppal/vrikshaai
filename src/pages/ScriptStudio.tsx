@@ -1,7 +1,7 @@
 import { useState, useCallback, useEffect } from "react";
 import { useParams, useNavigate, useBlocker } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { FileCode2, Save, Loader2, ArrowLeft, GitBranch, PanelLeftClose, PanelLeft, Eye, MoreHorizontal, Upload, History, Download, LayoutTemplate, ChevronRight } from "lucide-react";
+import { FileCode2, Save, Loader2, ArrowLeft, GitBranch, PanelLeftClose, PanelLeft, Eye, MoreHorizontal, Upload, History, Download, LayoutTemplate, ChevronRight, Key } from "lucide-react";
 import { ScriptChatInterface } from "@/components/script-studio/ScriptChatInterface";
 import { DynamicFlowchartRenderer } from "@/components/script-studio/DynamicFlowchartRenderer";
 import { ScriptSectionEditor } from "@/components/script-studio/ScriptSectionEditor";
@@ -12,6 +12,7 @@ import { ScriptPreview } from "@/components/script-studio/ScriptPreview";
 import { ScriptVersionHistory } from "@/components/script-studio/ScriptVersionHistory";
 import { ObservabilityVerification } from "@/components/script-studio/ObservabilityVerification";
 import { ScriptTemplatesModal } from "@/components/script-studio/ScriptTemplatesModal";
+import { APIKeysModal } from "@/components/settings/APIKeysModal";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -122,6 +123,7 @@ const ScriptStudio = () => {
   const [hasAutoSaved, setHasAutoSaved] = useState(false);
   const [isCreatingScript, setIsCreatingScript] = useState(false);
   const [isChatCollapsed, setIsChatCollapsed] = useState(false);
+  const [isApiKeysModalOpen, setIsApiKeysModalOpen] = useState(false);
 
   // Navigation blocker for unsaved changes
   const blocker = useBlocker(
@@ -618,6 +620,11 @@ const ScriptStudio = () => {
                 </DropdownMenuContent>
               </DropdownMenu>
               
+              <Button variant="outline" size="sm" onClick={() => setIsApiKeysModalOpen(true)}>
+                <Key className="h-4 w-4 mr-2" />
+                API Keys
+              </Button>
+              
               <Button size="sm" onClick={handleSaveScript} disabled={isSaving}>
                 {isSaving ? (
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -882,6 +889,8 @@ const ScriptStudio = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+      
+      <APIKeysModal open={isApiKeysModalOpen} onOpenChange={setIsApiKeysModalOpen} />
     </>
   );
 };
