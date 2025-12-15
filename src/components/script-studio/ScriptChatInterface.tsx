@@ -11,6 +11,13 @@ import { toast } from "sonner";
 import type { ScriptData, FlowchartNode } from "@/pages/ScriptStudio";
 import { TokenUsageDisplay, SessionUsageTotal, type TokenUsage } from "./TokenUsageDisplay";
 
+// Helper to validate UUID format - defined OUTSIDE component to ensure availability
+const isValidUUID = (id: string | null | undefined): boolean => {
+  if (!id || typeof id !== 'string') return false;
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+  return uuidRegex.test(id);
+};
+
 // Helper to try parsing script JSON from message content
 const tryParseScriptFromMessage = (content: string): { scriptUpdates?: Partial<ScriptData>; flowchartNodes?: FlowchartNode[] } | null => {
   try {
@@ -101,30 +108,40 @@ What kind of voice agent would you like to build?`,
   const [isLoading, setIsLoading] = useState(false);
   const [sessionId] = useState(() => crypto.randomUUID());
   const [chatHistoryLoaded, setChatHistoryLoaded] = useState(false);
-  // Helper to validate UUID format
-  const isValidUUID = (id: string): boolean => {
-    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-    return uuidRegex.test(id);
-  };
 
-  const [currentScriptId, setCurrentScriptId] = useState<string | null>(
-    scriptId && scriptId !== 'new' && isValidUUID(scriptId) ? scriptId : null
-  );
+  // Initialize currentScriptId with validation
+  const [currentScriptId, setCurrentScriptId] = useState<string | null>(() => {
+    const validId = scriptId && scriptId !== 'new' && isValidUUID(scriptId) ? scriptId : null;
+    console.log('[ScriptChatInterface] Initial scriptId:', scriptId, '-> currentScriptId:', validId);
+    return validId;
+  });
+  
   const [sessionUsage, setSessionUsage] = useState({ totalTokens: 0, totalCost: 0, requestCount: 0 });
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   // Sync scriptId from props
   useEffect(() => {
-    if (scriptId && scriptId !== 'new' && isValidUUID(scriptId) && scriptId !== currentScriptId) {
-      setCurrentScriptId(scriptId);
+    try {
+      if (scriptId && scriptId !== 'new' && isValidUUID(scriptId) && scriptId !== currentScriptId) {
+        console.log('[ScriptChatInterface] Syncing scriptId:', scriptId);
+        setCurrentScriptId(scriptId);
+      }
+    } catch (error) {
+      console.error('[ScriptChatInterface] Error syncing scriptId:', error);
     }
   }, [scriptId, currentScriptId]);
 
   // Load chat history when scriptId changes
   useEffect(() => {
-    if (currentScriptId && isValidUUID(currentScriptId) && !chatHistoryLoaded) {
-      loadChatHistory(currentScriptId);
+    try {
+      if (currentScriptId && isValidUUID(currentScriptId) && !chatHistoryLoaded) {
+        console.log('[ScriptChatInterface] Loading chat history for:', currentScriptId);
+        loadChatHistory(currentScriptId);
+      }
+    } catch (error) {
+      console.error('[ScriptChatInterface] Error in chat history effect:', error);
+      setChatHistoryLoaded(true);
     }
   }, [currentScriptId, chatHistoryLoaded]);
 

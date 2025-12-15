@@ -101,14 +101,27 @@ const initialScriptData: ScriptData = {
   flowchart: { nodes: [] },
 };
 
+// Helper to validate UUID format
+const isValidUUID = (id: string | null | undefined): boolean => {
+  if (!id || typeof id !== 'string') return false;
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+  return uuidRegex.test(id);
+};
+
 const ScriptStudio = () => {
   const { scriptId } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
+  
+  // Debug logging
+  console.log('[ScriptStudio] Mounting with scriptId from params:', scriptId);
+  
   const [scriptData, setScriptData] = useState<ScriptData>(initialScriptData);
-  const [currentScriptId, setCurrentScriptId] = useState<string | null>(
-    scriptId && scriptId !== 'new' ? scriptId : null
-  );
+  const [currentScriptId, setCurrentScriptId] = useState<string | null>(() => {
+    const validId = scriptId && scriptId !== 'new' && isValidUUID(scriptId) ? scriptId : null;
+    console.log('[ScriptStudio] Initial currentScriptId:', validId);
+    return validId;
+  });
   const [scriptStatus, setScriptStatus] = useState<string>("draft");
   const [scriptVersion, setScriptVersion] = useState<number>(1);
   const [isExportModalOpen, setIsExportModalOpen] = useState(false);
@@ -148,9 +161,16 @@ const ScriptStudio = () => {
 
   // Load script from URL param or selection
   useEffect(() => {
-    // Skip loading if scriptId is "new" or undefined
-    if (scriptId && scriptId !== 'new') {
-      loadScript(scriptId);
+    try {
+      // Skip loading if scriptId is "new" or undefined or invalid UUID
+      if (scriptId && scriptId !== 'new' && isValidUUID(scriptId)) {
+        console.log('[ScriptStudio] Loading script:', scriptId);
+        loadScript(scriptId);
+      } else {
+        console.log('[ScriptStudio] Skipping load - scriptId is:', scriptId);
+      }
+    } catch (error) {
+      console.error('[ScriptStudio] Error in load script effect:', error);
     }
   }, [scriptId]);
 

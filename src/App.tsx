@@ -7,6 +7,7 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { VoiceChatProvider } from "@/contexts/VoiceChatContext";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { AdminRoute } from "@/components/AdminRoute";
+import ErrorBoundary from "@/components/ErrorBoundary";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import TermsOfUse from "./pages/TermsOfUse";
@@ -93,14 +94,14 @@ const App = () => (
               <Route path="/crm/integrations" element={<AdminRoute><CRMIntegrations /></AdminRoute>} />
               <Route path="/crm/roi" element={<AdminRoute><CRMROIDashboard /></AdminRoute>} />
               <Route path="/crm/scripts" element={<AdminRoute><CRMScripts /></AdminRoute>} />
-              <Route path="/crm/scripts/new" element={<AdminRoute><ScriptStudio /></AdminRoute>} />
-              <Route path="/crm/scripts/:scriptId" element={<AdminRoute><ScriptStudio /></AdminRoute>} />
+              <Route path="/crm/scripts/new" element={<AdminRoute><ErrorBoundary fallbackRoute="/crm/scripts"><ScriptStudio /></ErrorBoundary></AdminRoute>} />
+              <Route path="/crm/scripts/:scriptId" element={<AdminRoute><ErrorBoundary fallbackRoute="/crm/scripts"><ScriptStudio /></ErrorBoundary></AdminRoute>} />
               <Route path="/crm/flowcharts" element={<AdminRoute><CRMFlowcharts /></AdminRoute>} />
               <Route path="/crm/observability" element={<AdminRoute><CRMObservability /></AdminRoute>} />
               <Route path="/crm/settings" element={<AdminRoute><CRMSettings /></AdminRoute>} />
               <Route path="/voice" element={<Voice />} />
-              <Route path="/scripttoflowchart" element={<ScriptStudio />} />
-              <Route path="/scripttoflowchart/:scriptId" element={<ScriptStudio />} />
+              <Route path="/scripttoflowchart" element={<ErrorBoundary fallbackRoute="/"><ScriptStudio /></ErrorBoundary>} />
+              <Route path="/scripttoflowchart/:scriptId" element={<ErrorBoundary fallbackRoute="/"><ScriptStudio /></ErrorBoundary>} />
               <Route path="/agentobservability" element={<AgentObservability />} />
               <Route
                 path="/call-history"
