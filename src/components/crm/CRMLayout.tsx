@@ -17,6 +17,7 @@ import {
   FileCode2,
   GitBranch,
   Activity,
+  Settings,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -66,6 +67,10 @@ const acceleratorNavItems = [
   { title: "Applications", url: "/crm/applications", icon: FileText },
 ];
 
+const systemNavItems = [
+  { title: "Settings", url: "/crm/settings", icon: Settings },
+];
+
 export function CRMLayout({ children }: CRMLayoutProps) {
   const navigate = useNavigate();
   const location = useLocation();
@@ -75,6 +80,7 @@ export function CRMLayout({ children }: CRMLayoutProps) {
   const [crmOpen, setCrmOpen] = useState(true);
   const [voiceOpen, setVoiceOpen] = useState(location.pathname.includes('/crm/calls'));
   const [acceleratorOpen, setAcceleratorOpen] = useState(location.pathname.includes('/crm/applications'));
+  const [systemOpen, setSystemOpen] = useState(location.pathname.includes('/crm/settings'));
 
   const handleLogout = async () => {
     try {
@@ -246,6 +252,41 @@ export function CRMLayout({ children }: CRMLayoutProps) {
                   <SidebarGroupContent>
                     <SidebarMenu>
                       {acceleratorNavItems.map((item) => (
+                        <SidebarMenuItem key={item.title}>
+                          <SidebarMenuButton
+                            asChild
+                            isActive={isActive(item.url)}
+                          >
+                            <button
+                              onClick={() => navigate(item.url)}
+                              className="w-full flex items-center gap-2"
+                            >
+                              <item.icon className="h-4 w-4" />
+                              <span>{item.title}</span>
+                            </button>
+                          </SidebarMenuButton>
+                        </SidebarMenuItem>
+                      ))}
+                    </SidebarMenu>
+                  </SidebarGroupContent>
+                </CollapsibleContent>
+              </SidebarGroup>
+            </Collapsible>
+
+            {/* System Section */}
+            <Collapsible open={systemOpen} onOpenChange={setSystemOpen}>
+              <SidebarGroup>
+                <CollapsibleTrigger className="flex items-center justify-between w-full px-3 py-2 text-sm font-semibold text-muted-foreground hover:text-foreground">
+                  <span className="flex items-center gap-2">
+                    <Settings className="h-4 w-4" />
+                    System
+                  </span>
+                  <ChevronDown className={cn("h-4 w-4 transition-transform", systemOpen && "rotate-180")} />
+                </CollapsibleTrigger>
+                <CollapsibleContent>
+                  <SidebarGroupContent>
+                    <SidebarMenu>
+                      {systemNavItems.map((item) => (
                         <SidebarMenuItem key={item.title}>
                           <SidebarMenuButton
                             asChild
