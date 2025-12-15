@@ -99,6 +99,7 @@ const ScriptStudio = () => {
   const [animatingSection, setAnimatingSection] = useState<string | null>(null);
   const [isGeneratingFlowchart, setIsGeneratingFlowchart] = useState(false);
   const [hasAutoSaved, setHasAutoSaved] = useState(false);
+  const [isCreatingScript, setIsCreatingScript] = useState(false);
 
   // Load script from URL param or selection
   useEffect(() => {
@@ -365,6 +366,54 @@ const ScriptStudio = () => {
     setHasUnsavedChanges(true);
   };
 
+  // Ensure script is saved before chat starts - called from chat interface
+  const ensureScriptSaved = useCallback(async (): Promise<string | null> => {
+    // Already have a script ID
+    if (currentScriptId) return currentScriptId;
+    
+    // Already creating
+    if (isCreatingScript) return null;
+    
+    if (!user?.id) {
+      toast.error("Please sign in to save scripts");
+      return null;
+    }
+
+    setIsCreatingScript(true);
+    try {
+      const { data, error } = await supabase
+        .from("agent_scripts")
+        .insert([{
+          name: scriptData.name || "Untitled Script",
+          description: scriptData.description,
+          use_case: scriptData.useCase,
+          industry: scriptData.industry,
+          script_json: JSON.parse(JSON.stringify({ sections: scriptData.sections })),
+          flowchart_json: JSON.parse(JSON.stringify(scriptData.flowchart)),
+          status: "draft",
+          version: 1,
+          created_by: user.id,
+        }])
+        .select("id, version")
+        .single();
+
+      if (error) throw error;
+      
+      setCurrentScriptId(data.id);
+      setScriptVersion(data.version || 1);
+      setHasAutoSaved(true);
+      navigate(`/scripttoflowchart/${data.id}`, { replace: true });
+      toast.success("Script created");
+      return data.id;
+    } catch (error) {
+      console.error("Failed to create script:", error);
+      toast.error("Failed to create script");
+      return null;
+    } finally {
+      setIsCreatingScript(false);
+    }
+  }, [currentScriptId, isCreatingScript, user, scriptData, navigate]);
+
   useEffect(() => {
     document.title = "Script Studio - Build Voice Agent Scripts with AI | Vriksha";
   }, []);
@@ -573,6 +622,7 @@ const ScriptStudio = () => {
                     onFlowchartUpdate={handleFlowchartUpdate}
                     scriptId={currentScriptId}
                     phase={currentPhase}
+                    onEnsureScriptSaved={ensureScriptSaved}
                   />
                 </div>
 
@@ -603,6 +653,7 @@ const ScriptStudio = () => {
                     onFlowchartUpdate={handleFlowchartUpdate}
                     scriptId={currentScriptId}
                     phase={currentPhase}
+                    onEnsureScriptSaved={ensureScriptSaved}
                   />
                 </div>
 

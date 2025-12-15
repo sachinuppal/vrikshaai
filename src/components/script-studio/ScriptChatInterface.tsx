@@ -59,6 +59,7 @@ interface ScriptChatInterfaceProps {
   onFlowchartUpdate: (nodes: FlowchartNode[]) => void;
   scriptId?: string | null;
   phase?: "script" | "flowchart";
+  onEnsureScriptSaved?: () => Promise<string | null>;
 }
 
 const STARTER_PROMPTS = [
@@ -74,6 +75,7 @@ export const ScriptChatInterface = ({
   onFlowchartUpdate,
   scriptId,
   phase = "script",
+  onEnsureScriptSaved,
 }: ScriptChatInterfaceProps) => {
   const [messages, setMessages] = useState<Message[]>([
     {
@@ -97,15 +99,23 @@ What kind of voice agent would you like to build?`,
   const [isLoading, setIsLoading] = useState(false);
   const [sessionId] = useState(() => crypto.randomUUID());
   const [chatHistoryLoaded, setChatHistoryLoaded] = useState(false);
+  const [currentScriptId, setCurrentScriptId] = useState<string | null>(scriptId || null);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
+  // Sync scriptId from props
+  useEffect(() => {
+    if (scriptId && scriptId !== currentScriptId) {
+      setCurrentScriptId(scriptId);
+    }
+  }, [scriptId, currentScriptId]);
+
   // Load chat history when scriptId changes
   useEffect(() => {
-    if (scriptId && !chatHistoryLoaded) {
-      loadChatHistory(scriptId);
+    if (currentScriptId && !chatHistoryLoaded) {
+      loadChatHistory(currentScriptId);
     }
-  }, [scriptId, chatHistoryLoaded]);
+  }, [currentScriptId, chatHistoryLoaded]);
 
   const loadChatHistory = async (id: string) => {
     try {
@@ -130,6 +140,7 @@ What kind of voice agent would you like to build?`,
       setChatHistoryLoaded(true);
     } catch (error) {
       console.error("Failed to load chat history:", error);
+      setChatHistoryLoaded(true); // Mark as loaded even on error
     }
   };
 
@@ -158,6 +169,15 @@ What kind of voice agent would you like to build?`,
   const handleSend = async () => {
     if (!input.trim() || isLoading) return;
 
+    // Ensure script is saved first (for new scripts)
+    let activeScriptId = currentScriptId;
+    if (!activeScriptId && onEnsureScriptSaved) {
+      activeScriptId = await onEnsureScriptSaved();
+      if (activeScriptId) {
+        setCurrentScriptId(activeScriptId);
+      }
+    }
+
     const userMessage: Message = {
       id: crypto.randomUUID(),
       role: "user",
@@ -170,8 +190,8 @@ What kind of voice agent would you like to build?`,
     setIsLoading(true);
 
     // Save user message to database
-    if (scriptId) {
-      saveMessage(userMessage, scriptId);
+    if (activeScriptId) {
+      saveMessage(userMessage, activeScriptId);
     }
 
     try {
@@ -241,8 +261,8 @@ What kind of voice agent would you like to build?`,
       setMessages((prev) => [...prev, assistantMessage]);
 
       // Save assistant message to database
-      if (scriptId) {
-        saveMessage(assistantMessage, scriptId);
+      if (activeScriptId) {
+        saveMessage(assistantMessage, activeScriptId);
       }
     } catch (error) {
       console.error("Chat error:", error);
@@ -275,6 +295,29 @@ What kind of voice agent would you like to build?`,
     textareaRef.current?.focus();
   };
 
+  // Restore script from chat history if messages have script content but preview is empty
+  const restoreScriptFromChat = useCallback(() => {
+    for (const msg of messages) {
+      if (msg.role === "assistant") {
+        const extracted = tryParseScriptFromMessage(msg.content);
+        if (extracted?.scriptUpdates) {
+          onScriptUpdate(extracted.scriptUpdates);
+          if (extracted.flowchartNodes) {
+            onFlowchartUpdate(extracted.flowchartNodes);
+          }
+          toast.success("Script restored from chat history!");
+          return;
+        }
+      }
+    }
+    toast.error("No script content found in chat history");
+  }, [messages, onScriptUpdate, onFlowchartUpdate]);
+
+  // Check if there's restorable content in chat
+  const hasRestorableContent = messages.length > 1 && 
+    scriptData.sections.every(s => !s.isComplete) &&
+    messages.some(m => m.role === "assistant" && tryParseScriptFromMessage(m.content));
+
   return (
     <Card className="flex h-full flex-col overflow-hidden border-border/50 bg-card/50 backdrop-blur">
       <CardHeader className="border-b border-border/50 pb-3">
@@ -290,6 +333,20 @@ What kind of voice agent would you like to build?`,
       </CardHeader>
 
       <CardContent className="flex flex-1 flex-col gap-4 overflow-hidden p-0">
+        {/* Restore Script Banner */}
+        {hasRestorableContent && (
+          <div className="mx-4 mt-4 flex items-center justify-between rounded-lg border border-primary/30 bg-primary/5 px-4 py-3">
+            <div className="flex items-center gap-2">
+              <AlertCircle className="h-5 w-5 text-primary" />
+              <span className="text-sm">Script content found in chat. Apply to preview?</span>
+            </div>
+            <Button size="sm" onClick={restoreScriptFromChat}>
+              <Wand2 className="mr-1 h-3 w-3" />
+              Restore Script
+            </Button>
+          </div>
+        )}
+
         {/* Messages */}
         <ScrollArea className="flex-1 p-4" ref={scrollAreaRef}>
           <div className="space-y-4">
