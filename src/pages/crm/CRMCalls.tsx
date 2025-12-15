@@ -363,13 +363,13 @@ const CRMCalls = () => {
         {/* Actions */}
         <div className="flex flex-wrap items-center gap-3">
           <Button variant="outline" size="sm" asChild>
-            <Link to="/scripttoflowchart">
+            <Link to="/crm/scripts">
               <FileCode2 className="h-4 w-4 mr-2" />
               Create Script
             </Link>
           </Button>
           <Button variant="outline" size="sm" asChild>
-            <Link to="/agentobservability">
+            <Link to="/crm/observability">
               <Activity className="h-4 w-4 mr-2" />
               Observability
             </Link>

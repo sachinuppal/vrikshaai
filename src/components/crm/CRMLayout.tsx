@@ -14,6 +14,9 @@ import {
   LogOut,
   Plug,
   BarChart3,
+  FileCode2,
+  GitBranch,
+  Activity,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -54,6 +57,9 @@ const crmNavItems = [
 
 const voiceNavItems = [
   { title: "All Calls", url: "/crm/calls", icon: Phone },
+  { title: "Scripts", url: "/crm/scripts", icon: FileCode2 },
+  { title: "Flowcharts", url: "/crm/flowcharts", icon: GitBranch },
+  { title: "Observability", url: "/crm/observability", icon: Activity },
 ];
 
 const acceleratorNavItems = [
