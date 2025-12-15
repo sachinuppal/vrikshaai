@@ -90,6 +90,7 @@ const App = () => (
               <Route path="/crm/roi" element={<AdminRoute><CRMROIDashboard /></AdminRoute>} />
               <Route path="/voice" element={<Voice />} />
               <Route path="/scripttoflowchart" element={<ScriptStudio />} />
+              <Route path="/scripttoflowchart/:scriptId" element={<ScriptStudio />} />
               <Route path="/agentobservability" element={<AgentObservability />} />
               <Route
                 path="/call-history"
