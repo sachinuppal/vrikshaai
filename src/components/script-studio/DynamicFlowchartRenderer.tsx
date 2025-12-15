@@ -24,6 +24,7 @@ interface DynamicFlowchartRendererProps {
   onNodesChange: (nodes: FlowchartNode[]) => void;
   scriptData: ScriptData;
   fullscreen?: boolean;
+  isAnimating?: boolean;
 }
 
 const NODE_ICONS = {
@@ -197,6 +198,7 @@ export const DynamicFlowchartRenderer = ({
   onNodesChange,
   scriptData,
   fullscreen = false,
+  isAnimating = false,
 }: DynamicFlowchartRendererProps) => {
   // Use provided nodes or generate from script
   const displayNodes = useMemo(() => {
@@ -214,11 +216,13 @@ export const DynamicFlowchartRenderer = ({
     return `${minX} ${minY} ${maxX - minX} ${maxY - minY}`;
   }, [displayNodes]);
 
-  // Create connection paths
+  // Create connection paths - defensive check for connections array
   const connections = useMemo(() => {
     const paths: { from: FlowchartNode; to: FlowchartNode; id: string }[] = [];
     displayNodes.forEach((node) => {
-      node.connections.forEach((targetId) => {
+      // Defensive check: ensure connections is an array
+      const nodeConnections = Array.isArray(node.connections) ? node.connections : [];
+      nodeConnections.forEach((targetId) => {
         const target = displayNodes.find((n) => n.id === targetId);
         if (target) {
           paths.push({ from: node, to: target, id: `${node.id}-${targetId}` });
@@ -335,9 +339,14 @@ export const DynamicFlowchartRenderer = ({
                   return (
                     <motion.g
                       key={node.id}
-                      initial={{ opacity: 0, scale: 0.8 }}
+                      initial={{ opacity: 0, scale: 0 }}
                       animate={{ opacity: 1, scale: 1 }}
-                      transition={{ delay: index * 0.05 }}
+                      transition={{ 
+                        delay: isAnimating ? index * 0.15 : index * 0.05,
+                        type: isAnimating ? "spring" : "tween",
+                        stiffness: 200,
+                        damping: 15
+                      }}
                     >
                       <foreignObject
                         x={node.position.x}
