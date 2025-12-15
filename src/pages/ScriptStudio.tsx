@@ -1,13 +1,14 @@
 import { useState, useCallback, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { motion } from "framer-motion";
-import { FileCode2, Sparkles, Save, Upload, Loader2 } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { FileCode2, Save, Upload, Loader2, ArrowLeft, GitBranch } from "lucide-react";
 import { ScriptChatInterface } from "@/components/script-studio/ScriptChatInterface";
 import { DynamicFlowchartRenderer } from "@/components/script-studio/DynamicFlowchartRenderer";
 import { ScriptSectionEditor } from "@/components/script-studio/ScriptSectionEditor";
 import { ScriptExportModal } from "@/components/script-studio/ScriptExportModal";
 import { ScriptSelector } from "@/components/script-studio/ScriptSelector";
 import { ScriptImportModal } from "@/components/script-studio/ScriptImportModal";
+import { ScriptPreview } from "@/components/script-studio/ScriptPreview";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
@@ -17,6 +18,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
@@ -48,6 +50,8 @@ export interface ScriptData {
     nodes: FlowchartNode[];
   };
 }
+
+type WorkflowPhase = "script" | "flowchart";
 
 const initialScriptData: ScriptData = {
   name: "New Voice Agent Script",
@@ -87,10 +91,14 @@ const ScriptStudio = () => {
   const [scriptVersion, setScriptVersion] = useState<number>(1);
   const [isExportModalOpen, setIsExportModalOpen] = useState(false);
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState("chat");
   const [isSaving, setIsSaving] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  
+  // Two-phase workflow state
+  const [currentPhase, setCurrentPhase] = useState<WorkflowPhase>("script");
+  const [animatingSection, setAnimatingSection] = useState<string | null>(null);
+  const [isGeneratingFlowchart, setIsGeneratingFlowchart] = useState(false);
 
   // Load script from URL param or selection
   useEffect(() => {
@@ -121,13 +129,18 @@ const ScriptStudio = () => {
           industry: data.industry || "",
           sections: scriptJson.sections || initialScriptData.sections,
           flowchart: {
-            nodes: flowchartJson.nodes || [],
+            nodes: Array.isArray(flowchartJson.nodes) ? flowchartJson.nodes : [],
           },
         });
         setCurrentScriptId(id);
         setScriptStatus(data.status || "draft");
         setScriptVersion(data.version || 1);
         setHasUnsavedChanges(false);
+        
+        // If script has flowchart, go to flowchart phase
+        if (flowchartJson.nodes && flowchartJson.nodes.length > 0) {
+          setCurrentPhase("flowchart");
+        }
       }
     } catch (error) {
       console.error("Failed to load script:", error);
@@ -156,7 +169,6 @@ const ScriptStudio = () => {
     setScriptStatus(newStatus);
     setHasUnsavedChanges(true);
     
-    // Immediately save status if script exists
     if (currentScriptId) {
       try {
         await supabase
@@ -175,11 +187,17 @@ const ScriptStudio = () => {
     setScriptData((prev) => {
       const newData = { ...prev, ...updates };
       
-      // If sections are being updated, merge them properly
+      // If sections are being updated, merge them properly and trigger animation
       if (updates.sections) {
+        const updatedSectionIds: string[] = [];
+        
         newData.sections = prev.sections.map((existingSection) => {
           const updatedSection = updates.sections?.find((s) => s.id === existingSection.id);
-          if (updatedSection) {
+          if (updatedSection && Object.keys(updatedSection.content || {}).length > 0) {
+            // Track which section was updated for animation
+            if (!existingSection.isComplete && updatedSection.isComplete) {
+              updatedSectionIds.push(existingSection.id);
+            }
             return {
               ...existingSection,
               content: { ...existingSection.content, ...updatedSection.content },
@@ -188,6 +206,12 @@ const ScriptStudio = () => {
           }
           return existingSection;
         });
+        
+        // Animate the first newly completed section
+        if (updatedSectionIds.length > 0) {
+          setAnimatingSection(updatedSectionIds[0]);
+          setTimeout(() => setAnimatingSection(null), 3000);
+        }
       }
       
       return newData;
@@ -213,16 +237,30 @@ const ScriptStudio = () => {
     setHasUnsavedChanges(true);
   }, []);
 
+  const handleProceedToFlowchart = async () => {
+    setIsGeneratingFlowchart(true);
+    
+    // Simulate flowchart generation delay for animation effect
+    await new Promise((resolve) => setTimeout(resolve, 500));
+    
+    setCurrentPhase("flowchart");
+    toast.success("Generating flowchart from your script...");
+    
+    setIsGeneratingFlowchart(false);
+  };
+
+  const handleBackToScript = () => {
+    setCurrentPhase("script");
+  };
+
   const handleSaveScript = async () => {
     setIsSaving(true);
     try {
       if (currentScriptId) {
-        // Save version history before updating
         await saveVersionHistory(currentScriptId, scriptVersion);
         
         const newVersion = scriptVersion + 1;
         
-        // Update existing script
         const { error } = await supabase
           .from("agent_scripts")
           .update({
@@ -242,7 +280,6 @@ const ScriptStudio = () => {
         setScriptVersion(newVersion);
         toast.success(`Script saved (v${newVersion})`);
       } else {
-        // Create new script with user ownership
         const { data, error } = await supabase
           .from("agent_scripts")
           .insert([{
@@ -288,6 +325,7 @@ const ScriptStudio = () => {
     setScriptStatus("draft");
     setScriptVersion(1);
     setHasUnsavedChanges(false);
+    setCurrentPhase("script");
     navigate("/scripttoflowchart");
   };
 
@@ -327,10 +365,15 @@ const ScriptStudio = () => {
               </div>
               <div>
                 <h1 className="text-lg font-semibold">{scriptData.name || "Script Studio"}</h1>
-                <p className="text-xs text-muted-foreground">
-                  Build Voice Agent Scripts with AI
-                  {hasUnsavedChanges && <span className="ml-2 text-yellow-500">• Unsaved changes</span>}
-                </p>
+                <div className="flex items-center gap-2">
+                  <p className="text-xs text-muted-foreground">
+                    Build Voice Agent Scripts with AI
+                  </p>
+                  <Badge variant={currentPhase === "script" ? "default" : "secondary"} className="text-xs">
+                    {currentPhase === "script" ? "Script Phase" : "Flowchart Phase"}
+                  </Badge>
+                  {hasUnsavedChanges && <span className="text-xs text-yellow-500">• Unsaved</span>}
+                </div>
               </div>
             </div>
 
@@ -341,7 +384,6 @@ const ScriptStudio = () => {
                 onNewScript={handleNewScript}
               />
               
-              {/* Status Dropdown */}
               <Select value={scriptStatus} onValueChange={handleStatusChange}>
                 <SelectTrigger className="w-[110px]">
                   <SelectValue />
@@ -376,67 +418,140 @@ const ScriptStudio = () => {
 
         {/* Main Content */}
         <main className="container py-6">
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-            <TabsList className="grid w-full max-w-md grid-cols-3">
-              <TabsTrigger value="chat">Chat Builder</TabsTrigger>
-              <TabsTrigger value="flowchart">Flowchart</TabsTrigger>
-              <TabsTrigger value="sections">18 Sections</TabsTrigger>
-            </TabsList>
+          <Tabs value={currentPhase === "script" ? "chat" : "flowchart"} className="space-y-6">
+            {/* Phase Navigation */}
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                {currentPhase === "flowchart" && (
+                  <Button variant="ghost" size="sm" onClick={handleBackToScript}>
+                    <ArrowLeft className="mr-2 h-4 w-4" />
+                    Back to Script
+                  </Button>
+                )}
+                <TabsList>
+                  <TabsTrigger 
+                    value="chat" 
+                    onClick={() => setCurrentPhase("script")}
+                    className="gap-2"
+                  >
+                    <FileCode2 className="h-4 w-4" />
+                    Script Builder
+                  </TabsTrigger>
+                  <TabsTrigger 
+                    value="flowchart" 
+                    onClick={() => setCurrentPhase("flowchart")}
+                    disabled={scriptData.sections.filter(s => s.isComplete).length < 3}
+                    className="gap-2"
+                  >
+                    <GitBranch className="h-4 w-4" />
+                    Flowchart
+                  </TabsTrigger>
+                </TabsList>
+              </div>
+              
+              <Badge variant="outline">
+                {scriptData.sections.filter(s => s.isComplete).length}/{scriptData.sections.length} sections complete
+              </Badge>
+            </div>
 
-            <TabsContent value="chat" className="space-y-0">
-              <div className="grid gap-6 lg:grid-cols-2">
-                {/* Chat Interface */}
+            {/* Script Building Phase */}
+            <AnimatePresence mode="wait">
+              {currentPhase === "script" && (
                 <motion.div
+                  key="script-phase"
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
-                  className="h-[calc(100vh-220px)] min-h-[500px]"
+                  exit={{ opacity: 0, x: -20 }}
+                  transition={{ duration: 0.3 }}
                 >
-                  <ScriptChatInterface
-                    scriptData={scriptData}
-                    onScriptUpdate={handleScriptUpdate}
-                    onFlowchartUpdate={handleFlowchartUpdate}
-                    scriptId={currentScriptId}
-                  />
-                </motion.div>
+                  <TabsContent value="chat" className="mt-0 space-y-0">
+                    <div className="grid gap-6 lg:grid-cols-2">
+                      {/* Chat Interface */}
+                      <motion.div
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        className="h-[calc(100vh-220px)] min-h-[500px]"
+                      >
+                        <ScriptChatInterface
+                          scriptData={scriptData}
+                          onScriptUpdate={handleScriptUpdate}
+                          onFlowchartUpdate={handleFlowchartUpdate}
+                          scriptId={currentScriptId}
+                          phase={currentPhase}
+                        />
+                      </motion.div>
 
-                {/* Live Flowchart Preview */}
+                      {/* Script Preview (Google Docs style) */}
+                      <motion.div
+                        initial={{ opacity: 0, x: 20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        className="h-[calc(100vh-220px)] min-h-[500px]"
+                      >
+                        <ScriptPreview
+                          sections={scriptData.sections}
+                          scriptName={scriptData.name}
+                          onProceedToFlowchart={handleProceedToFlowchart}
+                          animatingSection={animatingSection}
+                        />
+                      </motion.div>
+                    </div>
+                  </TabsContent>
+                </motion.div>
+              )}
+
+              {/* Flowchart Building Phase */}
+              {currentPhase === "flowchart" && (
                 <motion.div
+                  key="flowchart-phase"
                   initial={{ opacity: 0, x: 20 }}
                   animate={{ opacity: 1, x: 0 }}
-                  className="h-[calc(100vh-220px)] min-h-[500px]"
+                  exit={{ opacity: 0, x: 20 }}
+                  transition={{ duration: 0.3 }}
                 >
-                  <DynamicFlowchartRenderer
-                    nodes={scriptData.flowchart.nodes}
-                    onNodesChange={handleFlowchartUpdate}
-                    scriptData={scriptData}
-                  />
+                  <TabsContent value="flowchart" className="mt-0 space-y-0">
+                    <div className="grid gap-6 lg:grid-cols-2">
+                      {/* Chat Interface */}
+                      <motion.div
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        className="h-[calc(100vh-220px)] min-h-[500px]"
+                      >
+                        <ScriptChatInterface
+                          scriptData={scriptData}
+                          onScriptUpdate={handleScriptUpdate}
+                          onFlowchartUpdate={handleFlowchartUpdate}
+                          scriptId={currentScriptId}
+                          phase={currentPhase}
+                        />
+                      </motion.div>
+
+                      {/* Flowchart Preview */}
+                      <motion.div
+                        initial={{ opacity: 0, x: 20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        className="h-[calc(100vh-220px)] min-h-[500px]"
+                      >
+                        {isGeneratingFlowchart ? (
+                          <div className="flex h-full items-center justify-center rounded-lg border border-border/50 bg-card/50">
+                            <div className="flex flex-col items-center gap-4">
+                              <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                              <p className="text-muted-foreground">Generating flowchart...</p>
+                            </div>
+                          </div>
+                        ) : (
+                          <DynamicFlowchartRenderer
+                            nodes={scriptData.flowchart.nodes}
+                            onNodesChange={handleFlowchartUpdate}
+                            scriptData={scriptData}
+                            isAnimating={currentPhase === "flowchart"}
+                          />
+                        )}
+                      </motion.div>
+                    </div>
+                  </TabsContent>
                 </motion.div>
-              </div>
-            </TabsContent>
-
-            <TabsContent value="flowchart">
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="h-[calc(100vh-220px)] min-h-[600px]"
-              >
-                <DynamicFlowchartRenderer
-                  nodes={scriptData.flowchart.nodes}
-                  onNodesChange={handleFlowchartUpdate}
-                  scriptData={scriptData}
-                  fullscreen
-                />
-              </motion.div>
-            </TabsContent>
-
-            <TabsContent value="sections">
-              <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-                <ScriptSectionEditor
-                  sections={scriptData.sections}
-                  onSectionUpdate={handleSectionUpdate}
-                />
-              </motion.div>
-            </TabsContent>
+              )}
+            </AnimatePresence>
           </Tabs>
         </main>
       </div>

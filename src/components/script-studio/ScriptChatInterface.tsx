@@ -26,6 +26,7 @@ interface ScriptChatInterfaceProps {
   onScriptUpdate: (updates: Partial<ScriptData>) => void;
   onFlowchartUpdate: (nodes: FlowchartNode[]) => void;
   scriptId?: string | null;
+  phase?: "script" | "flowchart";
 }
 
 const STARTER_PROMPTS = [
@@ -40,6 +41,7 @@ export const ScriptChatInterface = ({
   onScriptUpdate,
   onFlowchartUpdate,
   scriptId,
+  phase = "script",
 }: ScriptChatInterfaceProps) => {
   const [messages, setMessages] = useState<Message[]>([
     {
@@ -47,12 +49,13 @@ export const ScriptChatInterface = ({
       role: "assistant",
       content: `Welcome to Script Studio! 🎙️
 
-I'll help you build a comprehensive voice agent script with all 18 sections. You can:
+I'll help you build a comprehensive voice agent script. You can:
 
-• **Describe your use case** and I'll generate the full script structure
-• **Ask me to modify specific sections** like guardrails or call flows
-• **Request logical flaw detection** to identify issues in your script
-• **Get recommendations** to improve agent performance
+• **Describe your use case** and I'll generate sections with animated preview
+• **Paste an existing script** and I'll parse it into our format
+• **Modify specific sections** like guardrails or call flows
+
+Once your script is ready, we'll proceed to generate the flowchart.
 
 What kind of voice agent would you like to build?`,
       timestamp: new Date(),
