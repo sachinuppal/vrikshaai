@@ -1,7 +1,7 @@
 import { useState, useCallback, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { FileCode2, Save, Upload, Loader2, ArrowLeft, GitBranch, PanelLeftClose, PanelLeft } from "lucide-react";
+import { FileCode2, Save, Upload, Loader2, ArrowLeft, GitBranch, PanelLeftClose, PanelLeft, Eye } from "lucide-react";
 import { ScriptChatInterface } from "@/components/script-studio/ScriptChatInterface";
 import { DynamicFlowchartRenderer } from "@/components/script-studio/DynamicFlowchartRenderer";
 import { ScriptSectionEditor } from "@/components/script-studio/ScriptSectionEditor";
@@ -10,6 +10,7 @@ import { ScriptSelector } from "@/components/script-studio/ScriptSelector";
 import { ScriptImportModal } from "@/components/script-studio/ScriptImportModal";
 import { ScriptPreview } from "@/components/script-studio/ScriptPreview";
 import { ScriptVersionHistory } from "@/components/script-studio/ScriptVersionHistory";
+import { ObservabilityVerification } from "@/components/script-studio/ObservabilityVerification";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -51,7 +52,7 @@ export interface ScriptData {
   };
 }
 
-type WorkflowPhase = "script" | "flowchart";
+type WorkflowPhase = "script" | "flowchart" | "observability";
 
 const initialScriptData: ScriptData = {
   name: "New Voice Agent Script",
@@ -497,7 +498,7 @@ const ScriptStudio = () => {
                     Build Voice Agent Scripts with AI
                   </p>
                   <Badge variant={currentPhase === "script" ? "default" : "secondary"} className="text-xs">
-                    {currentPhase === "script" ? "Script Phase" : "Flowchart Phase"}
+                    {currentPhase === "script" ? "Script Phase" : currentPhase === "flowchart" ? "Flowchart Phase" : "Observability"}
                   </Badge>
                   {hasUnsavedChanges && <span className="text-xs text-yellow-500">• Unsaved</span>}
                 </div>
@@ -568,7 +569,7 @@ const ScriptStudio = () => {
                   <PanelLeftClose className="h-4 w-4" />
                 )}
               </Button>
-              {currentPhase === "flowchart" && (
+              {(currentPhase === "flowchart" || currentPhase === "observability") && (
                 <Button variant="ghost" size="sm" onClick={handleBackToScript}>
                   <ArrowLeft className="mr-2 h-4 w-4" />
                   Back to Script
@@ -602,6 +603,18 @@ const ScriptStudio = () => {
                   <GitBranch className="h-4 w-4" />
                   Flowchart
                 </button>
+                <button
+                  onClick={() => setCurrentPhase("observability")}
+                  disabled={scriptData.sections.filter(s => s.isComplete).length < 3}
+                  className={`inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 gap-2 disabled:pointer-events-none disabled:opacity-50 ${
+                    currentPhase === "observability" 
+                      ? "bg-background text-foreground shadow-sm" 
+                      : "hover:bg-background/50"
+                  }`}
+                >
+                  <Eye className="h-4 w-4" />
+                  Observability
+                </button>
               </div>
             </div>
             
@@ -612,7 +625,7 @@ const ScriptStudio = () => {
 
           {/* Phase Content */}
           <AnimatePresence mode="wait">
-            {currentPhase === "script" ? (
+            {currentPhase === "script" && (
               <motion.div
                 key="script-phase"
                 initial={{ opacity: 0, x: -20 }}
@@ -656,7 +669,9 @@ const ScriptStudio = () => {
                   />
                 </div>
               </motion.div>
-            ) : (
+            )}
+            
+            {currentPhase === "flowchart" && (
               <motion.div
                 key="flowchart-phase"
                 initial={{ opacity: 0, x: 20 }}
@@ -700,6 +715,38 @@ const ScriptStudio = () => {
                     isGenerating={isGeneratingFlowchart}
                     onRegenerate={generateFlowchartFromAI}
                     isRegenerating={isGeneratingFlowchart}
+                  />
+                </div>
+              </motion.div>
+            )}
+            
+            {currentPhase === "observability" && (
+              <motion.div
+                key="observability-phase"
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: 20 }}
+                transition={{ duration: 0.3 }}
+                className="grid gap-6 lg:grid-cols-2"
+              >
+                {/* Flowchart on left */}
+                <div className="h-[calc(100vh-220px)] min-h-[500px]">
+                  <DynamicFlowchartRenderer
+                    nodes={scriptData.flowchart.nodes}
+                    onNodesChange={handleFlowchartUpdate}
+                    scriptData={scriptData}
+                    isAnimating={false}
+                    isGenerating={isGeneratingFlowchart}
+                    onRegenerate={generateFlowchartFromAI}
+                    isRegenerating={isGeneratingFlowchart}
+                  />
+                </div>
+
+                {/* Observability Verification on right */}
+                <div className="h-[calc(100vh-220px)] min-h-[500px]">
+                  <ObservabilityVerification
+                    scriptData={scriptData}
+                    scriptId={currentScriptId}
                   />
                 </div>
               </motion.div>
