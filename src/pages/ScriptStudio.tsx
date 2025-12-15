@@ -106,7 +106,9 @@ const ScriptStudio = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [scriptData, setScriptData] = useState<ScriptData>(initialScriptData);
-  const [currentScriptId, setCurrentScriptId] = useState<string | null>(scriptId || null);
+  const [currentScriptId, setCurrentScriptId] = useState<string | null>(
+    scriptId && scriptId !== 'new' ? scriptId : null
+  );
   const [scriptStatus, setScriptStatus] = useState<string>("draft");
   const [scriptVersion, setScriptVersion] = useState<number>(1);
   const [isExportModalOpen, setIsExportModalOpen] = useState(false);
