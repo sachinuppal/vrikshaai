@@ -10,7 +10,15 @@ import { ScriptSelector } from "@/components/script-studio/ScriptSelector";
 import { ScriptImportModal } from "@/components/script-studio/ScriptImportModal";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 
 export interface ScriptSection {
@@ -72,8 +80,11 @@ const initialScriptData: ScriptData = {
 const ScriptStudio = () => {
   const { scriptId } = useParams();
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [scriptData, setScriptData] = useState<ScriptData>(initialScriptData);
   const [currentScriptId, setCurrentScriptId] = useState<string | null>(scriptId || null);
+  const [scriptStatus, setScriptStatus] = useState<string>("draft");
+  const [scriptVersion, setScriptVersion] = useState<number>(1);
   const [isExportModalOpen, setIsExportModalOpen] = useState(false);
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("chat");
@@ -114,6 +125,8 @@ const ScriptStudio = () => {
           },
         });
         setCurrentScriptId(id);
+        setScriptStatus(data.status || "draft");
+        setScriptVersion(data.version || 1);
         setHasUnsavedChanges(false);
       }
     } catch (error) {
@@ -121,6 +134,40 @@ const ScriptStudio = () => {
       toast.error("Failed to load script");
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const saveVersionHistory = async (scriptId: string, currentVersion: number) => {
+    try {
+      await supabase.from("agent_script_versions").insert({
+        script_id: scriptId,
+        version: currentVersion,
+        script_json: JSON.parse(JSON.stringify({ sections: scriptData.sections })),
+        flowchart_json: JSON.parse(JSON.stringify(scriptData.flowchart)),
+        created_by: user?.id,
+        change_summary: `Version ${currentVersion} snapshot`,
+      });
+    } catch (error) {
+      console.error("Failed to save version history:", error);
+    }
+  };
+
+  const handleStatusChange = async (newStatus: string) => {
+    setScriptStatus(newStatus);
+    setHasUnsavedChanges(true);
+    
+    // Immediately save status if script exists
+    if (currentScriptId) {
+      try {
+        await supabase
+          .from("agent_scripts")
+          .update({ status: newStatus, updated_at: new Date().toISOString() })
+          .eq("id", currentScriptId);
+        toast.success(`Status changed to ${newStatus}`);
+      } catch (error) {
+        console.error("Failed to update status:", error);
+        toast.error("Failed to update status");
+      }
     }
   };
 
@@ -169,37 +216,53 @@ const ScriptStudio = () => {
   const handleSaveScript = async () => {
     setIsSaving(true);
     try {
-      const scriptPayload = {
-        name: scriptData.name,
-        description: scriptData.description,
-        use_case: scriptData.useCase,
-        industry: scriptData.industry,
-        script_json: JSON.parse(JSON.stringify({ sections: scriptData.sections })),
-        flowchart_json: JSON.parse(JSON.stringify(scriptData.flowchart)),
-        status: "draft",
-        updated_at: new Date().toISOString(),
-      };
-
       if (currentScriptId) {
+        // Save version history before updating
+        await saveVersionHistory(currentScriptId, scriptVersion);
+        
+        const newVersion = scriptVersion + 1;
+        
         // Update existing script
         const { error } = await supabase
           .from("agent_scripts")
-          .update(scriptPayload)
+          .update({
+            name: scriptData.name,
+            description: scriptData.description,
+            use_case: scriptData.useCase,
+            industry: scriptData.industry,
+            script_json: JSON.parse(JSON.stringify({ sections: scriptData.sections })),
+            flowchart_json: JSON.parse(JSON.stringify(scriptData.flowchart)),
+            status: scriptStatus,
+            version: newVersion,
+            updated_at: new Date().toISOString(),
+          })
           .eq("id", currentScriptId);
 
         if (error) throw error;
-        toast.success("Script saved successfully");
+        setScriptVersion(newVersion);
+        toast.success(`Script saved (v${newVersion})`);
       } else {
-        // Create new script
+        // Create new script with user ownership
         const { data, error } = await supabase
           .from("agent_scripts")
-          .insert([scriptPayload])
-          .select("id")
+          .insert([{
+            name: scriptData.name,
+            description: scriptData.description,
+            use_case: scriptData.useCase,
+            industry: scriptData.industry,
+            script_json: JSON.parse(JSON.stringify({ sections: scriptData.sections })),
+            flowchart_json: JSON.parse(JSON.stringify(scriptData.flowchart)),
+            status: scriptStatus,
+            version: 1,
+            created_by: user?.id,
+          }])
+          .select("id, version")
           .single();
 
         if (error) throw error;
         
         setCurrentScriptId(data.id);
+        setScriptVersion(data.version || 1);
         navigate(`/scripttoflowchart/${data.id}`, { replace: true });
         toast.success("Script created successfully");
       }
@@ -222,6 +285,8 @@ const ScriptStudio = () => {
   const handleNewScript = () => {
     setScriptData(initialScriptData);
     setCurrentScriptId(null);
+    setScriptStatus("draft");
+    setScriptVersion(1);
     setHasUnsavedChanges(false);
     navigate("/scripttoflowchart");
   };
@@ -275,6 +340,21 @@ const ScriptStudio = () => {
                 onSelectScript={handleSelectScript}
                 onNewScript={handleNewScript}
               />
+              
+              {/* Status Dropdown */}
+              <Select value={scriptStatus} onValueChange={handleStatusChange}>
+                <SelectTrigger className="w-[110px]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="draft">Draft</SelectItem>
+                  <SelectItem value="active">Active</SelectItem>
+                  <SelectItem value="archived">Archived</SelectItem>
+                </SelectContent>
+              </Select>
+              
+              <span className="text-xs text-muted-foreground">v{scriptVersion}</span>
+              
               <Button variant="outline" size="sm" onClick={() => setIsImportModalOpen(true)}>
                 <Upload className="mr-2 h-4 w-4" />
                 Import

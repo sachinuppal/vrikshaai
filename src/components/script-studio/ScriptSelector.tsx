@@ -48,9 +48,10 @@ export const ScriptSelector = ({
   const loadScripts = async () => {
     setIsLoading(true);
     try {
+      // RLS will automatically filter to user's own scripts + active scripts
       const { data, error } = await supabase
         .from("agent_scripts")
-        .select("id, name, industry, use_case, status, updated_at")
+        .select("id, name, industry, use_case, status, updated_at, created_by")
         .order("updated_at", { ascending: false });
 
       if (error) throw error;
