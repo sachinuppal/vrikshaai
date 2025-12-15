@@ -6,24 +6,24 @@ const corsHeaders = {
 };
 
 const SCRIPT_SECTIONS = [
-  "identity_framing",
-  "objectives",
-  "conversation_contract",
-  "operating_context",
-  "stt_instructions",
-  "tts_instructions",
-  "turn_taking",
-  "task_logic",
-  "core_flows",
-  "guardrails",
-  "knowledge_grounding",
-  "faq_pack",
-  "compliance_policy",
-  "ux_guidelines",
-  "output_formats",
-  "testing_config",
-  "deployment_config",
-  "usage_guidelines",
+  { id: "identity_framing", name: "Identity & Framing" },
+  { id: "objectives", name: "Objectives & Success Criteria" },
+  { id: "conversation_contract", name: "Conversation Contract" },
+  { id: "operating_context", name: "Operating Context" },
+  { id: "stt_instructions", name: "STT Instructions" },
+  { id: "tts_instructions", name: "TTS Instructions" },
+  { id: "turn_taking", name: "Turn-Taking & Dialogue" },
+  { id: "task_logic", name: "Task Logic" },
+  { id: "core_flows", name: "Core Call Flows" },
+  { id: "guardrails", name: "Guardrails & Safety" },
+  { id: "knowledge_grounding", name: "Knowledge & Grounding" },
+  { id: "faq_pack", name: "FAQ Pack" },
+  { id: "compliance_policy", name: "Compliance & Policy" },
+  { id: "ux_guidelines", name: "UX Guidelines" },
+  { id: "output_formats", name: "Output Formats" },
+  { id: "testing_config", name: "Testing & Evaluation" },
+  { id: "deployment_config", name: "Deployment Config" },
+  { id: "usage_guidelines", name: "Usage Guidelines" },
 ];
 
 serve(async (req) => {
@@ -42,53 +42,82 @@ serve(async (req) => {
     console.log("Script Studio Chat - Session:", sessionId);
     console.log("User message:", message);
 
+    // Detect if this is a raw script import (large text block)
+    const isScriptImport = message.length > 500 && 
+      (message.toLowerCase().includes("convert") || 
+       message.toLowerCase().includes("existing script") ||
+       message.toLowerCase().includes("parse") ||
+       message.includes("If they say") ||
+       message.includes("Agent:") ||
+       message.includes("User:"));
+
     const systemPrompt = `You are an expert voice agent script builder assistant. Your role is to help users create comprehensive voice agent scripts following the 18-section framework.
 
 ## The 18 Sections Framework:
-1. Identity & Framing - Agent name, role, brand voice, persona boundaries
-2. Objectives & Success Criteria - Primary/secondary goals, non-goals, success metrics
-3. Conversation Contract - Consent, privacy, safety notes, user control cues
-4. Operating Context - Tools/APIs, data fields, environment assumptions
-5. STT Instructions - Language detection, entity extraction, error handling
-6. TTS Instructions - Speaking style, prosody, pronunciation
-7. Turn-Taking & Dialogue - Barge-in, backchanneling, silence policy
-8. Task Logic - Intent taxonomy, slot schema, decision tree
-9. Core Call Flows - Happy path, alternates, edge cases, escalation
-10. Guardrails & Safety - Hard bans, PII rules, no-hallucination
-11. Knowledge & Grounding - Knowledge sources, citation rules
-12. FAQ Pack - Top FAQs, objection handling
-13. Compliance & Policy - Regulatory requirements, disclaimers
-14. UX Guidelines - Empathy, clarity, choice architecture
-15. Output Formats - Structured outputs, summaries, templates
-16. Testing & Evaluation - Test sets, rubrics
-17. Deployment Config - Voice selection, latency constraints
-18. Usage Guidelines - Team update rules, versioning
+${SCRIPT_SECTIONS.map((s, i) => `${i + 1}. ${s.name} (id: "${s.id}")`).join("\n")}
+
+### Section Content Guidelines:
+For each section, provide COMPLETE and DETAILED content. Here's what each section should contain:
+
+1. **identity_framing**: agent_name, role, brand_voice, persona_boundaries, greeting_template
+2. **objectives**: primary_goal, secondary_goals, non_goals, success_metrics
+3. **conversation_contract**: consent_script, privacy_notice, user_control_cues, opt_out_path
+4. **operating_context**: available_tools, data_fields, environment_assumptions, integration_notes
+5. **stt_instructions**: language_detection, entity_extraction, error_handling, accent_handling
+6. **tts_instructions**: speaking_style, prosody, pronunciation_rules, pause_patterns
+7. **turn_taking**: barge_in_policy, backchanneling, silence_threshold, interruption_handling
+8. **task_logic**: intent_taxonomy, slot_schema, decision_tree, validation_rules
+9. **core_flows**: happy_path, alternate_paths, edge_cases, escalation_triggers
+10. **guardrails**: hard_bans, pii_rules, topic_restrictions, safety_responses
+11. **knowledge_grounding**: knowledge_sources, citation_rules, fallback_responses
+12. **faq_pack**: common_questions, objection_handling, clarification_responses
+13. **compliance_policy**: regulatory_requirements, disclaimers, recording_notices
+14. **ux_guidelines**: empathy_cues, clarity_rules, choice_architecture
+15. **output_formats**: summary_template, handoff_format, logging_schema
+16. **testing_config**: test_scenarios, evaluation_rubrics, edge_case_tests
+17. **deployment_config**: voice_selection, latency_constraints, fallback_behavior
+18. **usage_guidelines**: update_procedures, versioning_rules, team_access
 
 ## Your Capabilities:
 - Generate complete scripts from use case descriptions
-- Populate specific sections based on user requests
+- Populate ALL 18 sections with detailed, actionable content
+- Parse and convert existing unstructured scripts into the 18-section format
 - Identify logical flaws in conversation flows
 - Suggest improvements and best practices
 - Create flowchart node structures for visualization
 
+${isScriptImport ? `
+## IMPORTANT - Script Import Mode:
+The user is importing an existing script. You MUST:
+1. Parse the entire content carefully
+2. Extract and organize ALL information into the 18 sections
+3. Fill in every section with relevant content from the script
+4. For sections without explicit content, infer logical defaults
+5. Generate a comprehensive flowchart from the conversation flows
+6. Mark all sections as complete (isComplete: true) where you've added content
+` : ""}
+
 ## Response Format:
-Always respond with JSON containing:
+Always respond with valid JSON containing:
 {
   "message": "Your conversational response to the user",
-  "scriptUpdates": { // Optional: updates to script sections
-    "name": "Script name if changed",
-    "description": "Description if changed",
+  "scriptUpdates": {
+    "name": "Script name",
+    "description": "Script description",
     "useCase": "Use case category",
     "industry": "Industry",
-    "sections": [ // Array of section updates
+    "sections": [
       {
         "id": "section_id",
-        "content": { ...section specific content },
-        "isComplete": true/false
+        "name": "Section Name",
+        "content": { 
+          // Section-specific fields with COMPLETE content
+        },
+        "isComplete": true
       }
     ]
   },
-  "flowchartNodes": [ // Optional: flowchart structure
+  "flowchartNodes": [
     {
       "id": "unique_id",
       "type": "start|end|step|decision|action|tool|guardrail",
@@ -104,10 +133,12 @@ Always respond with JSON containing:
   }
 }
 
+CRITICAL: When generating sections, ALWAYS include the "name" field for each section, and set "isComplete": true when you've added meaningful content.
+
 Current Script State:
 ${JSON.stringify(currentScript, null, 2)}
 
-Be helpful, specific, and always think about edge cases and safety when building voice agent scripts.`;
+Be helpful, specific, and always think about edge cases and safety when building voice agent scripts. Generate COMPLETE content for all relevant sections.`;
 
     const messages = [
       { role: "system", content: systemPrompt },
@@ -154,12 +185,25 @@ Be helpful, specific, and always think about edge cases and safety when building
       throw new Error("No response from AI");
     }
 
-    console.log("AI Response:", aiContent);
+    console.log("AI Response received, length:", aiContent.length);
 
     let parsed;
     try {
       parsed = JSON.parse(aiContent);
+      
+      // Ensure sections have proper structure
+      if (parsed.scriptUpdates?.sections) {
+        parsed.scriptUpdates.sections = parsed.scriptUpdates.sections.map((section: any) => {
+          const sectionDef = SCRIPT_SECTIONS.find(s => s.id === section.id);
+          return {
+            ...section,
+            name: section.name || sectionDef?.name || section.id,
+            isComplete: section.isComplete ?? (section.content && Object.keys(section.content).length > 0),
+          };
+        });
+      }
     } catch (e) {
+      console.error("JSON parse error:", e);
       // If JSON parsing fails, return as plain message
       parsed = {
         message: aiContent,

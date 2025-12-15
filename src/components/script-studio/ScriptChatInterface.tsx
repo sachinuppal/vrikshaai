@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Send, Bot, User, Loader2, Sparkles, AlertCircle, Lightbulb } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -25,6 +25,7 @@ interface ScriptChatInterfaceProps {
   scriptData: ScriptData;
   onScriptUpdate: (updates: Partial<ScriptData>) => void;
   onFlowchartUpdate: (nodes: FlowchartNode[]) => void;
+  scriptId?: string | null;
 }
 
 const STARTER_PROMPTS = [
@@ -38,6 +39,7 @@ export const ScriptChatInterface = ({
   scriptData,
   onScriptUpdate,
   onFlowchartUpdate,
+  scriptId,
 }: ScriptChatInterfaceProps) => {
   const [messages, setMessages] = useState<Message[]>([
     {
@@ -59,8 +61,58 @@ What kind of voice agent would you like to build?`,
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [sessionId] = useState(() => crypto.randomUUID());
+  const [chatHistoryLoaded, setChatHistoryLoaded] = useState(false);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  // Load chat history when scriptId changes
+  useEffect(() => {
+    if (scriptId && !chatHistoryLoaded) {
+      loadChatHistory(scriptId);
+    }
+  }, [scriptId, chatHistoryLoaded]);
+
+  const loadChatHistory = async (id: string) => {
+    try {
+      const { data, error } = await supabase
+        .from("script_chat_messages")
+        .select("*")
+        .eq("script_id", id)
+        .order("created_at", { ascending: true });
+
+      if (error) throw error;
+
+      if (data && data.length > 0) {
+        const loadedMessages: Message[] = data.map((msg) => ({
+          id: msg.id,
+          role: msg.role as "user" | "assistant",
+          content: msg.content,
+          timestamp: new Date(msg.created_at || Date.now()),
+          metadata: msg.metadata as Message["metadata"],
+        }));
+        setMessages(loadedMessages);
+      }
+      setChatHistoryLoaded(true);
+    } catch (error) {
+      console.error("Failed to load chat history:", error);
+    }
+  };
+
+  const saveMessage = useCallback(async (message: Message, currentScriptId: string | null) => {
+    if (!currentScriptId) return;
+
+    try {
+      await supabase.from("script_chat_messages").insert({
+        script_id: currentScriptId,
+        session_id: sessionId,
+        role: message.role,
+        content: message.content,
+        metadata: message.metadata || {},
+      });
+    } catch (error) {
+      console.error("Failed to save message:", error);
+    }
+  }, [sessionId]);
 
   useEffect(() => {
     if (scrollAreaRef.current) {
@@ -82,6 +134,11 @@ What kind of voice agent would you like to build?`,
     setInput("");
     setIsLoading(true);
 
+    // Save user message to database
+    if (scriptId) {
+      saveMessage(userMessage, scriptId);
+    }
+
     try {
       // Call the edge function for script building
       const response = await supabase.functions.invoke("script-studio-chat", {
@@ -102,9 +159,20 @@ What kind of voice agent would you like to build?`,
 
       const data = response.data;
 
-      // Handle script updates from AI
+      // Handle script updates from AI - auto-fill sections
       if (data.scriptUpdates) {
         onScriptUpdate(data.scriptUpdates);
+        
+        // Show toast for section updates
+        if (data.scriptUpdates.sections && data.scriptUpdates.sections.length > 0) {
+          const sectionNames = data.scriptUpdates.sections
+            .filter((s: any) => s.isComplete)
+            .map((s: any) => s.name || s.id)
+            .slice(0, 3);
+          if (sectionNames.length > 0) {
+            toast.success(`Auto-filled: ${sectionNames.join(", ")}${data.scriptUpdates.sections.length > 3 ? "..." : ""}`);
+          }
+        }
       }
 
       // Handle flowchart updates
@@ -121,6 +189,11 @@ What kind of voice agent would you like to build?`,
       };
 
       setMessages((prev) => [...prev, assistantMessage]);
+
+      // Save assistant message to database
+      if (scriptId) {
+        saveMessage(assistantMessage, scriptId);
+      }
     } catch (error) {
       console.error("Chat error:", error);
       toast.error("Failed to process your request. Please try again.");

@@ -6,12 +6,18 @@ import {
   FileText,
   LogOut,
   Shield,
+  FileCode2,
+  GitBranch,
+  Activity,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuth } from "@/contexts/AuthContext";
 import AdminCallsTab from "@/components/admin/AdminCallsTab";
 import AdminApplicationsTab from "@/components/admin/AdminApplicationsTab";
+import AdminScriptsTab from "@/components/admin/AdminScriptsTab";
+import AdminObservabilityTab from "@/components/admin/AdminObservabilityTab";
+import AdminFlowchartsTab from "@/components/admin/AdminFlowchartsTab";
 
 const Admin = () => {
   const [activeTab, setActiveTab] = useState("calls");
@@ -56,14 +62,26 @@ const Admin = () => {
               animate={{ opacity: 1, y: 0 }}
               className="mb-8"
             >
-              <TabsList className="grid w-full max-w-md grid-cols-2">
+              <TabsList className="grid w-full max-w-3xl grid-cols-5">
                 <TabsTrigger value="calls" className="flex items-center gap-2">
                   <Phone className="h-4 w-4" />
-                  Voice Calls
+                  <span className="hidden sm:inline">Calls</span>
                 </TabsTrigger>
                 <TabsTrigger value="applications" className="flex items-center gap-2">
                   <FileText className="h-4 w-4" />
-                  Applications
+                  <span className="hidden sm:inline">Applications</span>
+                </TabsTrigger>
+                <TabsTrigger value="scripts" className="flex items-center gap-2">
+                  <FileCode2 className="h-4 w-4" />
+                  <span className="hidden sm:inline">Scripts</span>
+                </TabsTrigger>
+                <TabsTrigger value="flowcharts" className="flex items-center gap-2">
+                  <GitBranch className="h-4 w-4" />
+                  <span className="hidden sm:inline">Flowcharts</span>
+                </TabsTrigger>
+                <TabsTrigger value="observability" className="flex items-center gap-2">
+                  <Activity className="h-4 w-4" />
+                  <span className="hidden sm:inline">Observability</span>
                 </TabsTrigger>
               </TabsList>
             </motion.div>
@@ -100,6 +118,57 @@ const Admin = () => {
                 </p>
               </motion.div>
               <AdminApplicationsTab />
+            </TabsContent>
+
+            <TabsContent value="scripts">
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="mb-6"
+              >
+                <h2 className="text-2xl font-bold text-foreground flex items-center gap-3">
+                  <FileCode2 className="h-7 w-7 text-primary" />
+                  Agent Scripts
+                </h2>
+                <p className="text-muted-foreground mt-1">
+                  Manage all voice agent scripts and their configurations
+                </p>
+              </motion.div>
+              <AdminScriptsTab />
+            </TabsContent>
+
+            <TabsContent value="flowcharts">
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="mb-6"
+              >
+                <h2 className="text-2xl font-bold text-foreground flex items-center gap-3">
+                  <GitBranch className="h-7 w-7 text-primary" />
+                  Flowcharts
+                </h2>
+                <p className="text-muted-foreground mt-1">
+                  Visual gallery of all conversation flowcharts
+                </p>
+              </motion.div>
+              <AdminFlowchartsTab />
+            </TabsContent>
+
+            <TabsContent value="observability">
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="mb-6"
+              >
+                <h2 className="text-2xl font-bold text-foreground flex items-center gap-3">
+                  <Activity className="h-7 w-7 text-primary" />
+                  Observability Sessions
+                </h2>
+                <p className="text-muted-foreground mt-1">
+                  Review call analysis and quality metrics
+                </p>
+              </motion.div>
+              <AdminObservabilityTab />
             </TabsContent>
           </Tabs>
         </div>
