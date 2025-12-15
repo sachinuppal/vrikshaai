@@ -41,7 +41,9 @@ import {
   VoiceOrchestration,
   AnimatedROIMetrics,
   BeforeAfterVoice,
-  InteractiveIndustryGrid
+  InteractiveIndustryGrid,
+  ScriptBuilderDemo,
+  ObservabilityDemo
 } from '@/components/voice';
 
 const Voice = () => {
@@ -437,6 +439,42 @@ const Voice = () => {
           </FadeInView>
 
           <ArchitectureFlow />
+        </div>
+      </section>
+
+      {/* Script Builder Demo - NEW */}
+      <section className="py-20 px-4">
+        <div className="max-w-6xl mx-auto">
+          <FadeInView>
+            <div className="text-center mb-12">
+              <h2 className="text-3xl md:text-4xl font-bold mb-4">
+                Build Scripts with <span className="text-primary">AI Assistance</span>
+              </h2>
+              <p className="text-muted-foreground max-w-2xl mx-auto">
+                Describe your use case in plain English — our AI generates complete call scripts with dynamic flowcharts
+              </p>
+            </div>
+          </FadeInView>
+
+          <ScriptBuilderDemo />
+        </div>
+      </section>
+
+      {/* Observability Demo - NEW */}
+      <section className="py-20 px-4 bg-muted/30">
+        <div className="max-w-6xl mx-auto">
+          <FadeInView>
+            <div className="text-center mb-12">
+              <h2 className="text-3xl md:text-4xl font-bold mb-4">
+                Real-Time <span className="text-primary">Observability</span>
+              </h2>
+              <p className="text-muted-foreground max-w-2xl mx-auto">
+                Monitor every call against 5 pillars of performance and 18-section compliance standards
+              </p>
+            </div>
+          </FadeInView>
+
+          <ObservabilityDemo />
         </div>
       </section>
 
