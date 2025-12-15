@@ -125,6 +125,92 @@ export type Database = {
           },
         ]
       }
+      agent_script_versions: {
+        Row: {
+          change_summary: string | null
+          created_at: string | null
+          created_by: string | null
+          flowchart_json: Json | null
+          id: string
+          script_id: string | null
+          script_json: Json
+          version: number
+        }
+        Insert: {
+          change_summary?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          flowchart_json?: Json | null
+          id?: string
+          script_id?: string | null
+          script_json: Json
+          version: number
+        }
+        Update: {
+          change_summary?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          flowchart_json?: Json | null
+          id?: string
+          script_id?: string | null
+          script_json?: Json
+          version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agent_script_versions_script_id_fkey"
+            columns: ["script_id"]
+            isOneToOne: false
+            referencedRelation: "agent_scripts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      agent_scripts: {
+        Row: {
+          created_at: string | null
+          created_by: string | null
+          description: string | null
+          flowchart_json: Json | null
+          id: string
+          industry: string | null
+          name: string
+          script_json: Json
+          status: string | null
+          updated_at: string | null
+          use_case: string | null
+          version: number | null
+        }
+        Insert: {
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          flowchart_json?: Json | null
+          id?: string
+          industry?: string | null
+          name: string
+          script_json?: Json
+          status?: string | null
+          updated_at?: string | null
+          use_case?: string | null
+          version?: number | null
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          flowchart_json?: Json | null
+          id?: string
+          industry?: string | null
+          name?: string
+          script_json?: Json
+          status?: string | null
+          updated_at?: string | null
+          use_case?: string | null
+          version?: number | null
+        }
+        Relationships: []
+      }
       application_collaborators: {
         Row: {
           application_id: string
@@ -1397,6 +1483,99 @@ export type Database = {
         }
         Relationships: []
       }
+      observability_sessions: {
+        Row: {
+          accuracy_score: number | null
+          adherence_score: number | null
+          anomalies_detected: Json | null
+          client_analysis: Json | null
+          created_at: string | null
+          error_message: string | null
+          external_call_id: string | null
+          id: string
+          latency_score: number | null
+          observability_result: Json
+          outcome_score: number | null
+          overall_score: number | null
+          platform_analysis: Json | null
+          reliability_score: number | null
+          risk_level: string | null
+          script_id: string | null
+          session_type: string | null
+          source: string | null
+          status: string | null
+          transcript: Json | null
+          updated_at: string | null
+          violations: Json | null
+          voice_call_id: string | null
+        }
+        Insert: {
+          accuracy_score?: number | null
+          adherence_score?: number | null
+          anomalies_detected?: Json | null
+          client_analysis?: Json | null
+          created_at?: string | null
+          error_message?: string | null
+          external_call_id?: string | null
+          id?: string
+          latency_score?: number | null
+          observability_result?: Json
+          outcome_score?: number | null
+          overall_score?: number | null
+          platform_analysis?: Json | null
+          reliability_score?: number | null
+          risk_level?: string | null
+          script_id?: string | null
+          session_type?: string | null
+          source?: string | null
+          status?: string | null
+          transcript?: Json | null
+          updated_at?: string | null
+          violations?: Json | null
+          voice_call_id?: string | null
+        }
+        Update: {
+          accuracy_score?: number | null
+          adherence_score?: number | null
+          anomalies_detected?: Json | null
+          client_analysis?: Json | null
+          created_at?: string | null
+          error_message?: string | null
+          external_call_id?: string | null
+          id?: string
+          latency_score?: number | null
+          observability_result?: Json
+          outcome_score?: number | null
+          overall_score?: number | null
+          platform_analysis?: Json | null
+          reliability_score?: number | null
+          risk_level?: string | null
+          script_id?: string | null
+          session_type?: string | null
+          source?: string | null
+          status?: string | null
+          transcript?: Json | null
+          updated_at?: string | null
+          violations?: Json | null
+          voice_call_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "observability_sessions_script_id_fkey"
+            columns: ["script_id"]
+            isOneToOne: false
+            referencedRelation: "agent_scripts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "observability_sessions_voice_call_id_fkey"
+            columns: ["voice_call_id"]
+            isOneToOne: false
+            referencedRelation: "voice_widget_calls"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           country_code: string | null
@@ -1429,6 +1608,44 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      script_chat_messages: {
+        Row: {
+          content: string
+          created_at: string | null
+          id: string
+          metadata: Json | null
+          role: string
+          script_id: string | null
+          session_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string | null
+          id?: string
+          metadata?: Json | null
+          role: string
+          script_id?: string | null
+          session_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string | null
+          id?: string
+          metadata?: Json | null
+          role?: string
+          script_id?: string | null
+          session_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "script_chat_messages_script_id_fkey"
+            columns: ["script_id"]
+            isOneToOne: false
+            referencedRelation: "agent_scripts"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_roles: {
         Row: {

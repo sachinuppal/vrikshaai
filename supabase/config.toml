@@ -77,3 +77,6 @@ verify_jwt = true
 
 [functions.crm-run-flow-now]
 verify_jwt = true
+
+[functions.script-studio-chat]
+verify_jwt = false
