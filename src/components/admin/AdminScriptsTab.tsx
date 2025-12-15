@@ -188,7 +188,7 @@ const AdminScriptsTab = () => {
             </p>
           </div>
         </div>
-        <Button onClick={() => navigate("/scripttoflowchart")}>
+        <Button onClick={() => navigate("/crm/scripts/new")}>
           <Plus className="mr-2 h-4 w-4" />
           Create New Script
         </Button>
@@ -233,7 +233,7 @@ const AdminScriptsTab = () => {
               : "Create your first script to get started"}
           </p>
           {!searchQuery && statusFilter === "all" && (
-            <Button className="mt-4" onClick={() => navigate("/scripttoflowchart")}>
+            <Button className="mt-4" onClick={() => navigate("/crm/scripts/new")}>
               <Plus className="mr-2 h-4 w-4" />
               Create Script
             </Button>
@@ -291,13 +291,13 @@ const AdminScriptsTab = () => {
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
                         <DropdownMenuItem
-                          onClick={() => navigate(`/scripttoflowchart/${script.id}`)}
+                          onClick={() => navigate(`/crm/scripts/${script.id}`)}
                         >
                           <Pencil className="mr-2 h-4 w-4" />
                           Edit
                         </DropdownMenuItem>
                         <DropdownMenuItem
-                          onClick={() => navigate(`/scripttoflowchart/${script.id}`)}
+                          onClick={() => navigate(`/crm/scripts/${script.id}`)}
                         >
                           <Eye className="mr-2 h-4 w-4" />
                           View

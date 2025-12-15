@@ -92,6 +92,8 @@ const App = () => (
               <Route path="/crm/integrations" element={<AdminRoute><CRMIntegrations /></AdminRoute>} />
               <Route path="/crm/roi" element={<AdminRoute><CRMROIDashboard /></AdminRoute>} />
               <Route path="/crm/scripts" element={<AdminRoute><CRMScripts /></AdminRoute>} />
+              <Route path="/crm/scripts/new" element={<AdminRoute><ScriptStudio /></AdminRoute>} />
+              <Route path="/crm/scripts/:scriptId" element={<AdminRoute><ScriptStudio /></AdminRoute>} />
               <Route path="/crm/flowcharts" element={<AdminRoute><CRMFlowcharts /></AdminRoute>} />
               <Route path="/crm/observability" element={<AdminRoute><CRMObservability /></AdminRoute>} />
               <Route path="/voice" element={<Voice />} />
