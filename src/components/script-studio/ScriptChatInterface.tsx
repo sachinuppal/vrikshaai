@@ -497,8 +497,8 @@ What kind of voice agent would you like to build?`,
           </div>
         </ScrollArea>
 
-        {/* Starter Prompts (show when few messages) */}
-        {messages.length < 3 && !isLoading && (
+        {/* Starter Prompts (show only before user sends first message) */}
+        {!messages.some(m => m.role === "user") && !isLoading && (
           <div className="border-t border-border/50 px-4 pb-2 pt-3">
             <p className="mb-2 text-xs text-muted-foreground">Quick start:</p>
             <div className="flex flex-wrap gap-2">
