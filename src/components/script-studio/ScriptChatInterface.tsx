@@ -101,21 +101,29 @@ What kind of voice agent would you like to build?`,
   const [isLoading, setIsLoading] = useState(false);
   const [sessionId] = useState(() => crypto.randomUUID());
   const [chatHistoryLoaded, setChatHistoryLoaded] = useState(false);
-  const [currentScriptId, setCurrentScriptId] = useState<string | null>(scriptId || null);
+  // Helper to validate UUID format
+  const isValidUUID = (id: string): boolean => {
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+    return uuidRegex.test(id);
+  };
+
+  const [currentScriptId, setCurrentScriptId] = useState<string | null>(
+    scriptId && scriptId !== 'new' && isValidUUID(scriptId) ? scriptId : null
+  );
   const [sessionUsage, setSessionUsage] = useState({ totalTokens: 0, totalCost: 0, requestCount: 0 });
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   // Sync scriptId from props
   useEffect(() => {
-    if (scriptId && scriptId !== currentScriptId) {
+    if (scriptId && scriptId !== 'new' && isValidUUID(scriptId) && scriptId !== currentScriptId) {
       setCurrentScriptId(scriptId);
     }
   }, [scriptId, currentScriptId]);
 
   // Load chat history when scriptId changes
   useEffect(() => {
-    if (currentScriptId && !chatHistoryLoaded) {
+    if (currentScriptId && isValidUUID(currentScriptId) && !chatHistoryLoaded) {
       loadChatHistory(currentScriptId);
     }
   }, [currentScriptId, chatHistoryLoaded]);
