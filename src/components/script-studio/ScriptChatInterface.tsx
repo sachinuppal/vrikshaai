@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Send, Bot, User, Loader2, Sparkles, AlertCircle, Lightbulb } from "lucide-react";
+import { Send, Bot, User, Loader2, Sparkles, AlertCircle, Lightbulb, Wand2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -9,6 +9,38 @@ import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import type { ScriptData, FlowchartNode } from "@/pages/ScriptStudio";
+
+// Helper to try parsing script JSON from message content
+const tryParseScriptFromMessage = (content: string): { scriptUpdates?: Partial<ScriptData>; flowchartNodes?: FlowchartNode[] } | null => {
+  try {
+    // Try to parse the entire content as JSON
+    const parsed = JSON.parse(content);
+    if (parsed.scriptUpdates || parsed.flowchartNodes) {
+      return { scriptUpdates: parsed.scriptUpdates, flowchartNodes: parsed.flowchartNodes };
+    }
+    return null;
+  } catch {
+    // Try to find JSON within the content
+    const jsonMatch = content.match(/\{[\s\S]*"scriptUpdates"[\s\S]*\}/);
+    if (jsonMatch) {
+      try {
+        const parsed = JSON.parse(jsonMatch[0]);
+        return { scriptUpdates: parsed.scriptUpdates, flowchartNodes: parsed.flowchartNodes };
+      } catch {
+        return null;
+      }
+    }
+    return null;
+  }
+};
+
+// Clean up message display - show friendly text instead of raw JSON
+const getDisplayMessage = (content: string): string => {
+  if (content.startsWith('{') && (content.includes('"scriptUpdates"') || content.includes('"flowchartNodes"'))) {
+    return "I've generated the script content for you. You can apply it using the button below, or check the preview on the right!";
+  }
+  return content;
+};
 
 interface Message {
   id: string;
@@ -160,28 +192,43 @@ What kind of voice agent would you like to build?`,
         throw new Error(response.error.message || "Failed to get response");
       }
 
-      const data = response.data;
+      let scriptUpdates = response.data.scriptUpdates;
+      let flowchartNodes = response.data.flowchartNodes;
+      let displayMessage = response.data.message;
+
+      // If no scriptUpdates but message looks like JSON, try to extract
+      if (!scriptUpdates && displayMessage && typeof displayMessage === 'string') {
+        const extracted = tryParseScriptFromMessage(displayMessage);
+        if (extracted) {
+          scriptUpdates = extracted.scriptUpdates;
+          flowchartNodes = extracted.flowchartNodes || flowchartNodes;
+          displayMessage = "I've generated and populated the script sections for you. Check the preview on the right!";
+        }
+      }
 
       // Handle script updates from AI - auto-fill sections
-      if (data.scriptUpdates) {
-        onScriptUpdate(data.scriptUpdates);
+      if (scriptUpdates) {
+        onScriptUpdate(scriptUpdates);
         
         // Show toast for section updates
-        if (data.scriptUpdates.sections && data.scriptUpdates.sections.length > 0) {
-          const sectionNames = data.scriptUpdates.sections
+        if (scriptUpdates.sections && scriptUpdates.sections.length > 0) {
+          const sectionNames = scriptUpdates.sections
             .filter((s: any) => s.isComplete)
             .map((s: any) => s.name || s.id)
             .slice(0, 3);
           if (sectionNames.length > 0) {
-            toast.success(`Auto-filled: ${sectionNames.join(", ")}${data.scriptUpdates.sections.length > 3 ? "..." : ""}`);
+            toast.success(`Auto-filled: ${sectionNames.join(", ")}${scriptUpdates.sections.length > 3 ? "..." : ""}`);
           }
         }
       }
 
       // Handle flowchart updates
-      if (data.flowchartNodes) {
-        onFlowchartUpdate(data.flowchartNodes);
+      if (flowchartNodes) {
+        onFlowchartUpdate(flowchartNodes);
       }
+
+      // Use cleaned display message
+      const data = { ...response.data, message: displayMessage };
 
       const assistantMessage: Message = {
         id: crypto.randomUUID(),
@@ -275,7 +322,33 @@ What kind of voice agent would you like to build?`,
                         : "bg-muted/50"
                     }`}
                   >
-                    <div className="whitespace-pre-wrap text-sm">{message.content}</div>
+                    <div className="whitespace-pre-wrap text-sm">{getDisplayMessage(message.content)}</div>
+                    
+                    {/* Apply to Script Preview button for raw JSON messages */}
+                    {message.role === "assistant" && tryParseScriptFromMessage(message.content) && (
+                      <Button
+                        size="sm"
+                        variant="secondary"
+                        className="mt-2 w-fit"
+                        onClick={() => {
+                          const extracted = tryParseScriptFromMessage(message.content);
+                          if (extracted) {
+                            if (extracted.scriptUpdates) {
+                              onScriptUpdate(extracted.scriptUpdates);
+                              toast.success("Script applied to preview!");
+                            }
+                            if (extracted.flowchartNodes) {
+                              onFlowchartUpdate(extracted.flowchartNodes);
+                              toast.success("Flowchart nodes applied!");
+                            }
+                          }
+                        }}
+                      >
+                        <Wand2 className="mr-1 h-3 w-3" />
+                        Apply to Script Preview
+                      </Button>
+                    )}
+                    
                     {message.metadata?.type && (
                       <div className="mt-2 flex items-center gap-2">
                         {message.metadata.type === "flaw_detected" && (

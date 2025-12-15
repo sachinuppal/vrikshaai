@@ -229,13 +229,53 @@ Be helpful, specific, and always think about edge cases and safety when building
           };
         });
       }
+
+      // If scriptUpdates are embedded in the message field, extract them
+      if (!parsed.scriptUpdates && parsed.message && typeof parsed.message === 'string') {
+        try {
+          const jsonMatch = parsed.message.match(/\{[\s\S]*"scriptUpdates"[\s\S]*\}/);
+          if (jsonMatch) {
+            const embedded = JSON.parse(jsonMatch[0]);
+            if (embedded.scriptUpdates) {
+              parsed.scriptUpdates = embedded.scriptUpdates;
+              parsed.message = "I've generated and populated the script sections for you. Check the preview on the right!";
+            }
+            if (embedded.flowchartNodes) {
+              parsed.flowchartNodes = embedded.flowchartNodes;
+            }
+          }
+        } catch (extractError) {
+          console.log("Could not extract embedded JSON from message:", extractError);
+        }
+      }
+
+      // Clean up message if it's raw JSON that contains scriptUpdates
+      if (parsed.message && typeof parsed.message === 'string' && 
+          parsed.message.startsWith('{') && parsed.message.includes('"scriptUpdates"')) {
+        parsed.message = "I've generated and populated the script sections for you. Check the preview on the right!";
+      }
     } catch (e) {
       console.error("JSON parse error:", e);
-      // If JSON parsing fails, return as plain message
-      parsed = {
-        message: aiContent,
-        metadata: { type: "general" },
-      };
+      // If JSON parsing fails, try to extract scriptUpdates from raw text
+      try {
+        const jsonMatch = aiContent.match(/\{[\s\S]*"scriptUpdates"[\s\S]*\}/);
+        if (jsonMatch) {
+          parsed = JSON.parse(jsonMatch[0]);
+          if (!parsed.message) {
+            parsed.message = "I've generated the script sections for you. Check the preview!";
+          }
+        } else {
+          parsed = {
+            message: aiContent,
+            metadata: { type: "general" },
+          };
+        }
+      } catch (extractError) {
+        parsed = {
+          message: aiContent,
+          metadata: { type: "general" },
+        };
+      }
     }
 
     return new Response(JSON.stringify(parsed), {
