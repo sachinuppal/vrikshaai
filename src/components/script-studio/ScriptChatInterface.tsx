@@ -1,0 +1,297 @@
+import { useState, useRef, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Send, Bot, User, Loader2, Sparkles, AlertCircle, Lightbulb } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
+import type { ScriptData, FlowchartNode } from "@/pages/ScriptStudio";
+
+interface Message {
+  id: string;
+  role: "user" | "assistant";
+  content: string;
+  timestamp: Date;
+  metadata?: {
+    type?: "script_update" | "flowchart_update" | "recommendation" | "flaw_detected";
+    data?: any;
+  };
+}
+
+interface ScriptChatInterfaceProps {
+  scriptData: ScriptData;
+  onScriptUpdate: (updates: Partial<ScriptData>) => void;
+  onFlowchartUpdate: (nodes: FlowchartNode[]) => void;
+}
+
+const STARTER_PROMPTS = [
+  "Build me a store locator script for a retail chain",
+  "Create an appointment booking agent for a dental clinic",
+  "Design a debt collection script with compliance safeguards",
+  "Help me build a customer support agent for an e-commerce platform",
+];
+
+export const ScriptChatInterface = ({
+  scriptData,
+  onScriptUpdate,
+  onFlowchartUpdate,
+}: ScriptChatInterfaceProps) => {
+  const [messages, setMessages] = useState<Message[]>([
+    {
+      id: "welcome",
+      role: "assistant",
+      content: `Welcome to Script Studio! 🎙️
+
+I'll help you build a comprehensive voice agent script with all 18 sections. You can:
+
+• **Describe your use case** and I'll generate the full script structure
+• **Ask me to modify specific sections** like guardrails or call flows
+• **Request logical flaw detection** to identify issues in your script
+• **Get recommendations** to improve agent performance
+
+What kind of voice agent would you like to build?`,
+      timestamp: new Date(),
+    },
+  ]);
+  const [input, setInput] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [sessionId] = useState(() => crypto.randomUUID());
+  const scrollAreaRef = useRef<HTMLDivElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  useEffect(() => {
+    if (scrollAreaRef.current) {
+      scrollAreaRef.current.scrollTop = scrollAreaRef.current.scrollHeight;
+    }
+  }, [messages]);
+
+  const handleSend = async () => {
+    if (!input.trim() || isLoading) return;
+
+    const userMessage: Message = {
+      id: crypto.randomUUID(),
+      role: "user",
+      content: input.trim(),
+      timestamp: new Date(),
+    };
+
+    setMessages((prev) => [...prev, userMessage]);
+    setInput("");
+    setIsLoading(true);
+
+    try {
+      // Call the edge function for script building
+      const response = await supabase.functions.invoke("script-studio-chat", {
+        body: {
+          message: userMessage.content,
+          sessionId,
+          currentScript: scriptData,
+          messageHistory: messages.slice(-10).map((m) => ({
+            role: m.role,
+            content: m.content,
+          })),
+        },
+      });
+
+      if (response.error) {
+        throw new Error(response.error.message || "Failed to get response");
+      }
+
+      const data = response.data;
+
+      // Handle script updates from AI
+      if (data.scriptUpdates) {
+        onScriptUpdate(data.scriptUpdates);
+      }
+
+      // Handle flowchart updates
+      if (data.flowchartNodes) {
+        onFlowchartUpdate(data.flowchartNodes);
+      }
+
+      const assistantMessage: Message = {
+        id: crypto.randomUUID(),
+        role: "assistant",
+        content: data.message,
+        timestamp: new Date(),
+        metadata: data.metadata,
+      };
+
+      setMessages((prev) => [...prev, assistantMessage]);
+    } catch (error) {
+      console.error("Chat error:", error);
+      toast.error("Failed to process your request. Please try again.");
+
+      // Add error message
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: crypto.randomUUID(),
+          role: "assistant",
+          content: "I apologize, but I encountered an error processing your request. Please try again.",
+          timestamp: new Date(),
+        },
+      ]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      handleSend();
+    }
+  };
+
+  const handleStarterPrompt = (prompt: string) => {
+    setInput(prompt);
+    textareaRef.current?.focus();
+  };
+
+  return (
+    <Card className="flex h-full flex-col overflow-hidden border-border/50 bg-card/50 backdrop-blur">
+      <CardHeader className="border-b border-border/50 pb-3">
+        <div className="flex items-center justify-between">
+          <CardTitle className="flex items-center gap-2 text-base">
+            <Bot className="h-5 w-5 text-primary" />
+            Script Builder AI
+          </CardTitle>
+          <Badge variant="secondary" className="text-xs">
+            {scriptData.sections.filter((s) => s.isComplete).length}/18 sections
+          </Badge>
+        </div>
+      </CardHeader>
+
+      <CardContent className="flex flex-1 flex-col gap-4 overflow-hidden p-0">
+        {/* Messages */}
+        <ScrollArea className="flex-1 p-4" ref={scrollAreaRef}>
+          <div className="space-y-4">
+            <AnimatePresence mode="popLayout">
+              {messages.map((message) => (
+                <motion.div
+                  key={message.id}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  className={`flex gap-3 ${message.role === "user" ? "flex-row-reverse" : ""}`}
+                >
+                  <div
+                    className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full ${
+                      message.role === "user"
+                        ? "bg-primary text-primary-foreground"
+                        : "bg-muted text-muted-foreground"
+                    }`}
+                  >
+                    {message.role === "user" ? (
+                      <User className="h-4 w-4" />
+                    ) : (
+                      <Bot className="h-4 w-4" />
+                    )}
+                  </div>
+                  <div
+                    className={`flex max-w-[85%] flex-col gap-1 rounded-lg px-4 py-3 ${
+                      message.role === "user"
+                        ? "bg-primary text-primary-foreground"
+                        : "bg-muted/50"
+                    }`}
+                  >
+                    <div className="whitespace-pre-wrap text-sm">{message.content}</div>
+                    {message.metadata?.type && (
+                      <div className="mt-2 flex items-center gap-2">
+                        {message.metadata.type === "flaw_detected" && (
+                          <Badge variant="destructive" className="text-xs">
+                            <AlertCircle className="mr-1 h-3 w-3" />
+                            Issue Detected
+                          </Badge>
+                        )}
+                        {message.metadata.type === "recommendation" && (
+                          <Badge variant="secondary" className="text-xs">
+                            <Lightbulb className="mr-1 h-3 w-3" />
+                            Recommendation
+                          </Badge>
+                        )}
+                        {message.metadata.type === "script_update" && (
+                          <Badge className="text-xs">
+                            <Sparkles className="mr-1 h-3 w-3" />
+                            Script Updated
+                          </Badge>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                </motion.div>
+              ))}
+            </AnimatePresence>
+
+            {isLoading && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="flex gap-3"
+              >
+                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-muted text-muted-foreground">
+                  <Bot className="h-4 w-4" />
+                </div>
+                <div className="flex items-center gap-2 rounded-lg bg-muted/50 px-4 py-3">
+                  <Loader2 className="h-4 w-4 animate-spin text-primary" />
+                  <span className="text-sm text-muted-foreground">Thinking...</span>
+                </div>
+              </motion.div>
+            )}
+          </div>
+        </ScrollArea>
+
+        {/* Starter Prompts (show when few messages) */}
+        {messages.length < 3 && !isLoading && (
+          <div className="border-t border-border/50 px-4 pb-2 pt-3">
+            <p className="mb-2 text-xs text-muted-foreground">Quick start:</p>
+            <div className="flex flex-wrap gap-2">
+              {STARTER_PROMPTS.map((prompt, idx) => (
+                <Button
+                  key={idx}
+                  variant="outline"
+                  size="sm"
+                  className="h-auto whitespace-normal py-1.5 text-left text-xs"
+                  onClick={() => handleStarterPrompt(prompt)}
+                >
+                  {prompt}
+                </Button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Input Area */}
+        <div className="border-t border-border/50 p-4">
+          <div className="flex gap-2">
+            <Textarea
+              ref={textareaRef}
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={handleKeyDown}
+              placeholder="Describe your voice agent or ask me to modify the script..."
+              className="min-h-[80px] resize-none"
+              disabled={isLoading}
+            />
+            <Button
+              onClick={handleSend}
+              disabled={!input.trim() || isLoading}
+              size="icon"
+              className="h-auto self-end"
+            >
+              {isLoading ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Send className="h-4 w-4" />
+              )}
+            </Button>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+};
