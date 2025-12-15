@@ -6,3 +6,5 @@ export { VoiceOrchestration } from './VoiceOrchestration';
 export { AnimatedROIMetrics } from './AnimatedROIMetrics';
 export { BeforeAfterVoice } from './BeforeAfterVoice';
 export { InteractiveIndustryGrid } from './InteractiveIndustryGrid';
+export { ScriptBuilderDemo } from './ScriptBuilderDemo';
+export { ObservabilityDemo } from './ObservabilityDemo';
