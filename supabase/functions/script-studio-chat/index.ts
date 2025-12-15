@@ -32,7 +32,7 @@ serve(async (req) => {
   }
 
   try {
-    const { message, sessionId, currentScript, messageHistory } = await req.json();
+    const { message, sessionId, currentScript, messageHistory, action } = await req.json();
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
 
     if (!LOVABLE_API_KEY) {
@@ -41,6 +41,9 @@ serve(async (req) => {
 
     console.log("Script Studio Chat - Session:", sessionId);
     console.log("User message:", message);
+    console.log("Action:", action);
+
+    const isFlowchartGeneration = action === "generate_flowchart";
 
     // Detect if this is a raw script import (large text block)
     const isScriptImport = message.length > 500 && 
@@ -95,6 +98,30 @@ The user is importing an existing script. You MUST:
 4. For sections without explicit content, infer logical defaults
 5. Generate a comprehensive flowchart from the conversation flows
 6. Mark all sections as complete (isComplete: true) where you've added content
+` : ""}
+
+${isFlowchartGeneration ? `
+## FLOWCHART GENERATION MODE - CRITICAL INSTRUCTIONS
+You are generating a comprehensive flowchart based on the script content. Analyze ALL completed sections carefully.
+
+Create nodes for each of these categories:
+1. **start**: Opening/greeting from identity_framing section
+2. **guardrail**: Consent, disclosures, safety checks from compliance_policy and guardrails sections
+3. **decision**: All branch points and conditional logic from task_logic and core_flows sections
+4. **action**: Operations and business logic from task_logic section
+5. **tool**: API calls, database lookups, integrations from operating_context section
+6. **step**: Conversation steps, dialogue turns from core_flows section
+7. **end**: Wrap-up, goodbye, call termination points
+
+Guidelines for node generation:
+- Position nodes vertically (y increases by ~120 for sequence)
+- Use x offset for parallel branches (left branch: x-100, right branch: x+100)
+- Each node MUST have: id (unique), type, label, position {x, y}, connections (array of target node ids)
+- Create at least 10-15 nodes for a comprehensive flowchart
+- Include error handling paths and fallback nodes
+- Connect all nodes properly - every node except 'end' should have at least one connection
+
+IMPORTANT: Focus ONLY on generating flowchartNodes. Include a brief message but put all effort into creating a detailed, accurate flowchart based on the script content.
 ` : ""}
 
 ## Response Format:

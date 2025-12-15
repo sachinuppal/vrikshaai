@@ -25,6 +25,7 @@ interface DynamicFlowchartRendererProps {
   scriptData: ScriptData;
   fullscreen?: boolean;
   isAnimating?: boolean;
+  isGenerating?: boolean;
 }
 
 const NODE_ICONS = {
@@ -199,6 +200,7 @@ export const DynamicFlowchartRenderer = ({
   scriptData,
   fullscreen = false,
   isAnimating = false,
+  isGenerating = false,
 }: DynamicFlowchartRendererProps) => {
   // Use provided nodes or generate from script
   const displayNodes = useMemo(() => {
@@ -270,10 +272,23 @@ export const DynamicFlowchartRenderer = ({
         </div>
       </CardHeader>
 
-      <CardContent className="flex-1 overflow-hidden p-0">
+      <CardContent className="flex-1 overflow-hidden p-0 relative">
+        {isGenerating && (
+          <div className="absolute inset-0 flex items-center justify-center bg-background/80 backdrop-blur-sm z-10">
+            <div className="flex flex-col items-center gap-4">
+              <motion.div
+                animate={{ rotate: 360 }}
+                transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+              >
+                <GitBranch className="h-12 w-12 text-primary" />
+              </motion.div>
+              <p className="text-sm text-muted-foreground">Generating flowchart from script...</p>
+            </div>
+          </div>
+        )}
         <ScrollArea className="h-full">
           <div className="min-h-full p-4">
-            {displayNodes.length === 0 ? (
+            {displayNodes.length === 0 && !isGenerating ? (
               <div className="flex h-full flex-col items-center justify-center py-12 text-center">
                 <GitBranch className="mb-4 h-12 w-12 text-muted-foreground/50" />
                 <h3 className="mb-2 text-lg font-medium">No Flowchart Yet</h3>
