@@ -1,7 +1,7 @@
 import { useState, useCallback, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { FileCode2, Save, Upload, Loader2, ArrowLeft, GitBranch } from "lucide-react";
+import { FileCode2, Save, Upload, Loader2, ArrowLeft, GitBranch, Sparkles } from "lucide-react";
 import { ScriptChatInterface } from "@/components/script-studio/ScriptChatInterface";
 import { DynamicFlowchartRenderer } from "@/components/script-studio/DynamicFlowchartRenderer";
 import { ScriptSectionEditor } from "@/components/script-studio/ScriptSectionEditor";
@@ -237,16 +237,43 @@ const ScriptStudio = () => {
     setHasUnsavedChanges(true);
   }, []);
 
-  const handleProceedToFlowchart = async () => {
+  const generateFlowchartFromAI = async () => {
     setIsGeneratingFlowchart(true);
     
-    // Simulate flowchart generation delay for animation effect
-    await new Promise((resolve) => setTimeout(resolve, 500));
-    
+    try {
+      const { data, error } = await supabase.functions.invoke("script-studio-chat", {
+        body: {
+          message: "Based on the current script sections, generate a detailed conversation flowchart. Include all decision points, guardrails, tool calls, and conversation paths from the script. Make it comprehensive and match the actual script content.",
+          sessionId: `script-${currentScriptId || 'new'}-flowchart`,
+          currentScript: scriptData,
+          messageHistory: [],
+          action: "generate_flowchart"
+        }
+      });
+
+      if (error) throw error;
+
+      if (data.flowchartNodes && data.flowchartNodes.length > 0) {
+        handleFlowchartUpdate(data.flowchartNodes);
+        toast.success(`Generated flowchart with ${data.flowchartNodes.length} nodes`);
+      } else if (data.error) {
+        throw new Error(data.error);
+      }
+    } catch (error) {
+      console.error("Failed to generate flowchart:", error);
+      toast.error("Failed to generate flowchart. Using default structure.");
+    } finally {
+      setIsGeneratingFlowchart(false);
+    }
+  };
+
+  const handleProceedToFlowchart = async () => {
     setCurrentPhase("flowchart");
-    toast.success("Generating flowchart from your script...");
     
-    setIsGeneratingFlowchart(false);
+    // If no flowchart exists, auto-generate one from AI
+    if (scriptData.flowchart.nodes.length === 0) {
+      await generateFlowchartFromAI();
+    }
   };
 
   const handleBackToScript = () => {
@@ -471,10 +498,25 @@ const ScriptStudio = () => {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               {currentPhase === "flowchart" && (
-                <Button variant="ghost" size="sm" onClick={handleBackToScript}>
-                  <ArrowLeft className="mr-2 h-4 w-4" />
-                  Back to Script
-                </Button>
+                <>
+                  <Button variant="ghost" size="sm" onClick={handleBackToScript}>
+                    <ArrowLeft className="mr-2 h-4 w-4" />
+                    Back to Script
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={generateFlowchartFromAI}
+                    disabled={isGeneratingFlowchart}
+                  >
+                    {isGeneratingFlowchart ? (
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    ) : (
+                      <Sparkles className="mr-2 h-4 w-4" />
+                    )}
+                    {isGeneratingFlowchart ? "Generating..." : "Regenerate Flowchart"}
+                  </Button>
+                </>
               )}
               <div className="inline-flex h-10 items-center justify-center rounded-md bg-muted p-1 text-muted-foreground">
                 <button
@@ -566,21 +608,13 @@ const ScriptStudio = () => {
 
                 {/* Flowchart Preview */}
                 <div className="h-[calc(100vh-220px)] min-h-[500px]">
-                  {isGeneratingFlowchart ? (
-                    <div className="flex h-full items-center justify-center rounded-lg border border-border/50 bg-card/50">
-                      <div className="flex flex-col items-center gap-4">
-                        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                        <p className="text-muted-foreground">Generating flowchart...</p>
-                      </div>
-                    </div>
-                  ) : (
-                    <DynamicFlowchartRenderer
-                      nodes={scriptData.flowchart.nodes}
-                      onNodesChange={handleFlowchartUpdate}
-                      scriptData={scriptData}
-                      isAnimating={currentPhase === "flowchart"}
-                    />
-                  )}
+                  <DynamicFlowchartRenderer
+                    nodes={scriptData.flowchart.nodes}
+                    onNodesChange={handleFlowchartUpdate}
+                    scriptData={scriptData}
+                    isAnimating={currentPhase === "flowchart"}
+                    isGenerating={isGeneratingFlowchart}
+                  />
                 </div>
               </motion.div>
             )}
