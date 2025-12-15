@@ -146,7 +146,8 @@ const ScriptStudio = () => {
 
   // Load script from URL param or selection
   useEffect(() => {
-    if (scriptId) {
+    // Skip loading if scriptId is "new" or undefined
+    if (scriptId && scriptId !== 'new') {
       loadScript(scriptId);
     }
   }, [scriptId]);
