@@ -211,6 +211,62 @@ export type Database = {
         }
         Relationships: []
       }
+      ai_usage_log: {
+        Row: {
+          api_key_id: string | null
+          cost_usd: number | null
+          created_at: string | null
+          feature: string
+          id: string
+          input_tokens: number | null
+          metadata: Json | null
+          model: string
+          output_tokens: number | null
+          provider: string
+          session_id: string | null
+          total_tokens: number | null
+          user_id: string | null
+        }
+        Insert: {
+          api_key_id?: string | null
+          cost_usd?: number | null
+          created_at?: string | null
+          feature: string
+          id?: string
+          input_tokens?: number | null
+          metadata?: Json | null
+          model: string
+          output_tokens?: number | null
+          provider: string
+          session_id?: string | null
+          total_tokens?: number | null
+          user_id?: string | null
+        }
+        Update: {
+          api_key_id?: string | null
+          cost_usd?: number | null
+          created_at?: string | null
+          feature?: string
+          id?: string
+          input_tokens?: number | null
+          metadata?: Json | null
+          model?: string
+          output_tokens?: number | null
+          provider?: string
+          session_id?: string | null
+          total_tokens?: number | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_usage_log_api_key_id_fkey"
+            columns: ["api_key_id"]
+            isOneToOne: false
+            referencedRelation: "user_api_keys"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       application_collaborators: {
         Row: {
           application_id: string
@@ -1646,6 +1702,39 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      user_api_keys: {
+        Row: {
+          created_at: string | null
+          encrypted_key: string
+          id: string
+          is_active: boolean | null
+          key_name: string | null
+          provider: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          encrypted_key: string
+          id?: string
+          is_active?: boolean | null
+          key_name?: string | null
+          provider: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          encrypted_key?: string
+          id?: string
+          is_active?: boolean | null
+          key_name?: string | null
+          provider?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
       }
       user_roles: {
         Row: {

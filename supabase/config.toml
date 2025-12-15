@@ -86,3 +86,6 @@ verify_jwt = false
 
 [functions.verify-observability-config]
 verify_jwt = false
+
+[functions.ai-router]
+verify_jwt = false
