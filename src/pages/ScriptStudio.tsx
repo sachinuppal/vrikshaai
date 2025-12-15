@@ -1,7 +1,7 @@
 import { useState, useCallback, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { FileCode2, Save, Upload, Loader2, ArrowLeft, GitBranch, Sparkles } from "lucide-react";
+import { FileCode2, Save, Upload, Loader2, ArrowLeft, GitBranch, PanelLeftClose, PanelLeft } from "lucide-react";
 import { ScriptChatInterface } from "@/components/script-studio/ScriptChatInterface";
 import { DynamicFlowchartRenderer } from "@/components/script-studio/DynamicFlowchartRenderer";
 import { ScriptSectionEditor } from "@/components/script-studio/ScriptSectionEditor";
@@ -101,6 +101,7 @@ const ScriptStudio = () => {
   const [isGeneratingFlowchart, setIsGeneratingFlowchart] = useState(false);
   const [hasAutoSaved, setHasAutoSaved] = useState(false);
   const [isCreatingScript, setIsCreatingScript] = useState(false);
+  const [isChatCollapsed, setIsChatCollapsed] = useState(false);
 
   // Load script from URL param or selection
   useEffect(() => {
@@ -555,26 +556,23 @@ const ScriptStudio = () => {
           {/* Phase Navigation */}
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={() => setIsChatCollapsed(!isChatCollapsed)}
+                title={isChatCollapsed ? "Show chat" : "Hide chat"}
+              >
+                {isChatCollapsed ? (
+                  <PanelLeft className="h-4 w-4" />
+                ) : (
+                  <PanelLeftClose className="h-4 w-4" />
+                )}
+              </Button>
               {currentPhase === "flowchart" && (
-                <>
-                  <Button variant="ghost" size="sm" onClick={handleBackToScript}>
-                    <ArrowLeft className="mr-2 h-4 w-4" />
-                    Back to Script
-                  </Button>
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    onClick={generateFlowchartFromAI}
-                    disabled={isGeneratingFlowchart}
-                  >
-                    {isGeneratingFlowchart ? (
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    ) : (
-                      <Sparkles className="mr-2 h-4 w-4" />
-                    )}
-                    {isGeneratingFlowchart ? "Generating..." : "Regenerate Flowchart"}
-                  </Button>
-                </>
+                <Button variant="ghost" size="sm" onClick={handleBackToScript}>
+                  <ArrowLeft className="mr-2 h-4 w-4" />
+                  Back to Script
+                </Button>
               )}
               <div className="inline-flex h-10 items-center justify-center rounded-md bg-muted p-1 text-muted-foreground">
                 <button
@@ -621,19 +619,32 @@ const ScriptStudio = () => {
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: -20 }}
                 transition={{ duration: 0.3 }}
-                className="grid gap-6 lg:grid-cols-2"
+                className={`grid gap-6 transition-all duration-300 ${
+                  isChatCollapsed ? "grid-cols-1" : "lg:grid-cols-2"
+                }`}
               >
                 {/* Chat Interface */}
-                <div className="h-[calc(100vh-220px)] min-h-[500px]">
-                  <ScriptChatInterface
-                    scriptData={scriptData}
-                    onScriptUpdate={handleScriptUpdate}
-                    onFlowchartUpdate={handleFlowchartUpdate}
-                    scriptId={currentScriptId}
-                    phase={currentPhase}
-                    onEnsureScriptSaved={ensureScriptSaved}
-                  />
-                </div>
+                <motion.div 
+                  className="h-[calc(100vh-220px)] min-h-[500px]"
+                  animate={{ 
+                    width: isChatCollapsed ? 0 : "auto",
+                    opacity: isChatCollapsed ? 0 : 1,
+                    marginRight: isChatCollapsed ? 0 : undefined
+                  }}
+                  transition={{ duration: 0.3 }}
+                  style={{ overflow: "hidden" }}
+                >
+                  {!isChatCollapsed && (
+                    <ScriptChatInterface
+                      scriptData={scriptData}
+                      onScriptUpdate={handleScriptUpdate}
+                      onFlowchartUpdate={handleFlowchartUpdate}
+                      scriptId={currentScriptId}
+                      phase={currentPhase}
+                      onEnsureScriptSaved={ensureScriptSaved}
+                    />
+                  )}
+                </motion.div>
 
                 {/* Script Preview (Google Docs style) */}
                 <div className="h-[calc(100vh-220px)] min-h-[500px]">
@@ -652,19 +663,32 @@ const ScriptStudio = () => {
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: 20 }}
                 transition={{ duration: 0.3 }}
-                className="grid gap-6 lg:grid-cols-2"
+                className={`grid gap-6 transition-all duration-300 ${
+                  isChatCollapsed ? "grid-cols-1" : "lg:grid-cols-2"
+                }`}
               >
                 {/* Chat Interface */}
-                <div className="h-[calc(100vh-220px)] min-h-[500px]">
-                  <ScriptChatInterface
-                    scriptData={scriptData}
-                    onScriptUpdate={handleScriptUpdate}
-                    onFlowchartUpdate={handleFlowchartUpdate}
-                    scriptId={currentScriptId}
-                    phase={currentPhase}
-                    onEnsureScriptSaved={ensureScriptSaved}
-                  />
-                </div>
+                <motion.div 
+                  className="h-[calc(100vh-220px)] min-h-[500px]"
+                  animate={{ 
+                    width: isChatCollapsed ? 0 : "auto",
+                    opacity: isChatCollapsed ? 0 : 1,
+                    marginRight: isChatCollapsed ? 0 : undefined
+                  }}
+                  transition={{ duration: 0.3 }}
+                  style={{ overflow: "hidden" }}
+                >
+                  {!isChatCollapsed && (
+                    <ScriptChatInterface
+                      scriptData={scriptData}
+                      onScriptUpdate={handleScriptUpdate}
+                      onFlowchartUpdate={handleFlowchartUpdate}
+                      scriptId={currentScriptId}
+                      phase={currentPhase}
+                      onEnsureScriptSaved={ensureScriptSaved}
+                    />
+                  )}
+                </motion.div>
 
                 {/* Flowchart Preview */}
                 <div className="h-[calc(100vh-220px)] min-h-[500px]">
@@ -674,6 +698,8 @@ const ScriptStudio = () => {
                     scriptData={scriptData}
                     isAnimating={currentPhase === "flowchart"}
                     isGenerating={isGeneratingFlowchart}
+                    onRegenerate={generateFlowchartFromAI}
+                    isRegenerating={isGeneratingFlowchart}
                   />
                 </div>
               </motion.div>
