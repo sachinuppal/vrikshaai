@@ -1,7 +1,7 @@
 import { useState, useCallback, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { FileCode2, Save, Upload, Loader2, ArrowLeft, GitBranch, PanelLeftClose, PanelLeft, Eye, LayoutTemplate } from "lucide-react";
+import { FileCode2, Save, Upload, Loader2, ArrowLeft, GitBranch, PanelLeftClose, PanelLeft, Eye, LayoutTemplate, List } from "lucide-react";
 import { ScriptChatInterface } from "@/components/script-studio/ScriptChatInterface";
 import { DynamicFlowchartRenderer } from "@/components/script-studio/DynamicFlowchartRenderer";
 import { ScriptSectionEditor } from "@/components/script-studio/ScriptSectionEditor";
@@ -514,6 +514,16 @@ const ScriptStudio = () => {
         <header className="sticky top-0 z-50 border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
           <div className="container flex h-16 items-center justify-between">
             <div className="flex items-center gap-3">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => navigate("/admin")}
+                className="gap-2"
+              >
+                <List className="h-4 w-4" />
+                All Scripts
+              </Button>
+              <div className="h-6 w-px bg-border" />
               <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
                 <FileCode2 className="h-5 w-5 text-primary" />
               </div>
