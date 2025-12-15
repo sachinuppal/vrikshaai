@@ -1,7 +1,7 @@
 import { useState, useCallback, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { FileCode2, Save, Upload, Loader2, ArrowLeft, GitBranch, PanelLeftClose, PanelLeft, Eye } from "lucide-react";
+import { FileCode2, Save, Upload, Loader2, ArrowLeft, GitBranch, PanelLeftClose, PanelLeft, Eye, LayoutTemplate } from "lucide-react";
 import { ScriptChatInterface } from "@/components/script-studio/ScriptChatInterface";
 import { DynamicFlowchartRenderer } from "@/components/script-studio/DynamicFlowchartRenderer";
 import { ScriptSectionEditor } from "@/components/script-studio/ScriptSectionEditor";
@@ -11,6 +11,7 @@ import { ScriptImportModal } from "@/components/script-studio/ScriptImportModal"
 import { ScriptPreview } from "@/components/script-studio/ScriptPreview";
 import { ScriptVersionHistory } from "@/components/script-studio/ScriptVersionHistory";
 import { ObservabilityVerification } from "@/components/script-studio/ObservabilityVerification";
+import { ScriptTemplatesModal } from "@/components/script-studio/ScriptTemplatesModal";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -92,6 +93,7 @@ const ScriptStudio = () => {
   const [scriptVersion, setScriptVersion] = useState<number>(1);
   const [isExportModalOpen, setIsExportModalOpen] = useState(false);
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
+  const [isTemplatesModalOpen, setIsTemplatesModalOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
@@ -360,6 +362,30 @@ const ScriptStudio = () => {
     navigate("/scripttoflowchart");
   };
 
+  const handleSelectTemplate = (template: {
+    name: string;
+    description: string;
+    useCase: string;
+    industry: string;
+    sections: ScriptSection[];
+  }) => {
+    setScriptData({
+      name: template.name,
+      description: template.description,
+      useCase: template.useCase,
+      industry: template.industry,
+      sections: template.sections,
+      flowchart: { nodes: [] },
+    });
+    setCurrentScriptId(null);
+    setScriptStatus("draft");
+    setScriptVersion(1);
+    setHasUnsavedChanges(true);
+    setCurrentPhase("script");
+    navigate("/scripttoflowchart");
+    toast.success(`Template "${template.name}" loaded`);
+  };
+
   const handleImport = (importedData: Partial<ScriptData>, flowchartNodes?: FlowchartNode[]) => {
     setScriptData((prev) => ({
       ...prev,
@@ -510,6 +536,7 @@ const ScriptStudio = () => {
                 currentScriptId={currentScriptId}
                 onSelectScript={handleSelectScript}
                 onNewScript={handleNewScript}
+                onOpenTemplates={() => setIsTemplatesModalOpen(true)}
               />
               
               <Select value={scriptStatus} onValueChange={handleStatusChange}>
@@ -525,6 +552,10 @@ const ScriptStudio = () => {
               
               <span className="text-xs text-muted-foreground">v{scriptVersion}</span>
               
+              <Button variant="outline" size="sm" onClick={() => setIsTemplatesModalOpen(true)}>
+                <LayoutTemplate className="mr-2 h-4 w-4" />
+                Templates
+              </Button>
               <Button variant="outline" size="sm" onClick={() => setIsImportModalOpen(true)}>
                 <Upload className="mr-2 h-4 w-4" />
                 Import
@@ -765,6 +796,12 @@ const ScriptStudio = () => {
         isOpen={isImportModalOpen}
         onClose={() => setIsImportModalOpen(false)}
         onImport={handleImport}
+      />
+
+      <ScriptTemplatesModal
+        isOpen={isTemplatesModalOpen}
+        onClose={() => setIsTemplatesModalOpen(false)}
+        onSelectTemplate={handleSelectTemplate}
       />
     </>
   );
