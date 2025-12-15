@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import type { ScriptData, FlowchartNode } from "@/pages/ScriptStudio";
+import { TokenUsageDisplay, SessionUsageTotal, type TokenUsage } from "./TokenUsageDisplay";
 
 // Helper to try parsing script JSON from message content
 const tryParseScriptFromMessage = (content: string): { scriptUpdates?: Partial<ScriptData>; flowchartNodes?: FlowchartNode[] } | null => {
@@ -51,6 +52,7 @@ interface Message {
     type?: "script_update" | "flowchart_update" | "recommendation" | "flaw_detected";
     data?: any;
   };
+  usage?: TokenUsage;
 }
 
 interface ScriptChatInterfaceProps {
@@ -100,6 +102,7 @@ What kind of voice agent would you like to build?`,
   const [sessionId] = useState(() => crypto.randomUUID());
   const [chatHistoryLoaded, setChatHistoryLoaded] = useState(false);
   const [currentScriptId, setCurrentScriptId] = useState<string | null>(scriptId || null);
+  const [sessionUsage, setSessionUsage] = useState({ totalTokens: 0, totalCost: 0, requestCount: 0 });
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -250,12 +253,23 @@ What kind of voice agent would you like to build?`,
       // Use cleaned display message
       const data = { ...response.data, message: displayMessage };
 
+      // Track token usage
+      const usage = response.data.usage as TokenUsage | undefined;
+      if (usage) {
+        setSessionUsage((prev) => ({
+          totalTokens: prev.totalTokens + (usage.total_tokens || 0),
+          totalCost: prev.totalCost + (usage.cost_usd || 0),
+          requestCount: prev.requestCount + 1,
+        }));
+      }
+
       const assistantMessage: Message = {
         id: crypto.randomUUID(),
         role: "assistant",
         content: data.message,
         timestamp: new Date(),
         metadata: data.metadata,
+        usage,
       };
 
       setMessages((prev) => [...prev, assistantMessage]);
@@ -428,6 +442,13 @@ What kind of voice agent would you like to build?`,
                         )}
                       </div>
                     )}
+                    
+                    {/* Token Usage Display */}
+                    {message.usage && (
+                      <div className="mt-2">
+                        <TokenUsageDisplay usage={message.usage} compact />
+                      </div>
+                    )}
                   </div>
                 </motion.div>
               ))}
@@ -468,6 +489,17 @@ What kind of voice agent would you like to build?`,
                 </Button>
               ))}
             </div>
+          </div>
+        )}
+
+        {/* Session Usage Total */}
+        {sessionUsage.requestCount > 0 && (
+          <div className="px-4">
+            <SessionUsageTotal
+              totalTokens={sessionUsage.totalTokens}
+              totalCost={sessionUsage.totalCost}
+              requestCount={sessionUsage.requestCount}
+            />
           </div>
         )}
 
