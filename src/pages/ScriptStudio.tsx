@@ -1,7 +1,7 @@
 import { useState, useCallback, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { FileCode2, Save, Upload, Loader2, ArrowLeft, GitBranch, PanelLeftClose, PanelLeft, Eye, LayoutTemplate, List } from "lucide-react";
+import { FileCode2, Save, Loader2, ArrowLeft, GitBranch, PanelLeftClose, PanelLeft, Eye, MoreHorizontal, Upload, History, Download, LayoutTemplate, ChevronRight } from "lucide-react";
 import { ScriptChatInterface } from "@/components/script-studio/ScriptChatInterface";
 import { DynamicFlowchartRenderer } from "@/components/script-studio/DynamicFlowchartRenderer";
 import { ScriptSectionEditor } from "@/components/script-studio/ScriptSectionEditor";
@@ -20,6 +20,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -512,46 +519,35 @@ const ScriptStudio = () => {
       <div className="min-h-screen bg-background">
         {/* Header */}
         <header className="sticky top-0 z-50 border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-          <div className="container flex h-16 items-center justify-between">
-            <div className="flex items-center gap-3">
+          <div className="container flex h-14 items-center justify-between">
+            {/* Left: Breadcrumb Navigation */}
+            <div className="flex items-center gap-2">
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => navigate("/admin")}
-                className="gap-2"
+                onClick={() => navigate("/crm/scripts")}
+                className="text-muted-foreground hover:text-foreground px-2"
               >
-                <List className="h-4 w-4" />
-                All Scripts
+                Scripts
               </Button>
-              <div className="h-6 w-px bg-border" />
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-                <FileCode2 className="h-5 w-5 text-primary" />
-              </div>
-              <div>
-                <h1 className="text-lg font-semibold">{scriptData.name || "Script Studio"}</h1>
-                <div className="flex items-center gap-2">
-                  <p className="text-xs text-muted-foreground">
-                    Build Voice Agent Scripts with AI
-                  </p>
-                  <Badge variant={currentPhase === "script" ? "default" : "secondary"} className="text-xs">
-                    {currentPhase === "script" ? "Script Phase" : currentPhase === "flowchart" ? "Flowchart Phase" : "Observability"}
-                  </Badge>
-                  {hasUnsavedChanges && <span className="text-xs text-yellow-500">• Unsaved</span>}
-                </div>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-2">
+              <ChevronRight className="h-4 w-4 text-muted-foreground" />
               <ScriptSelector
                 currentScriptId={currentScriptId}
                 onSelectScript={handleSelectScript}
                 onNewScript={handleNewScript}
-                onOpenTemplates={() => setIsTemplatesModalOpen(true)}
               />
-              
+              {hasUnsavedChanges && (
+                <span className="text-xs text-yellow-500 ml-2">• Unsaved</span>
+              )}
+            </div>
+
+            {/* Right: Actions */}
+            <div className="flex items-center gap-2">
+              {/* Combined Status + Version */}
               <Select value={scriptStatus} onValueChange={handleStatusChange}>
-                <SelectTrigger className="w-[110px]">
+                <SelectTrigger className="w-auto gap-2 h-9">
                   <SelectValue />
+                  <span className="text-muted-foreground text-xs">v{scriptVersion}</span>
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="draft">Draft</SelectItem>
@@ -560,34 +556,46 @@ const ScriptStudio = () => {
                 </SelectContent>
               </Select>
               
-              <span className="text-xs text-muted-foreground">v{scriptVersion}</span>
+              {/* More Actions Dropdown */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="sm">
+                    <MoreHorizontal className="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-48">
+                  <DropdownMenuItem onClick={() => setIsTemplatesModalOpen(true)}>
+                    <LayoutTemplate className="mr-2 h-4 w-4" />
+                    Browse Templates
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setIsImportModalOpen(true)}>
+                    <Upload className="mr-2 h-4 w-4" />
+                    Import Script
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <ScriptVersionHistory
+                    scriptId={currentScriptId}
+                    currentVersion={scriptVersion}
+                    onRestore={(data, nodes) => {
+                      handleScriptUpdate(data);
+                      handleFlowchartUpdate(nodes);
+                    }}
+                    asDropdownItem
+                  />
+                  <DropdownMenuItem onClick={() => setIsExportModalOpen(true)}>
+                    <Download className="mr-2 h-4 w-4" />
+                    Export JSON
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
               
-              <Button variant="outline" size="sm" onClick={() => setIsTemplatesModalOpen(true)}>
-                <LayoutTemplate className="mr-2 h-4 w-4" />
-                Templates
-              </Button>
-              <Button variant="outline" size="sm" onClick={() => setIsImportModalOpen(true)}>
-                <Upload className="mr-2 h-4 w-4" />
-                Import
-              </Button>
-              <ScriptVersionHistory
-                scriptId={currentScriptId}
-                currentVersion={scriptVersion}
-                onRestore={(data, nodes) => {
-                  handleScriptUpdate(data);
-                  handleFlowchartUpdate(nodes);
-                }}
-              />
-              <Button variant="outline" size="sm" onClick={() => setIsExportModalOpen(true)}>
-                Export JSON
-              </Button>
               <Button size="sm" onClick={handleSaveScript} disabled={isSaving}>
                 {isSaving ? (
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 ) : (
                   <Save className="mr-2 h-4 w-4" />
                 )}
-                Save Script
+                Save
               </Button>
             </div>
           </div>
