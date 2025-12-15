@@ -9,6 +9,7 @@ import { ScriptExportModal } from "@/components/script-studio/ScriptExportModal"
 import { ScriptSelector } from "@/components/script-studio/ScriptSelector";
 import { ScriptImportModal } from "@/components/script-studio/ScriptImportModal";
 import { ScriptPreview } from "@/components/script-studio/ScriptPreview";
+import { ScriptVersionHistory } from "@/components/script-studio/ScriptVersionHistory";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -526,6 +527,14 @@ const ScriptStudio = () => {
                 <Upload className="mr-2 h-4 w-4" />
                 Import
               </Button>
+              <ScriptVersionHistory
+                scriptId={currentScriptId}
+                currentVersion={scriptVersion}
+                onRestore={(data, nodes) => {
+                  handleScriptUpdate(data);
+                  handleFlowchartUpdate(nodes);
+                }}
+              />
               <Button variant="outline" size="sm" onClick={() => setIsExportModalOpen(true)}>
                 Export JSON
               </Button>
