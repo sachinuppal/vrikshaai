@@ -97,6 +97,8 @@ const AdminScriptsTab = () => {
 
   const handleDuplicate = async (script: Script) => {
     try {
+      const { data: userData } = await supabase.auth.getUser();
+      
       const { data: originalScript, error: fetchError } = await supabase
         .from("agent_scripts")
         .select("*")
@@ -114,6 +116,7 @@ const AdminScriptsTab = () => {
         flowchart_json: originalScript.flowchart_json,
         status: "draft",
         version: 1,
+        created_by: userData.user?.id,
       });
 
       if (insertError) throw insertError;
@@ -122,6 +125,25 @@ const AdminScriptsTab = () => {
     } catch (error) {
       console.error("Failed to duplicate script:", error);
       toast.error("Failed to duplicate script");
+    }
+  };
+
+  const handleStatusChange = async (scriptId: string, newStatus: string) => {
+    try {
+      const { error } = await supabase
+        .from("agent_scripts")
+        .update({ status: newStatus, updated_at: new Date().toISOString() })
+        .eq("id", scriptId);
+
+      if (error) throw error;
+      
+      setScripts((prev) =>
+        prev.map((s) => (s.id === scriptId ? { ...s, status: newStatus } : s))
+      );
+      toast.success(`Status changed to ${newStatus}`);
+    } catch (error) {
+      console.error("Failed to update status:", error);
+      toast.error("Failed to update status");
     }
   };
 
@@ -239,7 +261,21 @@ const AdminScriptsTab = () => {
                   </TableCell>
                   <TableCell>{script.industry || "—"}</TableCell>
                   <TableCell>{script.use_case || "—"}</TableCell>
-                  <TableCell>{getStatusBadge(script.status)}</TableCell>
+                  <TableCell>
+                    <Select
+                      value={script.status || "draft"}
+                      onValueChange={(value) => handleStatusChange(script.id, value)}
+                    >
+                      <SelectTrigger className="h-8 w-[100px]">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="draft">Draft</SelectItem>
+                        <SelectItem value="active">Active</SelectItem>
+                        <SelectItem value="archived">Archived</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </TableCell>
                   <TableCell>v{script.version || 1}</TableCell>
                   <TableCell>
                     {script.updated_at
