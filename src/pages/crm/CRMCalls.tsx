@@ -13,7 +13,9 @@ import {
   Users,
   BarChart3,
   Download,
-  UserPlus
+  UserPlus,
+  FileCode2,
+  Activity
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -360,6 +362,18 @@ const CRMCalls = () => {
 
         {/* Actions */}
         <div className="flex flex-wrap items-center gap-3">
+          <Button variant="outline" size="sm" asChild>
+            <Link to="/scripttoflowchart">
+              <FileCode2 className="h-4 w-4 mr-2" />
+              Create Script
+            </Link>
+          </Button>
+          <Button variant="outline" size="sm" asChild>
+            <Link to="/agentobservability">
+              <Activity className="h-4 w-4 mr-2" />
+              Observability
+            </Link>
+          </Button>
           <Button variant="outline" size="sm" onClick={exportToCSV}>
             <Download className="h-4 w-4 mr-2" />
             Export CSV

@@ -10,7 +10,6 @@ import { ScriptSelector } from "@/components/script-studio/ScriptSelector";
 import { ScriptImportModal } from "@/components/script-studio/ScriptImportModal";
 import { ScriptPreview } from "@/components/script-studio/ScriptPreview";
 import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Select,
   SelectContent,
@@ -99,6 +98,7 @@ const ScriptStudio = () => {
   const [currentPhase, setCurrentPhase] = useState<WorkflowPhase>("script");
   const [animatingSection, setAnimatingSection] = useState<string | null>(null);
   const [isGeneratingFlowchart, setIsGeneratingFlowchart] = useState(false);
+  const [hasAutoSaved, setHasAutoSaved] = useState(false);
 
   // Load script from URL param or selection
   useEffect(() => {
@@ -342,6 +342,55 @@ const ScriptStudio = () => {
     document.title = "Script Studio - Build Voice Agent Scripts with AI | Vriksha";
   }, []);
 
+  // Auto-save new script as draft when first content is added
+  useEffect(() => {
+    const hasContent = scriptData.sections.some(s => s.isComplete);
+    if (!currentScriptId && hasContent && user?.id && !hasAutoSaved) {
+      const autoSaveNewScript = async () => {
+        try {
+          const { data, error } = await supabase
+            .from("agent_scripts")
+            .insert([{
+              name: scriptData.name || "Untitled Script",
+              description: scriptData.description,
+              use_case: scriptData.useCase,
+              industry: scriptData.industry,
+              script_json: JSON.parse(JSON.stringify({ sections: scriptData.sections })),
+              flowchart_json: JSON.parse(JSON.stringify(scriptData.flowchart)),
+              status: "draft",
+              version: 1,
+              created_by: user?.id,
+            }])
+            .select("id, version")
+            .single();
+
+          if (error) throw error;
+          
+          setCurrentScriptId(data.id);
+          setScriptVersion(data.version || 1);
+          setHasAutoSaved(true);
+          setHasUnsavedChanges(false);
+          navigate(`/scripttoflowchart/${data.id}`, { replace: true });
+          toast.success("Script auto-saved as draft");
+        } catch (error) {
+          console.error("Auto-save failed:", error);
+        }
+      };
+      autoSaveNewScript();
+    }
+  }, [scriptData.sections, currentScriptId, user, hasAutoSaved, navigate, scriptData]);
+
+  // Debounced auto-save for existing scripts
+  useEffect(() => {
+    if (currentScriptId && hasUnsavedChanges) {
+      const timer = setTimeout(() => {
+        handleSaveScript();
+      }, 10000); // Auto-save after 10 seconds of inactivity
+      
+      return () => clearTimeout(timer);
+    }
+  }, [currentScriptId, hasUnsavedChanges, scriptData]);
+
   if (isLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background">
@@ -417,142 +466,125 @@ const ScriptStudio = () => {
         </header>
 
         {/* Main Content */}
-        <main className="container py-6">
-          <Tabs value={currentPhase === "script" ? "chat" : "flowchart"} className="space-y-6">
-            {/* Phase Navigation */}
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-4">
-                {currentPhase === "flowchart" && (
-                  <Button variant="ghost" size="sm" onClick={handleBackToScript}>
-                    <ArrowLeft className="mr-2 h-4 w-4" />
-                    Back to Script
-                  </Button>
-                )}
-                <TabsList>
-                  <TabsTrigger 
-                    value="chat" 
-                    onClick={() => setCurrentPhase("script")}
-                    className="gap-2"
-                  >
-                    <FileCode2 className="h-4 w-4" />
-                    Script Builder
-                  </TabsTrigger>
-                  <TabsTrigger 
-                    value="flowchart" 
-                    onClick={() => setCurrentPhase("flowchart")}
-                    disabled={scriptData.sections.filter(s => s.isComplete).length < 3}
-                    className="gap-2"
-                  >
-                    <GitBranch className="h-4 w-4" />
-                    Flowchart
-                  </TabsTrigger>
-                </TabsList>
-              </div>
-              
-              <Badge variant="outline">
-                {scriptData.sections.filter(s => s.isComplete).length}/{scriptData.sections.length} sections complete
-              </Badge>
-            </div>
-
-            {/* Script Building Phase */}
-            <AnimatePresence mode="wait">
-              {currentPhase === "script" && (
-                <motion.div
-                  key="script-phase"
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -20 }}
-                  transition={{ duration: 0.3 }}
-                >
-                  <TabsContent value="chat" className="mt-0 space-y-0">
-                    <div className="grid gap-6 lg:grid-cols-2">
-                      {/* Chat Interface */}
-                      <motion.div
-                        initial={{ opacity: 0, x: -20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        className="h-[calc(100vh-220px)] min-h-[500px]"
-                      >
-                        <ScriptChatInterface
-                          scriptData={scriptData}
-                          onScriptUpdate={handleScriptUpdate}
-                          onFlowchartUpdate={handleFlowchartUpdate}
-                          scriptId={currentScriptId}
-                          phase={currentPhase}
-                        />
-                      </motion.div>
-
-                      {/* Script Preview (Google Docs style) */}
-                      <motion.div
-                        initial={{ opacity: 0, x: 20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        className="h-[calc(100vh-220px)] min-h-[500px]"
-                      >
-                        <ScriptPreview
-                          sections={scriptData.sections}
-                          scriptName={scriptData.name}
-                          onProceedToFlowchart={handleProceedToFlowchart}
-                          animatingSection={animatingSection}
-                        />
-                      </motion.div>
-                    </div>
-                  </TabsContent>
-                </motion.div>
-              )}
-
-              {/* Flowchart Building Phase */}
+        <main className="container py-6 space-y-6">
+          {/* Phase Navigation */}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
               {currentPhase === "flowchart" && (
-                <motion.div
-                  key="flowchart-phase"
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: 20 }}
-                  transition={{ duration: 0.3 }}
-                >
-                  <TabsContent value="flowchart" className="mt-0 space-y-0">
-                    <div className="grid gap-6 lg:grid-cols-2">
-                      {/* Chat Interface */}
-                      <motion.div
-                        initial={{ opacity: 0, x: -20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        className="h-[calc(100vh-220px)] min-h-[500px]"
-                      >
-                        <ScriptChatInterface
-                          scriptData={scriptData}
-                          onScriptUpdate={handleScriptUpdate}
-                          onFlowchartUpdate={handleFlowchartUpdate}
-                          scriptId={currentScriptId}
-                          phase={currentPhase}
-                        />
-                      </motion.div>
-
-                      {/* Flowchart Preview */}
-                      <motion.div
-                        initial={{ opacity: 0, x: 20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        className="h-[calc(100vh-220px)] min-h-[500px]"
-                      >
-                        {isGeneratingFlowchart ? (
-                          <div className="flex h-full items-center justify-center rounded-lg border border-border/50 bg-card/50">
-                            <div className="flex flex-col items-center gap-4">
-                              <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                              <p className="text-muted-foreground">Generating flowchart...</p>
-                            </div>
-                          </div>
-                        ) : (
-                          <DynamicFlowchartRenderer
-                            nodes={scriptData.flowchart.nodes}
-                            onNodesChange={handleFlowchartUpdate}
-                            scriptData={scriptData}
-                            isAnimating={currentPhase === "flowchart"}
-                          />
-                        )}
-                      </motion.div>
-                    </div>
-                  </TabsContent>
-                </motion.div>
+                <Button variant="ghost" size="sm" onClick={handleBackToScript}>
+                  <ArrowLeft className="mr-2 h-4 w-4" />
+                  Back to Script
+                </Button>
               )}
-            </AnimatePresence>
-          </Tabs>
+              <div className="inline-flex h-10 items-center justify-center rounded-md bg-muted p-1 text-muted-foreground">
+                <button
+                  onClick={() => setCurrentPhase("script")}
+                  className={`inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 gap-2 ${
+                    currentPhase === "script" 
+                      ? "bg-background text-foreground shadow-sm" 
+                      : "hover:bg-background/50"
+                  }`}
+                >
+                  <FileCode2 className="h-4 w-4" />
+                  Script Builder
+                </button>
+                <button
+                  onClick={() => {
+                    if (scriptData.sections.filter(s => s.isComplete).length >= 3) {
+                      handleProceedToFlowchart();
+                    }
+                  }}
+                  disabled={scriptData.sections.filter(s => s.isComplete).length < 3}
+                  className={`inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 gap-2 disabled:pointer-events-none disabled:opacity-50 ${
+                    currentPhase === "flowchart" 
+                      ? "bg-background text-foreground shadow-sm" 
+                      : "hover:bg-background/50"
+                  }`}
+                >
+                  <GitBranch className="h-4 w-4" />
+                  Flowchart
+                </button>
+              </div>
+            </div>
+            
+            <Badge variant="outline">
+              {scriptData.sections.filter(s => s.isComplete).length}/{scriptData.sections.length} sections complete
+            </Badge>
+          </div>
+
+          {/* Phase Content */}
+          <AnimatePresence mode="wait">
+            {currentPhase === "script" ? (
+              <motion.div
+                key="script-phase"
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                transition={{ duration: 0.3 }}
+                className="grid gap-6 lg:grid-cols-2"
+              >
+                {/* Chat Interface */}
+                <div className="h-[calc(100vh-220px)] min-h-[500px]">
+                  <ScriptChatInterface
+                    scriptData={scriptData}
+                    onScriptUpdate={handleScriptUpdate}
+                    onFlowchartUpdate={handleFlowchartUpdate}
+                    scriptId={currentScriptId}
+                    phase={currentPhase}
+                  />
+                </div>
+
+                {/* Script Preview (Google Docs style) */}
+                <div className="h-[calc(100vh-220px)] min-h-[500px]">
+                  <ScriptPreview
+                    sections={scriptData.sections}
+                    scriptName={scriptData.name}
+                    onProceedToFlowchart={handleProceedToFlowchart}
+                    animatingSection={animatingSection}
+                  />
+                </div>
+              </motion.div>
+            ) : (
+              <motion.div
+                key="flowchart-phase"
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: 20 }}
+                transition={{ duration: 0.3 }}
+                className="grid gap-6 lg:grid-cols-2"
+              >
+                {/* Chat Interface */}
+                <div className="h-[calc(100vh-220px)] min-h-[500px]">
+                  <ScriptChatInterface
+                    scriptData={scriptData}
+                    onScriptUpdate={handleScriptUpdate}
+                    onFlowchartUpdate={handleFlowchartUpdate}
+                    scriptId={currentScriptId}
+                    phase={currentPhase}
+                  />
+                </div>
+
+                {/* Flowchart Preview */}
+                <div className="h-[calc(100vh-220px)] min-h-[500px]">
+                  {isGeneratingFlowchart ? (
+                    <div className="flex h-full items-center justify-center rounded-lg border border-border/50 bg-card/50">
+                      <div className="flex flex-col items-center gap-4">
+                        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                        <p className="text-muted-foreground">Generating flowchart...</p>
+                      </div>
+                    </div>
+                  ) : (
+                    <DynamicFlowchartRenderer
+                      nodes={scriptData.flowchart.nodes}
+                      onNodesChange={handleFlowchartUpdate}
+                      scriptData={scriptData}
+                      isAnimating={currentPhase === "flowchart"}
+                    />
+                  )}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </main>
       </div>
 
