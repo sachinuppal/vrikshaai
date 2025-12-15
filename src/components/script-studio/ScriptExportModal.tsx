@@ -92,7 +92,7 @@ export const ScriptExportModal = ({ isOpen, onClose, scriptData }: ScriptExportM
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl">
+      <DialogContent className="max-w-2xl max-h-[85vh] flex flex-col overflow-hidden">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <FileJson className="h-5 w-5 text-primary" />
@@ -103,8 +103,8 @@ export const ScriptExportModal = ({ isOpen, onClose, scriptData }: ScriptExportM
           </DialogDescription>
         </DialogHeader>
 
-        <Tabs defaultValue="full" className="mt-4">
-          <TabsList className="grid w-full grid-cols-2">
+        <Tabs defaultValue="full" className="mt-4 flex-1 flex flex-col min-h-0">
+          <TabsList className="w-full grid grid-cols-2 bg-muted">
             <TabsTrigger value="full">
               <FileJson className="mr-2 h-4 w-4" />
               Full Export
@@ -115,11 +115,11 @@ export const ScriptExportModal = ({ isOpen, onClose, scriptData }: ScriptExportM
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="full" className="space-y-4">
+          <TabsContent value="full" className="space-y-4 flex-1 overflow-y-auto">
             <p className="text-sm text-muted-foreground">
               Complete export with all 18 sections, flowchart, and metadata.
             </p>
-            <ScrollArea className="h-[300px] rounded-lg border border-border bg-muted/30 p-4">
+            <ScrollArea className="h-[250px] rounded-lg border border-border bg-muted/30 p-4">
               <pre className="text-xs">{fullJson}</pre>
             </ScrollArea>
             <div className="flex gap-2">
@@ -147,11 +147,11 @@ export const ScriptExportModal = ({ isOpen, onClose, scriptData }: ScriptExportM
             </div>
           </TabsContent>
 
-          <TabsContent value="minimal" className="space-y-4">
+          <TabsContent value="minimal" className="space-y-4 flex-1 overflow-y-auto">
             <p className="text-sm text-muted-foreground">
               Minimal export with core fields for Ringg integration.
             </p>
-            <ScrollArea className="h-[300px] rounded-lg border border-border bg-muted/30 p-4">
+            <ScrollArea className="h-[250px] rounded-lg border border-border bg-muted/30 p-4">
               <pre className="text-xs">{minimalJson}</pre>
             </ScrollArea>
             <div className="flex gap-2">
