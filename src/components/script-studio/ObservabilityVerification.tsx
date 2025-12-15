@@ -105,7 +105,7 @@ export const ObservabilityVerification = ({
   const [apiChecks, setApiChecks] = useState<VerificationCheck[]>([
     { id: "ringg_api_key", label: "RINGG_API_KEY configured", status: "pending" },
     { id: "ringg_webhook_secret", label: "RINGG_WEBHOOK_SECRET configured", status: "pending" },
-    { id: "api_connectivity", label: "Ringg API connectivity", status: "pending" },
+    { id: "api_connectivity", label: "Voice API connectivity", status: "pending" },
   ]);
   const [webhookChecks, setWebhookChecks] = useState<VerificationCheck[]>([
     { id: "webhook_function", label: "ringg-webhook function deployed", status: "pending" },
