@@ -83,3 +83,6 @@ verify_jwt = false
 
 [functions.comprehensive-observability]
 verify_jwt = false
+
+[functions.verify-observability-config]
+verify_jwt = false

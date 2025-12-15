@@ -58,7 +58,7 @@ interface ScriptChatInterfaceProps {
   onScriptUpdate: (updates: Partial<ScriptData>) => void;
   onFlowchartUpdate: (nodes: FlowchartNode[]) => void;
   scriptId?: string | null;
-  phase?: "script" | "flowchart";
+  phase?: "script" | "flowchart" | "observability";
   onEnsureScriptSaved?: () => Promise<string | null>;
 }
 
