@@ -38,6 +38,7 @@ interface DynamicFlowchartRendererProps {
   isGenerating?: boolean;
   onRegenerate?: () => void;
   isRegenerating?: boolean;
+  onProceedToObservability?: () => void;
 }
 
 const NODE_ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
@@ -242,6 +243,7 @@ export const DynamicFlowchartRenderer = ({
   isGenerating = false,
   onRegenerate,
   isRegenerating = false,
+  onProceedToObservability,
 }: DynamicFlowchartRendererProps) => {
   const [zoomLevel, setZoomLevel] = useState(1);
   const [isFullscreenOpen, setIsFullscreenOpen] = useState(false);
@@ -492,6 +494,20 @@ export const DynamicFlowchartRenderer = ({
         </CardContent>
 
         {renderLegend()}
+
+        {/* Proceed to Observability Button */}
+        {onProceedToObservability && (
+          <div className="border-t border-border/50 p-4">
+            <Button 
+              onClick={onProceedToObservability} 
+              className="w-full"
+              size="lg"
+            >
+              Proceed to Observability
+              <ChevronRight className="ml-2 h-5 w-5" />
+            </Button>
+          </div>
+        )}
       </Card>
 
       {/* Fullscreen Dialog */}

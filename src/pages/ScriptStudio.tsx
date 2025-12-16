@@ -807,6 +807,7 @@ const ScriptStudio = () => {
                     isGenerating={isGeneratingFlowchart}
                     onRegenerate={generateFlowchartFromAI}
                     isRegenerating={isGeneratingFlowchart}
+                    onProceedToObservability={() => setCurrentPhase("observability")}
                   />
                 </div>
               </motion.div>
