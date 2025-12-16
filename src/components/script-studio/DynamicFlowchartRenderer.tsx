@@ -15,6 +15,7 @@ import {
   RotateCcw,
   Sparkles,
   Loader2,
+  HelpCircle,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -39,7 +40,7 @@ interface DynamicFlowchartRendererProps {
   isRegenerating?: boolean;
 }
 
-const NODE_ICONS = {
+const NODE_ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
   start: Play,
   end: Square,
   step: MessageSquare,
@@ -49,7 +50,7 @@ const NODE_ICONS = {
   guardrail: Shield,
 };
 
-const NODE_COLORS = {
+const NODE_COLORS: Record<string, string> = {
   start: "bg-green-500/20 border-green-500/50 text-green-400",
   end: "bg-red-500/20 border-red-500/50 text-red-400",
   step: "bg-blue-500/20 border-blue-500/50 text-blue-400",
@@ -57,6 +58,33 @@ const NODE_COLORS = {
   action: "bg-purple-500/20 border-purple-500/50 text-purple-400",
   tool: "bg-cyan-500/20 border-cyan-500/50 text-cyan-400",
   guardrail: "bg-orange-500/20 border-orange-500/50 text-orange-400",
+};
+
+const DEFAULT_ICON = HelpCircle;
+const DEFAULT_COLOR = "bg-muted/20 border-muted-foreground/50 text-muted-foreground";
+
+// Map unknown node types to valid types
+const normalizeNodeType = (type: string): string => {
+  if (type in NODE_ICONS) return type;
+  
+  const typeMap: Record<string, string> = {
+    input: "action",
+    output: "step",
+    response: "step",
+    api: "tool",
+    api_call: "tool",
+    condition: "decision",
+    branch: "decision",
+    check: "guardrail",
+    safety: "guardrail",
+    greeting: "step",
+    goodbye: "end",
+    terminate: "end",
+    begin: "start",
+  };
+  
+  const lowerType = type.toLowerCase();
+  return typeMap[lowerType] || "step";
 };
 
 // Generate a basic flowchart from script sections
@@ -332,8 +360,9 @@ export const DynamicFlowchartRenderer = ({
 
           {/* Nodes */}
           {displayNodes.map((node, index) => {
-            const Icon = NODE_ICONS[node.type];
-            const colorClass = NODE_COLORS[node.type];
+            const normalizedType = normalizeNodeType(node.type);
+            const Icon = NODE_ICONS[normalizedType] || DEFAULT_ICON;
+            const colorClass = NODE_COLORS[normalizedType] || DEFAULT_COLOR;
 
             return (
               <motion.g
