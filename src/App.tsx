@@ -45,6 +45,7 @@ import CRMScripts from "./pages/crm/CRMScripts";
 import CRMFlowcharts from "./pages/crm/CRMFlowcharts";
 import CRMObservability from "./pages/crm/CRMObservability";
 import CRMSettings from "./pages/crm/CRMSettings";
+import CRMDocs from "./pages/CRMDocs";
 import AICallingConsentModal from "./components/AICallingConsentModal";
 import { CookieConsent } from "./components/CookieConsent";
 
@@ -99,6 +100,7 @@ const App = () => (
               <Route path="/crm/flowcharts" element={<AdminRoute><CRMFlowcharts /></AdminRoute>} />
               <Route path="/crm/observability" element={<AdminRoute><CRMObservability /></AdminRoute>} />
               <Route path="/crm/settings" element={<AdminRoute><CRMSettings /></AdminRoute>} />
+              <Route path="/crm/docs" element={<AdminRoute><CRMDocs /></AdminRoute>} />
               <Route path="/voice" element={<Voice />} />
               <Route path="/scripttoflowchart" element={<ErrorBoundary fallbackRoute="/"><ScriptStudio /></ErrorBoundary>} />
               <Route path="/scripttoflowchart/:scriptId" element={<ErrorBoundary fallbackRoute="/"><ScriptStudio /></ErrorBoundary>} />
